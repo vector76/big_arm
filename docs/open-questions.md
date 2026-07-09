@@ -18,20 +18,21 @@ The ⭐ items block the most downstream work. Answers get folded into
    friction, cost, and printability likely dominate. The shoulder joint's
    ~20 N·m payload torque makes this the pacing decision for the torque
    worksheet.
-3. **Required feedback resolution and rate.** Follows from the repeatability
-   target and the ~10 s traverse speed. Slow motion means even ~10 Hz
-   correction may be plenty.
-4. **Repeatability target number.** What accuracy do pick-and-place and
-   drawing/plotting actually demand? (e.g., ±1 mm? ±3 mm?)
-5. **Material trade: plywood box-truss vs. inexpensive pine boards.** Nothing
+3. **Required feedback resolution and rate.** The repeatability target
+   (±1 mm mandatory / 0.1 mm stretch) gives a ~1.1 mrad total angular
+   budget — roughly 0.3 mrad per contributor. Rate still open; slow motion
+   means even ~10 Hz correction may be plenty. Validate against the Phase 1b
+   sensing measurements.
+4. **Material trade: plywood box-truss vs. inexpensive pine boards.** Nothing
    purchased yet. Pine boards are cheap and need no sheet-cutting; plywood
    trusses have better strength-to-weight and suit the CNC. Could mix.
-6. **Counterweight material and form.** Cheap dense mass: steel bar stock,
+5. **Counterweight material and form.** Cheap dense mass: steel bar stock,
    concrete, sand-filled boxes, scrap? How weights mount and adjust (fixed
    vs. positionable along the stub)? Joint-mounted motors contribute some
    mass but nowhere near enough on their own. Note the stub-length limit
    (~half link length) roughly doubles the required mass vs. a full-length
    stub.
+
 The first milestone question is resolved: the concept model is scaffolded
 and running in `model/` (torque/counterbalance math + 3D view). With the
 datasheet motor curve, load-adaptive cruise speeds, and the elbow restricted
@@ -41,6 +42,23 @@ to downward bending, traverse lands at ~2.9 s unloaded / ~6.8 s loaded
 Next milestones: single-joint testbed, then full-arm CAD in OpenSCAD.
 
 ## Resolved
+
+### 2026-07-09 (eighth round)
+
+- **Repeatability target:** ±1 mm at the tool tip mandatory; ±0.1 mm
+  stretch goal after full calibration and modeling. Closes Phase 0.
+
+### 2026-07-09 (seventh round)
+
+- **v0 design point locked** (see requirements.md): default model
+  parameters with elbow 90:1 and wrist 40:1 (low enough for single-stage,
+  non-bulky reductions), shoulder 150:1, yaw 60:1. Holding torque modeled
+  at 0.41 N·m — equal to pull-out — treating the quoted 59 N·cm as
+  optimistic. Margins 1.61 / 1.94 / 3.90; traverse ~2.9 s unloaded,
+  ~6.8 s loaded.
+- **Reduction preference:** single-stage strongly preferred at elbow and
+  wrist (no bulky large gears, no multi-stage trains). Constrains the
+  Phase 1a trade study.
 
 ### 2026-07-08 (sixth round)
 

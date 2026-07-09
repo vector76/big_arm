@@ -5,22 +5,14 @@ tracks, and detailed design (3) can start while the testbed (2) is still
 teaching lessons. Each phase has an exit gate — a thing that must be true
 before committing money and effort to the next.
 
-## Phase 0 — Converge the concept (in the model) ← we are here
+## Phase 0 — Converge the concept (in the model) ✅ complete 2026-07-09
 
-Use the engineering model to settle the design point:
+Settled: the v0 design point (see requirements.md) — ratios 60/150/90/40,
+conservative 0.41 N·m motor model, margins 1.61/1.94/3.90, traverse ~2.9 s
+unloaded / ~6.8 s loaded — and the repeatability target (±1 mm mandatory,
+±0.1 mm stretch).
 
-- Gear ratios (shoulder ratio vs. margin vs. loaded traverse is the live
-  tradeoff), link lengths, stub fractions, mass budget.
-- Set the **repeatability target** (still an open question — it sizes the
-  sensing system).
-- Possible model additions as needed: cost/BOM tally, base-yaw structure
-  loads, workspace/reach visualization.
-
-**Exit gate:** a frozen v0 parameter set (recorded as a shareable model URL
-and a table in requirements.md) whose margins, masses, speeds, and rough
-cost all look acceptable.
-
-## Phase 1 — Retire the risks on the bench (parallel tracks, all cheap)
+## Phase 1 — Retire the risks on the bench (parallel tracks, all cheap) ← we are here
 
 ### 1a. Reduction mechanism trade + prototype
 

@@ -67,13 +67,18 @@ export const defaultParams: DesignParams = {
   columnHeight: 0.4,
   yaw: { ratio: 60, efficiency: 0.8, travel: deg(180) },
   shoulder: { ratio: 150, efficiency: 0.7, travel: deg(120) },
-  elbow: { ratio: 120, efficiency: 0.7, travel: deg(135) },
-  wrist: { ratio: 60, efficiency: 0.7, travel: deg(180) },
+  // Elbow/wrist ratios kept low to allow single-stage reductions without
+  // bulky gears (decision 2026-07-09); closed-loop sensing absorbs the
+  // thinner margin.
+  elbow: { ratio: 90, efficiency: 0.7, travel: deg(135) },
+  wrist: { ratio: 40, efficiency: 0.7, travel: deg(180) },
   // StepperOnline 17HS19-2004S1 datasheet curve at 24 V, 2.2 A: pull-out
   // ~41 N*cm flat to ~450 rpm, then roughly linear to ~17 N*cm at 1200 rpm.
   // https://www.omc-stepperonline.com/nema-17-bipolar-59ncm-84oz-in-2a-42x48mm-4-wires-w-1m-cable-connector-17hs19-2004s1
+  // Holding torque deliberately set equal to pull-out: the 59 N*cm quoted
+  // holding figure may be optimistic (decision 2026-07-09).
   motor: {
-    holdingTorque: 0.59,
+    holdingTorque: 0.41,
     pullOutTorque: 0.41,
     cornerSpeed: 450 / 60,
     maxSpeed: 1200 / 60,

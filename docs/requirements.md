@@ -10,7 +10,7 @@ project decisions (latest: 2026-07-08). Nothing is frozen.
 | Payload | **≥ 5 lb (~2.3 kg) at full extension** | 5 lb is the minimum capability over the *entire* workspace; higher payload is expected at reduced reach. |
 | Reach | ~3 ft (0.9 m) | Clearly beyond the ~2 ft hobbyist class while keeping counterweight mass and truss size modest. |
 | Speed | **Any pose to any pose, unloaded, in ~10 s** | Soft requirement: if counterweight inertia makes this hard, it may be relaxed. Loaded moves may be slower — the traverse spec applies unloaded. |
-| Repeatability | TBD | Set by the sensing system, not the structure. Path accuracy matters for the drawing/plotting use case. |
+| Repeatability | **±1 mm at the tool tip (mandatory); ±0.1 mm stretch goal** after full calibration and modeling | Set by the sensing system, not the structure. Flow-down: ±1 mm at 0.9 m reach is ~1.1 mrad of total angular budget across joints and structure — each contributor needs to be good to roughly 0.3 mrad; the stretch goal tightens everything 10×. |
 | Absolute accuracy | TBD | May matter less than repeatability depending on use case. |
 
 ## Installation
@@ -35,6 +35,31 @@ project decisions (latest: 2026-07-08). Nothing is frozen.
 | Position feedback | **Layered sensing** per the unloaded-reference optical metrology concept ([sensing.md](sensing.md)): (1) joint angles via unloaded anti-backlash readout gears with camera-read fiducials, (2) link bending via free-floating reference beams read by macro-focus cameras, (3) coarse cross-check via a global workspace camera. ESP32-CAM-class modules as the universal readout; precision anchored by offline load/pose calibration of a structural model. |
 | Degrees of freedom (arm) | 4: base yaw, shoulder pitch, elbow pitch, wrist pitch (pitch axes mutually parallel) |
 | Degrees of freedom (end effector) | 2–3, as a separate module (e.g., wrist roll, gripper open/close); interface TBD |
+
+## v0 design point (2026-07-09)
+
+The concept model's default parameter set, agreed as the working design
+point (frozen pending the repeatability target and Phase 1 measured
+efficiencies):
+
+| Parameter | Value |
+|-----------|-------|
+| Link lengths | upper arm 0.45 m, forearm 0.35 m, wrist link 0.10 m (reach 0.90 m) |
+| Structure densities | 1.2 / 0.9 / 0.6 kg/m; stubs 1.0 kg/m |
+| Stub fractions | 0.5 of parent link (shoulder and elbow) |
+| Hardware masses | elbow 0.8 kg, wrist 0.5 kg, end effector 0.7 kg |
+| Reductions | yaw 60:1, shoulder 150:1, **elbow 90:1, wrist 40:1** — elbow/wrist kept low so single-stage reductions avoid bulky gears; closed-loop sensing absorbs the thinner margin |
+| Efficiency assumption | 0.7 (0.8 yaw) — to be measured in Phase 1a |
+| Motor model | pull-out **and** holding 0.41 N·m (quoted 0.59 N·m holding treated as optimistic), flat to 450 rpm, linear to 0.17 N·m at 1200 rpm |
+
+Predicted outputs at this design point:
+
+| Output | Value |
+|--------|-------|
+| Counterweights | elbow 1.23 kg, shoulder 6.46 kg |
+| Total arm mass (no payload) | ~11.0 kg |
+| Torque margins (worst pose, 5 lb) | shoulder 1.61, elbow 1.94, wrist 3.90 |
+| Full-travel traverse | ~2.9 s unloaded / ~6.8 s loaded (shoulder-bound) |
 
 ## Cost
 

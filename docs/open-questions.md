@@ -11,41 +11,44 @@ The ⭐ items block the most downstream work. Answers get folded into
    camera modules as the universal readout). Remaining sensing-specific
    questions (sensor count/placement, camera data path, calibration method,
    upper-arm beam geometry) live at the bottom of that document.
-2. ⭐ **CAD / modeling tooling.** In discussion. Constraints: no paid
-   software (SolidWorks, Fusion are out). User's preference order: OpenSCAD
-   (daily driver), FreeCAD (never used, willing), OnShape (web-based, free
-   tier requires open-sourcing the design — acceptable, but third choice).
-   Also on the table: a custom lightweight model in Python or
-   TypeScript/three.js for early concept spitballing — visualizing shapes,
-   weights, and gearing before committing to detailed CAD.
-3. **Reduction mechanism trade.** Belts (cheap, low backlash, limited ratio
+2. **Reduction mechanism trade.** Belts (cheap, low backlash, limited ratio
    per stage), worm (huge ratio, self-locking, friction), cycloidal
    (printable, compact), cable/capstan (zero backlash, very cheap,
    wood-friendly). Closed-loop feedback relaxes backlash concerns, so
    friction, cost, and printability likely dominate. The shoulder joint's
    ~20 N·m payload torque makes this the pacing decision for the torque
    worksheet.
-4. **Required feedback resolution and rate.** Follows from the repeatability
+3. **Required feedback resolution and rate.** Follows from the repeatability
    target and the ~10 s traverse speed. Slow motion means even ~10 Hz
    correction may be plenty.
-5. **Repeatability target number.** What accuracy do pick-and-place and
+4. **Repeatability target number.** What accuracy do pick-and-place and
    drawing/plotting actually demand? (e.g., ±1 mm? ±3 mm?)
-6. **Material trade: plywood box-truss vs. inexpensive pine boards.** Nothing
+5. **Material trade: plywood box-truss vs. inexpensive pine boards.** Nothing
    purchased yet. Pine boards are cheap and need no sheet-cutting; plywood
    trusses have better strength-to-weight and suit the CNC. Could mix.
-7. **Counterweight material and form.** Cheap dense mass: steel bar stock,
+6. **Counterweight material and form.** Cheap dense mass: steel bar stock,
    concrete, sand-filled boxes, scrap? How weights mount and adjust (fixed
    vs. positionable along the stub)? Joint-mounted motors contribute some
    mass but nowhere near enough on their own. Note the stub-length limit
    (~half link length) roughly doubles the required mass vs. a full-length
    stub.
-8. **First milestone.** Deferred until the tooling discussion (Q2) lands.
-   Candidates: (a) torque/counterbalance math worksheet, (b) concept
-   spitball model (Python/three.js) to compare gearing and balance schemes,
-   (c) single-joint testbed, (d) full-arm CAD. The worksheet needs no
-   tooling decision and could start immediately.
+7. **First milestone.** Tooling is now decided; the concept model is the
+   presumptive next step, with the torque/counterbalance math as its core.
+   Later milestones: single-joint testbed, then full-arm CAD in OpenSCAD.
 
 ## Resolved
+
+### 2026-07-08 (fifth round)
+
+- **Modeling/CAD tooling:** documented in [tooling.md](tooling.md).
+  A self-contained client-side **TypeScript + three.js engineering model**
+  (no server — all math is closed-form and runs in the browser; Vite build;
+  hostable as static files) for the concept/trade-study phase, with a pure
+  model-core module separated from rendering. **OpenSCAD** as the geometry
+  source of truth for detailed design. **Python** reserved for offline
+  analysis scripts once measured data exists (e.g., calibration fitting) —
+  not a live server. FreeCAD held in reserve for STEP/FEM needs; OnShape and
+  paid CAD out.
 
 ### 2026-07-08 (fourth round)
 

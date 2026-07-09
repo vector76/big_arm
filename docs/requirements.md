@@ -31,7 +31,7 @@ project decisions (latest: 2026-07-08). Nothing is frozen.
 | End-effector swaps | Provision for auxiliary counterweight positions (e.g., extra pins behind elbow/shoulder) to rebalance when a heavy end effector is fitted. (Tentative.) |
 | Actuation | NEMA 17 stepper motors with high-ratio reduction (mechanism TBD: belts, worm, cycloidal, cable/capstan…) |
 | Stepper drivers | **Open-loop** — no closed-loop stepper drivers. The dominant errors enter downstream of the motor (transmission, structure), so motor-shaft encoders add little; instead design with torque margin so skipped steps are not a realistic risk. |
-| Position feedback | **Layered sensing**: (1) joint angle sensing, (2) link bending sensing, and (3) approximate end-effector position sensing (e.g., a camera watching the end effector). The redundancy across layers is used to self-calibrate the internal kinematic/deflection model. Specific optical sensing concepts: reserved for a dedicated discussion. |
+| Position feedback | **Layered sensing** per the unloaded-reference optical metrology concept ([sensing.md](sensing.md)): (1) joint angles via unloaded anti-backlash readout gears with camera-read fiducials, (2) link bending via free-floating reference beams read by macro-focus cameras, (3) coarse cross-check via a global workspace camera. ESP32-CAM-class modules as the universal readout; precision anchored by offline load/pose calibration of a structural model. |
 | Degrees of freedom (arm) | 4: base yaw, shoulder pitch, elbow pitch, wrist pitch (pitch axes mutually parallel) |
 | Degrees of freedom (end effector) | 2–3, as a separate module (e.g., wrist roll, gripper open/close); interface TBD |
 

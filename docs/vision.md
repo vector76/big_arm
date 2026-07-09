@@ -85,8 +85,9 @@ approximate end-effector position measurement (e.g., a camera watching the
 tool). Any one layer has blind spots — joint sensing misses link flex,
 endpoint sensing alone is coarse — but together they over-determine the arm's
 state, and that redundancy lets the system *self-calibrate* its internal
-model of motion and deflection. (Specific optical sensing concepts are to be
-documented — see open questions.)
+model of motion and deflection. The sensing concept — comparing loaded
+members against unloaded optical references, read by cheap camera modules —
+is documented in [sensing.md](sensing.md).
 
 ## Kinematic layout
 

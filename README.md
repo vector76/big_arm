@@ -14,6 +14,7 @@ compliance of a lightweight structure.
 |-----|----------|
 | [docs/vision.md](docs/vision.md) | The design thesis and its four pillars |
 | [docs/requirements.md](docs/requirements.md) | Draft requirements (unknowns marked TBD) |
+| [docs/sensing.md](docs/sensing.md) | Sensing concept: unloaded-reference optical metrology |
 | [docs/open-questions.md](docs/open-questions.md) | Decisions and details still to be resolved |
 
 ## Status

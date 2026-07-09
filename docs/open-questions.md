@@ -5,11 +5,12 @@ The ⭐ items block the most downstream work. Answers get folded into
 
 ## Still open
 
-1. ⭐ **Optical feedback concepts.** Reserved for a dedicated discussion —
-   the user has candidate concepts to capture. The layered architecture is
-   decided (joint angles + link bending + approximate endpoint camera, with
-   cross-layer redundancy used for self-calibration); the specific sensing
-   mechanisms are not.
+1. **Sensing details.** The core concept is now captured in
+   [sensing.md](sensing.md) — unloaded-reference optical metrology (readout
+   gears for joint angles, floating reference beams for link bending, cheap
+   camera modules as the universal readout). Remaining sensing-specific
+   questions (sensor count/placement, camera data path, calibration method,
+   upper-arm beam geometry) live at the bottom of that document.
 2. ⭐ **CAD / modeling tooling.** In discussion. Constraints: no paid
    software (SolidWorks, Fusion are out). User's preference order: OpenSCAD
    (daily driver), FreeCAD (never used, willing), OnShape (web-based, free
@@ -45,6 +46,18 @@ The ⭐ items block the most downstream work. Answers get folded into
    tooling decision and could start immediately.
 
 ## Resolved
+
+### 2026-07-08 (fourth round)
+
+- **Optical feedback concept:** captured in [sensing.md](sensing.md). Core
+  principle: compare loaded members against unloaded optical references —
+  an unloaded anti-backlash readout gear pair per joint (amplified rotation
+  read by camera via fiducial tag), and a free-floating carbon-fiber
+  reference beam alongside long links (deflection read by a macro-focus
+  camera on the loaded structure). ESP32-CAM-class modules (<$10) as the
+  readout everywhere. Global workspace camera demoted to coarse cross-check.
+  Precision comes from offline load/pose calibration fitting a structural
+  model that includes unmeasured compliances (bench, base).
 
 ### 2026-07-08 (third round)
 

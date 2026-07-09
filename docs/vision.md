@@ -78,7 +78,14 @@ flex all become correctable disturbances instead of accuracy losses.
 
 Because motion is slow, the feedback loop operates in a quasi-static regime:
 no need to model or damp structural dynamics, just servo out the
-slowly-varying error. (Candidate optical sensing concepts exist and are to be
+slowly-varying error.
+
+Sensing is **layered and redundant**: joint angles, link bending, and an
+approximate end-effector position measurement (e.g., a camera watching the
+tool). Any one layer has blind spots — joint sensing misses link flex,
+endpoint sensing alone is coarse — but together they over-determine the arm's
+state, and that redundancy lets the system *self-calibrate* its internal
+model of motion and deflection. (Specific optical sensing concepts are to be
 documented — see open questions.)
 
 ## Kinematic layout

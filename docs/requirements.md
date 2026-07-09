@@ -1,34 +1,37 @@
 # Requirements (draft)
 
-Status: **draft**. Values marked TBD are undecided; values given without TBD
-came directly from the project concept. Nothing here is frozen.
+Status: **draft**. Values marked TBD are undecided; everything else came from
+project decisions (latest: 2026-07-08). Nothing is frozen.
 
 ## Performance
 
 | Requirement | Target | Notes |
 |-------------|--------|-------|
-| Payload | ~5 lb (~2.3 kg) | Exceeds typical small hobbyist arms (~2 lb). TBD whether this is at full reach or a rated radius. |
-| Reach | **~3 ft (0.9 m)** | Chosen to be clearly beyond the ~2 ft hobbyist class while keeping counterweight mass and truss size modest. |
-| Speed | Slow; TBD | Deliberately modest. Needs a concrete floor (e.g., "traverse the workspace in ≤ N seconds") so gearing can be chosen. |
-| Repeatability | TBD | With closed-loop optical feedback this is set by the sensor, not the structure. Path accuracy matters for the drawing/plotting use case. |
+| Payload | **≥ 5 lb (~2.3 kg) at full extension** | 5 lb is the minimum capability over the *entire* workspace; higher payload is expected at reduced reach. |
+| Reach | ~3 ft (0.9 m) | Clearly beyond the ~2 ft hobbyist class while keeping counterweight mass and truss size modest. |
+| Speed | **Any pose to any pose, unloaded, in ~10 s** | Soft requirement: if counterweight inertia makes this hard, it may be relaxed. Loaded moves may be slower — the traverse spec applies unloaded. |
+| Repeatability | TBD | Set by the sensing system, not the structure. Path accuracy matters for the drawing/plotting use case. |
 | Absolute accuracy | TBD | May matter less than repeatability depending on use case. |
 
-## Intended use
+## Installation
 
-Primary: **general experimentation** — the arm is a platform and
-proof-of-concept. It should additionally do **pick-and-place** (repeatability
-across the workspace) and **drawing/plotting/marking** (smooth, accurate path
-following on a surface) well. These two set the concrete performance bar:
-repeatable point moves plus coordinated multi-joint path tracking.
+| Requirement | Decision |
+|-------------|----------|
+| Mounting | Bolted to a bench (base does not need to be self-ballasting, though the arm counterweights will make it roughly balanced anyway) |
+| Base yaw travel | Limited rotation — no continuous rotation, no slip ring. ±90° may be enough; up to ~240° if beneficial. |
 
 ## Architecture
 
 | Requirement | Decision |
 |-------------|----------|
-| Structure | Plywood cut-out box-truss links |
-| Gravity balance | Full counterbalance via **counterweights + transfer linkage** (parallelogram/four-bar style): net gravity torque ≈ 0 at every joint, in every pose, for the arm's own mass (payload is *not* balanced) |
+| Structure | Plywood cut-out box-truss links. (Inexpensive pine boards are an open alternative — see open questions.) |
+| Gravity balance | Counterweights **mounted on the members themselves**: a bar extending behind the elbow carries mass placing the forearm's center of mass at the elbow axis; the upper arm extends behind the shoulder and carries mass balancing the entire arm. The multiplicative growth of counterweight mass is accepted — slow accelerations make the added inertia tolerable. Payload is *not* balanced. |
+| Counterweight stubs | Rearward extensions limited to **~half the length of their link** to avoid clumsiness, collisions, and workspace restriction. (Shorter lever → proportionally more counterweight mass.) Motors mounted at the joints can contribute counterweight mass but are expected to be far too light to serve alone. |
+| Wrist link balance | **Not counterbalanced.** The wrist link is short and light, and the end effector dominates its mass anyway — so the arm's balance is deliberately imperfect, and shoulder/elbow see a small moment shift as the wrist pitches. Motors absorb this residual. Possibly an attachment point for an optional counterweight if a very heavy end effector demands it. |
+| End-effector swaps | Provision for auxiliary counterweight positions (e.g., extra pins behind elbow/shoulder) to rebalance when a heavy end effector is fitted. (Tentative.) |
 | Actuation | NEMA 17 stepper motors with high-ratio reduction (mechanism TBD: belts, worm, cycloidal, cable/capstan…) |
-| Position feedback | Closed-loop optical sensing of true position, compensating structural compliance and transmission error (concept TBD — candidates exist) |
+| Stepper drivers | **Open-loop** — no closed-loop stepper drivers. The dominant errors enter downstream of the motor (transmission, structure), so motor-shaft encoders add little; instead design with torque margin so skipped steps are not a realistic risk. |
+| Position feedback | **Layered sensing**: (1) joint angle sensing, (2) link bending sensing, and (3) approximate end-effector position sensing (e.g., a camera watching the end effector). The redundancy across layers is used to self-calibrate the internal kinematic/deflection model. Specific optical sensing concepts: reserved for a dedicated discussion. |
 | Degrees of freedom (arm) | 4: base yaw, shoulder pitch, elbow pitch, wrist pitch (pitch axes mutually parallel) |
 | Degrees of freedom (end effector) | 2–3, as a separate module (e.g., wrist roll, gripper open/close); interface TBD |
 
@@ -36,21 +39,44 @@ repeatable point moves plus coordinated multi-joint path tracking.
 
 | Requirement | Target |
 |-------------|--------|
-| Total build cost | **~$500** (excluding tools already owned) — vs. the ~$2,000 hobbyist baseline. Leaves room for quality bearings, decent drivers, and sensors where they matter. |
+| Total build cost | ~$500 (excluding tools already owned) — vs. the ~$2,000 hobbyist baseline. Leaves room for quality bearings, decent drivers, and sensors where they matter. |
+
+## Fabrication & on-hand resources
+
+The design should build around what's already available:
+
+- **CNC router** — work envelope roughly **3 ft × 2 ft**. Primary tool for
+  plywood truss parts; panels must fit within this envelope.
+- **3D printer** — for joints, brackets, gears, and other supporting parts.
+- **Controller boards** — several spare 3D-printer-class boards currently
+  running Marlin; can be reflashed, and writing custom firmware is in scope.
+  These boards drive NEMA 17s natively — part of why NEMA 17 is the chosen
+  motor class.
+- **Motors** — nine NEMA 17 steppers on hand.
+- **Wood stock** — not yet purchased; plywood vs. inexpensive pine boards is
+  an open trade.
 
 ## Explicit non-goals
 
 - **Speed.** The arm is allowed to be slow. Slowness is a design tool, not a defect.
 - **Structural rigidity as an accuracy strategy.** Compliance is accepted and measured out, not stiffened out.
 - **Dynamic performance.** No requirement to manage vibration, resonance, or high-acceleration trajectories; operation is quasi-static.
+- **Continuous base rotation.** Limited yaw travel avoids slip rings and simplifies cable management.
 
 ## Assumptions to validate
 
-- A geared-down NEMA 17 provides enough torque margin for 5 lb payload at the
-  chosen reach and speed. (Needs a torque/gearing worksheet once reach is set.)
-- The counterbalance can be made pose-independent across all three parallel
-  pitch joints with acceptable added mass and inertia.
-- The plywood truss's compliance is repeatable enough (low hysteresis) that
-  optical feedback can servo it out.
+- **Shoulder torque margin is the tightest number in the project.** 5 lb at
+  3 ft is ~20 N·m of payload torque at the shoulder. A NEMA 17 through a
+  100:1 reduction at realistic efficiency delivers roughly that with little
+  margin — the torque/gearing worksheet needs to confirm ratio, loaded speed,
+  and margin against skipped steps (which the open-loop-driver decision
+  depends on).
+- The ~10 s unloaded traverse is achievable given the inertia of
+  member-mounted counterweights (soft requirement, may be relaxed).
+- The residual imbalance from the unbalanced wrist link (and any unbalanced
+  end-effector mass) stays comfortably inside the shoulder/elbow motors'
+  torque budget across all poses.
+- The wood structure's compliance is repeatable enough (low hysteresis) that
+  the sensing system can servo it out.
 - Slow closed-loop correction is sufficient — no destabilizing structural
   dynamics enter the control band.

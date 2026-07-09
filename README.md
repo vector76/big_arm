@@ -16,6 +16,7 @@ compliance of a lightweight structure.
 | [docs/requirements.md](docs/requirements.md) | Draft requirements (unknowns marked TBD) |
 | [docs/sensing.md](docs/sensing.md) | Sensing concept: unloaded-reference optical metrology |
 | [docs/tooling.md](docs/tooling.md) | Modeling & CAD tooling: TS/three.js engineering model, OpenSCAD, Python analysis |
+| [docs/roadmap.md](docs/roadmap.md) | Phased plan from concept convergence to working demos |
 | [docs/open-questions.md](docs/open-questions.md) | Decisions and details still to be resolved |
 
 ## Engineering model

@@ -32,11 +32,27 @@ The ⭐ items block the most downstream work. Answers get folded into
    mass but nowhere near enough on their own. Note the stub-length limit
    (~half link length) roughly doubles the required mass vs. a full-length
    stub.
-7. **First milestone.** Tooling is now decided; the concept model is the
-   presumptive next step, with the torque/counterbalance math as its core.
-   Later milestones: single-joint testbed, then full-arm CAD in OpenSCAD.
+The first milestone question is resolved: the concept model is scaffolded
+and running in `model/` (torque/counterbalance math + 3D view). With the
+datasheet motor curve, load-adaptive cruise speeds, and the elbow restricted
+to downward bending, traverse lands at ~2.9 s unloaded / ~6.8 s loaded
+(worst joint, full travel) — both the ~10 s unloaded target and the hoped-for
+~10 s loaded are met. Shoulder moving margin is 1.61 (pull-out based).
+Next milestones: single-joint testbed, then full-arm CAD in OpenSCAD.
 
 ## Resolved
+
+### 2026-07-08 (sixth round)
+
+- **Motors:** the nine on-hand NEMA 17s are StepperOnline 17HS19-2004S1
+  (59 N·cm holding, 2 A, 48 mm); 24 V supply to the drivers. Fans possible
+  if needed. Datasheet torque curve at 24 V / 2.2 A: pull-out ~41 N·cm flat
+  to ~450 rpm, roughly linear decline to ~17 N·cm at 1200 rpm.
+  <https://www.omc-stepperonline.com/nema-17-bipolar-59ncm-84oz-in-2a-42x48mm-4-wires-w-1m-cable-connector-17hs19-2004s1>
+- **Elbow range of motion:** downward bend only (~135° travel). With ±90°
+  wrist travel the same points stay reachable except some above the
+  shoulder. Shrinks worst-case traverse and simplifies counterweight
+  clearance.
 
 ### 2026-07-08 (fifth round)
 

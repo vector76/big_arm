@@ -18,6 +18,22 @@ compliance of a lightweight structure.
 | [docs/tooling.md](docs/tooling.md) | Modeling & CAD tooling: TS/three.js engineering model, OpenSCAD, Python analysis |
 | [docs/open-questions.md](docs/open-questions.md) | Decisions and details still to be resolved |
 
+## Engineering model
+
+[`model/`](model/) holds the interactive concept model (TypeScript +
+three.js, fully client-side — see [docs/tooling.md](docs/tooling.md)):
+counterweight sizing, joint torques and margins, and traverse times,
+computed live over a crude 3D view with sliders.
+
+```sh
+cd model
+npm install
+npm run dev    # interactive, http://localhost:5173
+npm test       # model-core unit tests
+npm run build  # static site in model/dist/
+```
+
 ## Status
 
-Concept stage (July 2026). Documents are drafts; nothing is built yet.
+Concept stage (July 2026). Documents are drafts; the engineering model is
+scaffolded and working; no hardware is built yet.

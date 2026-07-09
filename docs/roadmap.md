@@ -42,20 +42,26 @@ trade. Pick the counterweight material/form here too.
 sensing resolution that supports the repeatability target; structure
 material/joint style chosen with measured, repeatable compliance.
 
-## Phase 2 — Single-joint testbed (shoulder-scale)
+## Phase 2 — Single-joint testbed (shoulder, real geometry)
 
-One complete **shoulder** joint integrating all four pillars: a full-length
-wooden beam (~0.9 m) loaded with 5 lb at the tip to replicate the worst-case
-~27 N·m, stub + counterweight at real scale (~6.5 kg), NEMA 17 through the
-chosen reduction, unloaded readout gear + reference beam + cameras,
-closed-loop control on one axis.
+One complete **shoulder** joint integrating all four pillars, built at the
+**real upper-arm geometry** (0.45 m link, real stub and counterweight, real
+sensor stations) rather than a long surrogate beam — so the deflection
+magnitudes, reference-beam and camera geometry, and calibration procedure
+transfer one-to-one to the final arm (decision 2026-07-09).
 
-Shoulder-scale deliberately: it is the margin-critical joint, its
-counterweight is the structurally demanding one, the biggest bending moments
-live there, and hardware that survives the testbed becomes the real shoulder
-in Phase 4. Hang dummy masses along the beam to replicate the articulated
-arm's mass distribution, so counterweight sizing, residual imbalance, and
-swing inertia are representative and the control tuning transfers.
+Loading: a ~3 kg **balanced** dummy mass at the elbow position stands in
+for the elbow assembly (exercising the counterweight at real scale), plus
+up to ~6.1 kg of **unbalanced** mass at the elbow to reproduce the
+worst-case ~26.7 N·m shoulder torque (equivalent of 5 lb payload + end
+effector at full reach). Drivetrain: NEMA 17 through the Phase 1a winner
+(leading hypothesis: herringbone primary + capstan sector). Sensing:
+unloaded readout gear + reference beam + cameras, closed loop on one axis.
+
+Shoulder deliberately: it is the margin-critical joint, its counterweight
+is the structurally demanding one, the biggest bending moments live there,
+and hardware that survives the testbed becomes the real shoulder in
+Phase 4.
 
 Measure: positioning repeatability under varying load, residual imbalance,
 friction/efficiency at full torque, deflection and its repeatability,

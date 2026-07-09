@@ -11,13 +11,12 @@ The ⭐ items block the most downstream work. Answers get folded into
    camera modules as the universal readout). Remaining sensing-specific
    questions (sensor count/placement, camera data path, calibration method,
    upper-arm beam geometry) live at the bottom of that document.
-2. **Reduction mechanism trade.** Belts (cheap, low backlash, limited ratio
-   per stage), worm (huge ratio, self-locking, friction), cycloidal
-   (printable, compact), cable/capstan (zero backlash, very cheap,
-   wood-friendly). Closed-loop feedback relaxes backlash concerns, so
-   friction, cost, and printability likely dominate. The shoulder joint's
-   ~20 N·m payload torque makes this the pacing decision for the torque
-   worksheet.
+2. **Reduction mechanism trade.** Analysis and measurement plan in
+   [reduction-trade.md](reduction-trade.md). Shoulder leading hypothesis:
+   radially-preloaded printed herringbone primary (~3:1) + capstan cable
+   sector (~50:1) — η ≈ 0.85, margin ~1.96, zero backlash, drift killed by
+   absolute optical sensing. Wrist leans worm; elbow leans worm if measured
+   η ≥ 0.5. Closes when the bench rig produces measured efficiencies.
 3. **Required feedback resolution and rate.** The repeatability target
    (±1 mm mandatory / 0.1 mm stretch) gives a ~1.1 mrad total angular
    budget — roughly 0.3 mrad per contributor. Rate still open; slow motion
@@ -42,6 +41,19 @@ to downward bending, traverse lands at ~2.9 s unloaded / ~6.8 s loaded
 Next milestones: single-joint testbed, then full-arm CAD in OpenSCAD.
 
 ## Resolved
+
+### 2026-07-09 (ninth round)
+
+- **Anti-backlash gear primitive:** radially-preloaded printed herringbone
+  pairs (compliant mechanism maintains slight center pressure) — proven in
+  the user's prior work, effectively zero backlash. Preferred primary-stage
+  building block.
+- **Shoulder drivetrain hypothesis:** herringbone primary + capstan cable
+  sector, ~150:1 total, first prototype of Phase 1a; becomes the final
+  design if it measures well.
+- **Testbed geometry:** real 0.45 m upper-arm length with balanced dummy
+  elbow mass + unbalanced torque-equivalent load — not a full-length
+  surrogate beam — so deflection sensing and calibration transfer 1:1.
 
 ### 2026-07-09 (eighth round)
 

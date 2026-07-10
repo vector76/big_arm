@@ -42,13 +42,15 @@ move).
   printed cycloidal (η floor 0.45 is comfortable for a decent cycloidal).
   Both are single-stage and compact at this ratio.
 - **Shoulder (150:1): leading hypothesis (2026-07-09) — herringbone
-  primary + capstan cable sector.** A ~3:1 radially-preloaded printed
-  herringbone pair drives a small cable drum; the cable wraps a large
-  plywood sector fixed to the upper arm (~50:1 — e.g., 250 mm sector radius
-  over 5 mm effective drum radius; Ø500 mm arc fits the CNC and the 120°
-  travel). Expected η ≈ 0.9 × 0.95 ≈ **0.85 → margin ~1.96**. Worst-case
-  cable tension ≈ 26.7 N·m / 0.25 m ≈ **107 N** — mild for wire rope or
-  Dyneema in a wooden groove. Capstan drift (an accumulating *relative*
+  primary + capstan cable sector.** A 4.25:1 printed herringbone pair
+  (12T/51T m2; the wheel's addendum stubbed to 0.65 so its tips clear the
+  small pinion's base circle at 20° PA — the herringbone's full-tooth face
+  overlap keeps contact continuous) drives a small cable drum; the cable
+  wraps a plywood sector fixed to the upper arm (~35:1 — 238 mm sector
+  radius over 6.75 mm effective drum radius; the higher primary ratio
+  keeps the sector compact, 2026-07-10). Expected η ≈ 0.9 × 0.95 ≈
+  **0.85 → margin ~1.96**. Worst-case cable tension ≈ 26.7 N·m / 0.238 m ≈
+  **112 N** — mild for wire rope or Dyneema in a wooden groove. Capstan drift (an accumulating *relative*
   error) is made irrelevant by the *absolute* optical joint sensing; cable
   stretch under load is a slow systematic the calibration absorbs. Zero
   backlash end to end. **This is the first prototype; if it measures well
@@ -77,9 +79,19 @@ margin-1.6; elbow and wrist can.
 
 Build one test rig, swap mechanisms through it:
 
-- **Rig:** NEMA 17 on a plywood plate, mechanism under test, output shaft
-  with a torque arm (known lever, hang known weights). Drive from a spare
-  Marlin board.
+- **Rig:** vertical plywood board at the bench edge, mechanism under test
+  driving a 0.45 m pendulum arm (real upper-arm scale); weights hang
+  directly in calibrated arm holes, so τ = m·g·r·sin(θ) is known exactly
+  with no pulley friction in the load path. Travel −25°…+95° from
+  straight-down: asymmetric so the horizontal pose is covered (6.05 kg at
+  450 mm = 26.7 N·m, the worst-case shoulder torque), while one hung mass
+  still sweeps torque from −42% to +100% of max across travel and the
+  zero crossing at θ = 0 exposes lash as load transfers between flanks.
+  Failure-safe: rest is a stable equilibrium and torque ramps with the
+  commanded angle during bring-up. The gear mesh is set by press-and-clamp
+  (no radial-preload flexure on the rig); if the plain snug mesh shows
+  measurable lash at the zero crossing, the preload mechanism gets added
+  back and re-measured. Drive from a spare Marlin board.
 - **Measurements per mechanism:**
   1. Lifting efficiency: max weight raised without stalling at slow speed →
      η = (torque out) / (0.41 × ratio).
@@ -90,6 +102,11 @@ Build one test rig, swap mechanisms through it:
      disqualifying).
   5. Repeat lifting test at speed (e.g., 300 rpm motor) to spot-check the
      torque curve interaction.
+- **CAD:** the complete test stand — drivetrain parts, pendulum arm, rig
+  board/base/gussets, bearing hub, axle standoffs, and travel stops — is
+  in [`cad/prototype1/`](../cad/prototype1/) (parametric OpenSCAD; see
+  [`cad/README.md`](../cad/README.md) for geometry, cable, and bench
+  notes).
 - **Build order:** (1) herringbone-primary + capstan-sector at shoulder
   scale — the leading shoulder hypothesis, and it doubles as the start of
   the Phase 2 testbed drivetrain if it measures well; (2) threaded-rod worm

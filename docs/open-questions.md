@@ -13,8 +13,8 @@ The ⭐ items block the most downstream work. Answers get folded into
    upper-arm beam geometry) live at the bottom of that document.
 2. **Reduction mechanism trade.** Analysis and measurement plan in
    [reduction-trade.md](reduction-trade.md). Shoulder leading hypothesis:
-   radially-preloaded printed herringbone primary (~3:1) + capstan cable
-   sector (~50:1) — η ≈ 0.85, margin ~1.96, zero backlash, drift killed by
+   printed herringbone primary (4.25:1) + capstan cable
+   sector (~35:1) — η ≈ 0.85, margin ~1.96, zero backlash, drift killed by
    absolute optical sensing. Wrist leans worm; elbow leans worm if measured
    η ≥ 0.5. Closes when the bench rig produces measured efficiencies.
 3. **Required feedback resolution and rate.** The repeatability target

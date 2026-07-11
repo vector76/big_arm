@@ -6,9 +6,9 @@
 // part of the left one), rosybrown = yaw slew disc, steelblue = drive wheels,
 // tomato = pinions, dimgray = motors, seagreen = joint sensor,
 // slategray = counterweights, khaki = printed fittings, silver =
-// axles/bearings. The shoulder/elbow joint stations keep the
-// bearing_station.scad sketch palette: orchid arm bushing, yellowgreen
-// fixed bushing, red split pin, deepskyblue tee washer.
+// axles/bearings. The shoulder/elbow joint stations AND the yaw hub
+// keep the bearing_station.scad sketch palette: orchid arm bushing,
+// yellowgreen fixed bushing, red split pin, deepskyblue tee washer.
 //
 // Iteration-5 architecture — the shoulder capstan is INVERTED:
 // - The SECTOR IS FIXED, coplanar/integral with the LEFT base board
@@ -36,10 +36,16 @@
 //   the elbow (zero gravity torque at every pose); the down-only bend
 //   sweeps it up and away, and at full extension the hook parks in a
 //   slot in the upper arm's top board.
-// - BASE: a DOUBLED two-ply slew disc (r 200, 24 thick) rides support
-//   rollers under its rim and hold-downs over it; printed herringbone
-//   gear segments wrap 200 deg of the rim and a bench-standing motor
-//   drives them directly with the m2 12T pinion (the same pinion as
+// - BASE: a DOUBLED two-ply slew disc (r 200, 24 thick) rides bare-608
+//   support rollers under its rim (stub axles at z 13 off small
+//   blocks: crowns at the z 24 disc bottom) and hold-downs over it.
+//   The HUB is the joint bearing-station idiom FLIPPED onto the
+//   baseplate (hub_station in joints.scad, diagram hub_station.scad):
+//   a preloaded 608 pair locates the axis — and the yaw gear mesh —
+//   with no baseplate through-hole, so the plate bottom stays flat
+//   for clamping. Printed herringbone gear segments wrap 200 deg of
+//   the rim and the motor hangs INVERTED from a printed pylon,
+//   driving them directly with the m2 12T pinion (the same pinion as
 //   the shoulder primary) — single stage, ~17:1, yaw +-90. The pinion
 //   sits at bench azimuth 315, out of every swept corridor (the arm's
 //   drive boom owns azimuths 90..270 at full-up; the front board
@@ -47,7 +53,7 @@
 //   U of three boards: left = sector host; right = near-twin carrying
 //   the unloaded joint-angle sensor (sleeve turning with the arm hub,
 //   ring reader on the outer face — no drivetrain compliance in the
-//   measurement); front board runs disc-top-to-275 (limited only by
+//   measurement); front board runs disc-top-to-247 (limited only by
 //   the arm truss at shoulder_min). All three boards tab straight
 //   into the disc through mortises in both ply layers — the U plus
 //   disc make one torsion box, no angle blocks.
@@ -84,59 +90,85 @@ rz(pose_yaw) {                   // everything from here yaws together
   }
 }
 
-// ---- bench plate, center post, roller stations, yaw motor ----
+// ---- bench plate, hub station, roller stations, yaw motor ----
 module bench_env() {
+  // the baseplate is a PLAIN FLAT slab (clampable): nothing pierces
+  // or pockets it — the hub's green foot sits flat on top
   color("wheat") tz(-ply_t) linear_extrude(ply_t)
     sq([base_plate, base_plate], [1, 1], 12);
-  color("silver") tz(-18) cylinder(d = 8, h = 94, $fn = 24);
-  // support rollers under the disc rim (stations dodge the 315 deg lane
-  // where the pinion lives)
+  // the hub: bearing_station flipped onto the plate (hub_station in
+  // joints.scad; annotated diagram hub_station.scad). Drawn unposed:
+  // pink, the pin and the disc-side races actually turn with the disc
+  hub_station();
+  // support rollers under the disc rim: bare 608s on stub axles held
+  // at z 13 by small inboard blocks — crowns at 24 = the disc bottom,
+  // 2 mm of ground clearance under each bearing. Stations dodge the
+  // 315 deg lane where the pinion lives; more are cheap if rim loads
+  // ask for them
   rz([30, 90, 150, 210, 270, 330]) tx(roller_r) {
-    color("khaki") cub([24, 30, 30], [1, 1, 0]);
-    color("silver") tz(41) ry(90) cylinder(d = 22, h = 7, center = true);
+    color("khaki") tx(-15) cub([20, 24, 22], [1, 1, 0]);
+    color("silver") tz(13) ry(90) {
+      cylinder(d = 8, h = 28, center = true);
+      cylinder(d = 22, h = 7, center = true);
+    }
   }
   // hold-down stations: riser outside the gear band, arm in over the rim
   rz([30, 150, 270]) {
-    color("khaki") tx(yaw_disc_r + 20) cub([14, 30, 104], [0, 1, 0]);
-    color("khaki") tx(roller_r + 6) tz(92) cub([36, 30, 12], [0, 1, 0]);
-    color("silver") tx(roller_r) tz(88) ry(90)
+    color("khaki") tx(yaw_disc_r + 20) cub([14, 30, 76], [0, 1, 0]);
+    color("khaki") tx(roller_r + 6) tz(64) cub([36, 30, 12], [0, 1, 0]);
+    color("silver") tx(roller_r) tz(60) ry(90)
       cylinder(d = 22, h = 7, center = true);
   }
   // yaw drive: the m2 12T herringbone pinion (the shoulder primary
-  // pinion, reused) straight on a bench-standing motor, up into the
-  // segment band. Azimuth 315: out of the arm's swept corridors.
+  // pinion, reused) hangs INVERTED over the rim so the gear band can
+  // sit low: the motor face bolts down onto a printed pylon's top
+  // plate 2 over the band, the shaft drops through its clearance
+  // hole and the pinion spans the full band with margin. Azimuth
+  // 315: out of the arm's swept corridors.
   rz(135) tx(-(yaw_pitch_r + 12)) {
-    color("dimgray") cub([motor_w, motor_w, motor_len], [1, 1, 0]);
-    color("silver") tz(motor_len) cylinder(d = 5, h = 26, $fn = 24);
-    color("tomato") tz(motor_len + 1) cylinder(d = 28, h = gear_w);
+    color("khaki") {
+      tx(-38) cub([12, 50, 50], [1, 1, 0]);
+      tz(50) difference() {
+        tx(-44) cub([68, 50, 4], [0, 1, 0]);
+        tz(-0.5) cylinder(d = 32, h = 5);
+      }
+    }
+    color("dimgray") tz(54) cub([motor_w, motor_w, motor_len], [1, 1, 0]);
+    color("silver") tz(23) cylinder(d = 5, h = 31, $fn = 24);
+    color("tomato") tz(22) cylinder(d = 28, h = gear_w);
   }
 }
 
 // ---- slew disc + boards + fixed sector + shoulder stations ----
-// segs/hub: the printed gear segments and the central 608 housing are
-// install-at-graduation parts — the testbench clamps the disc dead
-// and omits both.
-module slew_base(segs = true, hub = true) {
+// segs: the printed gear segments are install-at-graduation parts —
+// the testbench clamps the disc dead and omits them (the hub station
+// lives in bench_env, which the testbench never draws).
+module slew_base(segs = true) {
   // the base: two-layer ply slew disc; printed herringbone gear
   // segments clip over the rim through yaw_seg_arc, centered on the
-  // pinion's disc-frame azimuth
-  color("rosybrown") tz([disc_z0, disc_z0 + ply_t]) linear_extrude(ply_t)
-    difference() {
+  // pinion's disc-frame azimuth. The sheets differ at the bore: the
+  // LOWER one is the hub station's moving plate (15.5 bore passing
+  // pink's sleeve, flange screwed to its top face), the UPPER one's
+  // 48 cutout swallows the flange + 2nd bearing + centering sheath —
+  // only the washer/jam-nut/bolt-tip pillar stands proud of the disc
+  color("rosybrown") {
+    tz(disc_z0) linear_extrude(ply_t) difference() {
       circle(r = yaw_disc_r);
-      circle(d = 40);
+      circle(d = 15.5);
       board_slots_2d();
     }
+    tz(disc_z0 + ply_t) linear_extrude(ply_t) difference() {
+      circle(r = yaw_disc_r);
+      circle(d = 48);
+      board_slots_2d();
+    }
+  }
   if (segs)
     color("khaki") tz(disc_z0) linear_extrude(2 * ply_t) rz(-45)
       difference() {
         pie(yaw_pitch_r + 7, yaw_seg_arc);
         circle(r = yaw_pitch_r - 12);
       }
-  // central 608 pair housing through the disc bore (axis location
-  // only), flush with the disc top: the shoulder counterweight passes
-  // 6 mm over it at full-up
-  if (hub)
-    color("khaki") tz(disc_z0 - 10) tube(40, 22, 34);
 
   // ... and the three boards: near-twins left/right plus the FRONT
   // board, ALL tabbed straight into the disc (mortises through both
@@ -239,8 +271,8 @@ module upper_arm() {
   // straight-back line — the drive stack sits above the centerline,
   // so the closing weight goes under it. y 1..43 keeps it inside the
   // base boards and under the drum/motor/bridge lanes; the worst
-  // corner sweeps r 325, passing z 95 over the disc top and x 121
-  // at the front board at full-up
+  // corner sweeps r 325, passing z 67 over the disc top (8 over the
+  // hub pillar's bolt tip) and x 121 at the front board at full-up
   color("slategray") ry(-(180 - cw_bend))
     tx(cw_r - cw_mass[0] / 2) ty(43) cub(cw_mass, [0, -1, 1]);
 
@@ -399,7 +431,7 @@ module boom_plate_2d() rz(dd) difference() {
     // centerline (the drive stack rides above it). Boundary = the two
     // binding constraints: an arc r 338 about the shoulder (any point
     // past arm angle 170 passes straight down at some pose, height
-    // 420 - r, so 338 keeps 6 over the z 76 disc top), then, past arm
+    // 392 - r, so 338 keeps 6 over the z 48 disc top), then, past arm
     // angle ~191 where the FRONT board takes over at full-up
     // (x = r*cos(angle+100) <= 124 vs the x 130 face), a chord to the
     // lower corner at arm angle 200, r 248. Local frame: +x' = arm

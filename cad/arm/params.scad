@@ -92,9 +92,11 @@ function link_d(back) = elbow_d + 2 * back * tan(arm_taper);
 // NEGATIVE): the drive stack's mass rides above the centerline, so
 // the closing weight must hang under it for the combined CG to land
 // on the shoulder axis. Fan + block are travel-capped: over the full
-// pose range the lowest sweep passes z 82+ over the z 76 disc top,
+// pose range the lowest sweep passes z 54+ over the z 48 disc top,
 // and at full-up everything stays x <= 124 off the x 130 front-board
-// face (the fan's lower corner slides down parallel to it). Sized
+// face (the fan's lower corner slides down parallel to it). The block
+// (a stand-in shape) bottoms at z 67, 8 over the hub pillar's bolt
+// tip. Sized
 // ~1.06 kg.m: the ~1.2 needed less what the motor + wheel + drum
 // already contribute at r 263..326.
 // Elbow: the LEFT forearm plate grows a FIN back over the elbow (one
@@ -120,13 +122,27 @@ elbow_cw_slot_x = 205;         // ...centered at upper_len - 245
 
 // ---- base: slew disc + THREE boards ----
 // (0) the slew disc: a plain TWO-LAYER ply disc (24 thick) riding
-//     support rollers under its rim and hold-downs over it (the roller
-//     ring reacts the overturning moment; the central 608 pair only
-//     locates the axis). Printed herringbone gear segments wrap
-//     yaw_seg_arc of the rim; a bench-standing motor drives them
-//     directly with the m2 12T pinion at azimuth 315 — out of every
-//     swept corridor (the arm's drive boom owns azimuths 90..270 at
-//     full-up; the front board corners sweep r 161 vs the pinion's 219)
+//     bare-608 support rollers under its rim (stub axles at z 13 off
+//     small blocks: crowns at 24 = the disc bottom, 2 mm of ground
+//     clearance) and hold-downs over it — the roller ring reacts the
+//     overturning moment. The hub is the joint bearing-station idiom
+//     FLIPPED onto the baseplate (hub_station in joints.scad; the
+//     annotated diagram is hub_station.scad): a preloaded 608 pair
+//     locates the axis — and with it the yaw gear mesh — from a
+//     broad flat-bottomed green cone held by 8 perimeter screws
+//     (they carry the shear; nothing is pocketed into the plate),
+//     its M3 head captive in a hex pocket backed by a diagonal lock
+//     screw, NO through-hole, so the baseplate bottom stays flat for
+//     clamping. The bearing rides high in the cone, so pink's
+//     cantilever is short. The lower sheet takes pink's
+//     flange; the upper sheet's 48 cutout swallows the mechanism,
+//     leaving only a 16-dia pillar (washer + jam nuts + bolt tip)
+//     11 proud of the disc top. Printed herringbone gear segments
+//     wrap yaw_seg_arc of the rim; the motor hangs INVERTED from a
+//     printed pylon at azimuth 315, pinion down over the full gear
+//     band — out of every swept corridor (the arm's drive boom owns
+//     azimuths 90..270 at full-up; the front board corners sweep
+//     r 161 vs the pinion's 219)
 // (1) LEFT (+y) board: grows the FIXED shoulder sector — one CNC ply
 //     piece (or face-bolted stack), so joint torque grounds straight
 //     into the base with no bracket or pylon
@@ -136,8 +152,8 @@ elbow_cw_slot_x = 205;         // ...centered at upper_len - 245
 //     drivetrain compliance in the measurement
 // (3) FRONT board tying the two into a stiff U. With the sector static,
 //     only the ARM truss sweeps the front: at shoulder_min its bottom
-//     edge passes z~291 at the board plane (the taper is anchored at
-//     the shoulder, so this matches the old box), top rises to 275.
+//     edge passes z~263 at the board plane (the taper is anchored at
+//     the shoulder), top rises to 247.
 //     The arm swings between the side boards (110 wide in a 126 gap).
 // ALL THREE boards tab straight into the disc — mortises through both
 // ply layers, panel shoulders landing on the disc top (no angle
@@ -145,12 +161,13 @@ elbow_cw_slot_x = 205;         // ...centered at upper_len - 245
 // into a torsion box with the disc as its floor.
 base_plate = 520;
 col_w = 150;          // side board spacing (inner faces at +-63)
-shoulder_h = 420;
+shoulder_h = 392;     // the whole machine rode down 28 with the disc
 front_x = 130;        // side boards' front edge; the front board spans it
-front_z1 = 275;       // 16 mm under the truss bottom at shoulder_min
-disc_z0 = 52;         // disc bottom: leaves room for the bench motor
-                      // under the rim (body z 0..48, pinion up into the
-                      // gear band z 52..76)
+front_z1 = 247;       // 16 mm under the truss bottom at shoulder_min
+disc_z0 = 24;         // disc bottom = the support-608 crowns (stub
+                      // axles at z 13, 2 mm ground clearance under
+                      // each bearing); inverting the yaw motor freed
+                      // the under-rim space that set the old height
 roller_r = 185;       // support/hold-down roller stations
 
 // ---- inverted shoulder capstan ----
@@ -179,7 +196,7 @@ sector_plane_y = col_w / 2 - ply_t / 2;   // 69: the left board mid-plane
 tb_desk = [900, 700, 25];
 tb_clamp_az = [45, 135, 225, 315]; // hold-down bars; keep hardware off
                                    // the rim near azimuth 180, where
-                                   // the CW sweep dips to z 82
+                                   // the CW sweep dips to z 54
 tb_stack = 30;                     // plate stack per rod end: ~2 std
 tb_plate_d = 134;                  // 2.5 kg plates each side, ~6 kg
                                    // total ~ the forearm assembly

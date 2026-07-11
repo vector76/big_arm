@@ -25,7 +25,10 @@ flags (0 = from origin, 1 = centered, -1 = negative-going), and
   Reductions: shoulder = the prototype1 capstan INVERTED (sector fixed
   to the base, drive rides the arm), yaw = a two-ply slew disc with
   printed herringbone gear segments driven directly by the m2 12T
-  pinion; the elbow + wrist drives are being overhauled (worms
+  pinion on an inverted motor, riding rim rollers and hubbed on the
+  same bearing-station idiom flipped onto the flat baseplate
+  (`arm/hub_station.scad` is its annotated standalone detail); the
+  elbow + wrist drives are being overhauled (worms
   dropped) and the model carries bare joints there. For iterating
   the big-picture structure before detailed design; see the header of
   `arm/assembly.scad` for the architecture notes and `arm/params.scad`
@@ -68,8 +71,7 @@ anything that was tested.
 
 - The two-ply slew disc lies flat on the desk, clamped dead (generic
   hold-down bars in the model). Gear segments, rim rollers, hold-downs,
-  the central 608 housing, and the yaw motor are simply not installed
-  yet.
+  the hub station, and the yaw motor are simply not installed yet.
 - No forearm and no elbow bearings: printed bushings fill the empty
   28.5 mm elbow pilot bores, and standard weight plates ride
   barbell-style on the ends of an M8 rod through them. Because the

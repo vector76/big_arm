@@ -6,9 +6,10 @@
 //   desk top sits at z = disc_z0, so every part keeps its final-
 //   assembly coordinates; the board tabs are flush with the disc
 //   underside, so the base sits flat. Gear segments, rim rollers,
-//   hold-downs, the central 608 housing and the yaw motor are simply
-//   not installed yet — graduating the rig = unclamp the disc and set
-//   it on its roller ring.
+//   hold-downs, the hub station and the yaw motor are simply not
+//   installed yet (all of them live in bench_env(), which this file
+//   never draws) — graduating the rig = unclamp the disc and set it
+//   on its roller ring.
 // - NO forearm, NO elbow bearings: printed bushings fill the empty
 //   28.5 elbow pilot bores (where the green joint bushings later
 //   land) and standard weight plates slide BARBELL-STYLE onto the
@@ -36,7 +37,7 @@
 //
 // CLAMP ZONING: yaw is frozen, so only the pitch sweep matters — the
 // boom fan / CW / drive stack own the strip y -75..117 behind the
-// shoulder (x < 0), dipping to z 82 just 6 mm over the rim. Keep
+// shoulder (x < 0), dipping to z 54 just 6 mm over the rim. Keep
 // clamp hardware off the rim within ~35 deg of azimuth 180 (or under
 // 6 mm tall there); the four bars at 45/135/225/315 all sit outside
 // the strip (|y| >= 141 at r 200). Drawn as generic riser-bar
@@ -65,7 +66,7 @@ rz(tb_clamp_az) {
   }
 }
 
-slew_base(segs = false, hub = false);
+slew_base(segs = false);
 tz(shoulder_h) ry(-pose_shoulder) {
   upper_arm();
   tx(upper_len) test_weight();

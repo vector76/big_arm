@@ -17,6 +17,18 @@ flags (0 = from origin, 1 = centered, -1 = negative-going), and
 - `lib/helpers.scad` — the transform/primitive helpers described above.
 - `lib/gears.scad` — self-contained involute gear library: 2D profiles and
   herringbone (double-helical) 3D gears. No external dependencies.
+- `arm/` — full-arm CONCEPT model (blocky, correct envelopes): plywood
+  box-truss links at the v0 design point. Shoulder + elbow joints are
+  paired preloaded bearing stations — internal preload loop, wood never
+  in a precision fit; `arm/bearing_station.scad` is the annotated
+  standalone detail — while the wrist keeps a dead-axle proxy.
+  Reductions: shoulder = the prototype1 capstan INVERTED (sector fixed
+  to the base, drive rides the arm), yaw = a two-ply slew disc with
+  printed herringbone gear segments driven directly by the m2 12T
+  pinion, elbow + wrist = worms inside the truss hollows. For iterating
+  the big-picture structure before detailed design; see the header of
+  `arm/assembly.scad` for the architecture notes and `arm/params.scad`
+  for poses.
 - `prototype1/` — Phase 1a shoulder drivetrain prototype: herringbone
   primary (12T/51T, module 2, 4.25:1; wheel tips stubbed to 0.65 addendum
   so they clear the small pinion's base circle at 20° PA) + capstan cable

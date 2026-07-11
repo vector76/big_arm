@@ -258,25 +258,22 @@ rz(pose_yaw) {
             circle(r = 36);
             circle(d = 15.5);
           }
-        // in-plane elbow counterweight, forearm-fixed on the center
-        // plane: riser pad + top boom + downward hook + block. The
-        // assembly's CG sits on the forearm axis extended back through
-        // the elbow (a top boom alone would ride ~80 high; the hook
-        // drops it back), so gravity torque vanishes at every pose.
-        // Down-only bend means the boom only sweeps up and away from
-        // the upper arm, and at full extension the hook parks in the
-        // top-board slot.
-        // boom and riser pad follow the TAPER LINE (parallel, 2 mm
-        // off the edge): the shared taper rises going back, so a
-        // horizontal boom would run into the upper arm's top board
-        // near its tail at full extension
+        // the LEFT forearm plate grows a FIN back over the elbow (one
+        // CNC piece, replacing the bolted-on boom + riser)
+        color("burlywood") ty(fore_w / 2) rx(90) linear_extrude(ply_t)
+          fore_cw_fin_2d();
+        // elbow counterweight, CENTERED for lateral symmetry: a
+        // dog-leg hanger crosses from the fin's inboard face (y 28)
+        // to the center plane, then drops through the upper arm's
+        // CENTERED top-board slot to the block, whose CG sits on the
+        // forearm axis extended back through the elbow — so gravity
+        // torque vanishes at every pose. At full extension the hanger
+        // parks in the slot (near-vertical entry: arc r ~245)
         color("slategray") {
-          tz(-6) ry(arm_taper) tz(elbow_d / 2)
-            cub([60, 40, 8], [0, 1, 0]);                       // riser
-          tz(2) ry(arm_taper) tz(elbow_d / 2) tx(elbow_cw_x0)
-            cub([60 - elbow_cw_x0, 40, 12], [0, 1, 0]);        // boom
+          tx(elbow_cw_x0) ty(-20) tz(88)
+            cub([25, 48, 24], [0, 0, 0]);                  // dog-leg
           tx(elbow_cw_x0) tz(-45)
-            cub([25, 40, link_d(-elbow_cw_x0) / 2 + 55], [0, 1, 0]);
+            cub([25, 40, link_d(-elbow_cw_x0) / 2 + 82], [0, 1, 0]);
           tx(elbow_cw_x0 - 28) tz(-45) cub(elbow_cw_blk, [0, 1, 0]);
         }
         // wrist worm + motor inside the forearm hollow
@@ -352,6 +349,25 @@ module sensor_board_2d() difference() {
 // a strip at arm angle dd carrying the drum dead axle bore and the
 // motor plunge cutout (prototype1 idiom: the motor hangs from a
 // slotted plate at its face; mesh set by press-and-clamp)
+// the forearm's LEFT plate fin, drawn in the forearm frame (elbow at
+// the origin): bottom edge 2 mm above the shared taper line behind
+// the axis — clears the upper arm's top chord at full extension, and
+// since the elbow bends DOWN only, every fin point's line clearance
+// only grows through travel until it has swung forward past the
+// upper arm's end. Ahead of the axis it laps down onto the plate's
+// solid top margin band (dipping below the line is fine there: the
+// upper arm ends at the elbow). The closest approach to the elbow
+// axis is r ~40, clearing the r 37.5 worm wheel ring
+module fore_cw_fin_2d() {
+  t = tan(arm_taper);
+  polygon([[70, elbow_d / 2 - 70 * t - 26],
+           [2, elbow_d / 2 - 2 * t - 26],
+           [0, elbow_d / 2 + 2],
+           [elbow_cw_x0, elbow_d / 2 - elbow_cw_x0 * t + 2],
+           [elbow_cw_x0, elbow_d / 2 - elbow_cw_x0 * t + 52],
+           [30, elbow_d / 2 - 30 * t + 50]]);
+}
+
 module boom_plate_2d() rz(dd) difference() {
   union() {
     sq([sr + 25 + cd + 55, 110], [0, 1], 16);

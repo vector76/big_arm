@@ -98,15 +98,18 @@ function link_d(back) = elbow_d + 2 * back * tan(arm_taper);
 // face (the fan's lower corner slides down parallel to it). Sized
 // ~1.06 kg.m: the ~1.2 needed less what the motor + wheel + drum
 // already contribute at r 263..326.
-// Elbow: an IN-PLANE boom + hook, forearm-fixed on the center plane.
-// The CW assembly's CG lies on the forearm axis extended back through
-// the elbow, so the combined forearm+CW CG sits AT the elbow axis and
-// gravity torque is zero at every pose (a top boom alone would put it
-// ~80 above that line; the downward hook at its end brings it back).
-// The elbow bends down only, so the boom only ever sweeps up and away
-// from the upper arm — and at FULL EXTENSION the hook parks inside the
-// upper arm through a slot in its top board (it enters nearly
-// vertically: arc r ~245, vertical tangent at 0 deg).
+// Elbow: the LEFT forearm plate grows a FIN back over the elbow (one
+// CNC piece with the plate; bottom edge 2 above the shared taper
+// line, so it clears the upper arm's top chord at full extension and
+// the down-only bend sweeps it up and away everywhere else). The CW
+// itself stays CENTERED for lateral symmetry: a dog-leg hanger
+// crosses from the fin's inboard face to the center plane and drops
+// to the block, whose CG lies on the forearm axis extended back
+// through the elbow — so the combined forearm+CW CG sits AT the
+// elbow axis and gravity torque is zero at every pose. At FULL
+// EXTENSION the hanger parks inside the upper arm through the
+// centered slot in its top board (it enters nearly vertically: arc
+// r ~245, vertical tangent at 0 deg).
 cw_bend = -2;                  // deg above straight-back: NEGATIVE =
                                // 2 deg below the centerline
 cw_r = 265;                    // block center; worst corner sweeps 325

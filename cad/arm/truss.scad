@@ -23,8 +23,8 @@ use <../lib/helpers.scad>
 // the joint gusset. s0/s1 keep the plate SOLID for that length at the
 // start/end — the joint zones, where the bearing stations mount and
 // the load concentrates, get no cutouts.
-module truss_plate_2d(l, d0, d1, margin = 14, s0 = 0, s1 = 0) {
-  g = 7;                                    // half-width of a diagonal
+module truss_plate_2d(l, d0, d1, margin = 28, s0 = 0, s1 = 0) {
+  g = 14;                                   // half-width of a diagonal
   dm = (d0 + d1) / 2;                       // mean depth sizes the bays
   h = dm - 2 * margin;
   k = (d1 - d0) / (2 * l);                  // edge slope (z per x)
@@ -64,7 +64,7 @@ module box_truss(x0, x1, w, d0, d1, bot_relief = 0, solid0 = 0, solid1 = 0) {
   // run full length past the axis as the joint fork, solid in the
   // solid0/solid1 joint zones
   color("burlywood") my([0, 1]) ty(w / 2) rx(90) linear_extrude(ply_t)
-    tx(x0) truss_plate_2d(l, d0, d1, 14, solid0, solid1);
+    tx(x0) truss_plate_2d(l, d0, d1, 28, solid0, solid1);
   // chords lie ON the tapered edges: outer face on the edge line,
   // board thickness inward
   color("sienna") tx(x0) tz(d0 / 2) ry(a) tz(-ply_t) linear_extrude(ply_t)

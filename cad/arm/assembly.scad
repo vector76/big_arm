@@ -2,8 +2,8 @@
 // axis = Z, pitch axes along Y. Pose via params or -D overrides.
 //
 // Color key: burlywood = truss side plates + boom plate, sienna =
-// truss chords, chocolate/peru = sector core/flanges, navajowhite =
-// base boards, rosybrown = yaw slew disc, steelblue = drive wheels,
+// truss chords, navajowhite = base boards (the fixed sector web is
+// part of the left one), rosybrown = yaw slew disc, steelblue = drive wheels,
 // tomato = pinions/worms, dimgray = motors, seagreen = joint sensor,
 // slategray = counterweights, khaki = printed fittings, silver =
 // axles/bearings. The shoulder/elbow joint stations keep the
@@ -124,11 +124,11 @@ rz(pose_yaw) {
     }
   }
 
-  // the FIXED shoulder sector, coplanar/integral with the left board
-  // (drawn in sector colors; physically one CNC piece with the board or
-  // a face-bolted stack — either way the torque path is board-direct)
+  // the FIXED shoulder sector web is drawn as part of left_board_2d
+  // (one CNC piece); only its rim cable channel is a separate part
   tz(shoulder_h)
-    cap_sector(sr, shoulder_max - shoulder_min + 10, sector_bis, sector_plane_y);
+    sector_channel(sr, shoulder_max - shoulder_min + 10, sector_bis,
+                   sector_plane_y);
   // paired preloaded bearing stations (joints.scad bearing_station;
   // annotated diagram in bearing_station.scad): pink bushing + roll
   // pin turn with the arm plates, green bushing + M3 bolt fixed to
@@ -317,11 +317,26 @@ module board_slots_2d() {
   tx(front_x) ty([-60, 20]) sq([ply_t, 40], [0, 0]);
 }
 
-// LEFT board: the fixed sector (cap_sector in the assembly) is
-// coplanar/integral with this — the core just adds the axle bore
-module left_board_2d() difference() {
-  board_core_2d();
-  txy([0, shoulder_h]) circle(d = 28.5);   // green snout pilot bore
+// LEFT board: grows the FIXED shoulder sector as a SOLID web —
+// literally one CNC piece, so it's drawn here in the board color. A
+// gusset triangle blends the sector's lower tip back into the board's
+// rear edge (fills the notch where the lower edge crossed x -80,
+// stiffening the cantilevered tip); it lives at base angles 240..253,
+// outside the drive fan's 115..235 sweep, so the radial rule holds.
+// Only the rim cable channel (sector_channel) is a separate part
+module left_board_2d() {
+  ang = shoulder_max - shoulder_min + 10;
+  a0 = sector_bis + ang / 2;               // lower sector edge (240)
+  difference() {
+    union() {
+      board_core_2d();
+      txy([0, shoulder_h]) rz(sector_bis) pie(sr, ang);
+      polygon([[-80, shoulder_h - 80 * tan(a0 - 180)],
+               [sr * cos(a0), shoulder_h + sr * sin(a0)],
+               [-80, shoulder_h + sr * sin(a0) - 40]]);
+    }
+    txy([0, shoulder_h]) circle(d = 28.5);   // green snout pilot bore
+  }
 }
 
 // RIGHT sensor board: near-twin; same pilot bore — its green bushing

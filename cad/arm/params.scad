@@ -159,12 +159,6 @@ roller_r = 185;       // support/hold-down roller stations
 shoulder_bend = 45;
 sector_plane_y = col_w / 2 - ply_t / 2;   // 69: the left board mid-plane
 
-// ---- sector construction (as prototype1: 3-layer ply, hollow) ----
-sector_core_t = 12;
-sector_flange_t = 6;
-sector_band = 40;
-sector_hub_r = 38;
-
 // ---- pose ----
 pose_yaw = 0;
 pose_shoulder = 40;

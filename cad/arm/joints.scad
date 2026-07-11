@@ -14,24 +14,6 @@
 include <params.scad>
 use <../lib/helpers.scad>
 
-// 2D sector: hollow — rim band + hub + spokes, as prototype1
-module cap_sector_2d(r, ang) {
-  spoke_n = ang > 100 ? 3 : 2;
-  difference() {
-    union() {
-      difference() {
-        pie(r, ang);
-        pie(r - sector_band, ang + 10);
-      }
-      circle(r = sector_hub_r);
-      rz([for (i = [0 : spoke_n - 1])
-          -ang / 2 + ang * (i + 0.5) / spoke_n])
-        sq([r, 34], [0, 1]);
-    }
-    circle(d = 28.5);          // green-snout pilot bore (the fixed
-  }                            // sector shares the board layer)
-}
-
 module pie(r, ang) {
   n = max(12, ceil(ang / 4));
   polygon(concat([[0, 0]],
@@ -39,18 +21,17 @@ module pie(r, ang) {
                         r * sin(-ang / 2 + ang * i / n)]]));
 }
 
-// 3-layer sector stood into the XZ plane (joint axis = Y), bisector
-// rotated to `bis` degrees from +X (measured in the XZ plane, toward +Z);
-// `plane` sets the core mid-plane's y (e.g. coplanar with a side plate)
-// single-ply core; the rim channel (printed clip-on segments in the
-// detail design — see prototype1) is drawn as one khaki ring
-module cap_sector(r, ang, bis = 180, plane = 0) {
-  ty(plane) rx(90) rz(bis) {
-    color("chocolate") linear_extrude(sector_core_t, center = true)
-      cap_sector_2d(r, ang);
+// the sector's rim cable channel (printed clip-on segments in the
+// detail design — see prototype1), stood into the XZ plane (joint
+// axis = Y), bisector rotated to `bis` degrees from +X (measured in
+// the XZ plane, toward +Z); `plane` sets the mid-plane's y. The
+// sector WEB itself is no separate part: the fixed sector is a solid
+// web CNC'd as one piece with the left base board (see the assembly's
+// left_board_2d)
+module sector_channel(r, ang, bis = 180, plane = 0) {
+  ty(plane) rx(90) rz(bis)
     color("khaki") linear_extrude(20, center = true)
       difference() { pie(r + 5.5, ang); pie(r - 8, ang + 8); }
-  }
 }
 
 // drive unit envelope: 51T wheel + drum on a dead axle, pinion + NEMA

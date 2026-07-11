@@ -16,7 +16,8 @@
 //     plane
 //
 // Y-LANE ZONING (why nothing collides), y in mm at the shoulder:
-// truss chords 0..43, counterweight boom 0..25 (its mass 0..43), link
+// truss chords 0..43, counterweight block 1..43 (bolted inboard of
+// the boom plate's downward tail), link
 // side plates 43..55 (the +y one grows the drive boom plate), drum
 // 56..82 (cable plane 69), wheel + pinion 82..109, motor 34..82
 // (plunged through the boom plate), bridge 109..117 — all riding the
@@ -84,15 +85,19 @@ elbow_d = shoulder_d - 2 * upper_len * tan(arm_taper);   // ~132
 function link_d(back) = elbow_d + 2 * back * tan(arm_taper);
 
 // ---- counterweights ----
-// Shoulder: a SINGLE central boom in the |y| < 25 lane (y-clear of the
-// fixed sector, drum, motor and bridge alike), pointing just cw_bend
-// above straight-back — nearly parallel to the arm, decoupled from the
-// drive direction. The price of parallel: at full-up the boom hangs
-// straight down the well center (base angle 280 - cw_bend = 270), so
-// cw_r is capped by the slew disc (mass bottoms at z 82 over the z 76
-// disc top; plan radius < 53 stays far inside the r 167+ hold-down
-// ring). Sized for ~1.05 kg.m: the ~1.2 needed less what the motor +
-// wheel + drum already contribute at r 263..326.
+// Shoulder: NO separate boom — the drive-boom plate (left side) is a
+// SOLID FAN from the boom down past straight-back (arm angles
+// 135..200, outer arc r 338), and the CW block bolts to its inboard
+// face (y 1..43: inside the base boards, under the drum/motor/bridge
+// lanes). The block sits just BELOW the arm centerline (cw_bend is
+// NEGATIVE): the drive stack's mass rides above the centerline, so
+// the closing weight must hang under it for the combined CG to land
+// on the shoulder axis. Fan + block are travel-capped: over the full
+// pose range the lowest sweep passes z 82+ over the z 76 disc top,
+// and at full-up everything stays x <= 124 off the x 130 front-board
+// face (the fan's lower corner slides down parallel to it). Sized
+// ~1.06 kg.m: the ~1.2 needed less what the motor + wheel + drum
+// already contribute at r 263..326.
 // Elbow: an IN-PLANE boom + hook, forearm-fixed on the center plane.
 // The CW assembly's CG lies on the forearm axis extended back through
 // the elbow, so the combined forearm+CW CG sits AT the elbow axis and
@@ -102,9 +107,10 @@ function link_d(back) = elbow_d + 2 * back * tan(arm_taper);
 // from the upper arm — and at FULL EXTENSION the hook parks inside the
 // upper arm through a slot in its top board (it enters nearly
 // vertically: arc r ~245, vertical tangent at 0 deg).
-cw_bend = 10;
-cw_r = 295;
-cw_mass = [85, 85, 62];        // ~3.5 kg steel
+cw_bend = -2;                  // deg above straight-back: NEGATIVE =
+                               // 2 deg below the centerline
+cw_r = 265;                    // block center; worst corner sweeps 325
+cw_mass = [110, 42, 110];      // ~4.0 kg steel, 42 across y
 elbow_cw_x0 = -252;            // boom tail; hook and block hang there
 elbow_cw_blk = [70, 40, 80];   // placeholder block, center near the axis line
 elbow_cw_slot = [88, 48];      // in the upper arm's top board only...

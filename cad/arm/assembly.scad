@@ -22,12 +22,15 @@
 //   idiom); a printed bridge (109..117) picks up both axle ends so
 //   they're simply supported. The drive mass behind the joint is free
 //   counterweight, and the gear mesh is entirely arm-internal.
-// - COUNTERWEIGHT: one central boom (|y| < 25, under the drive stack)
-//   just cw_bend above straight-back — near-parallel to the arm,
-//   decoupled from the drive direction — with a ~3.5 kg block at cw_r.
-//   At full-up it hangs down the well center between the boards; the
-//   slew disc caps cw_r there (~300), which is the price of parallel
-//   vs. the drive-direction boom's 400 mm lever. The
+// - COUNTERWEIGHT: the drive boom plate is a SOLID FAN reaching from
+//   the boom down past straight-back (left side only), and the ~4 kg
+//   block bolts to its inboard face just BELOW the arm centerline —
+//   under the drive stack's above-centerline mass, so the combined
+//   CG lands on the shoulder axis. At full-up the fan sweeps down
+//   the well between the boards; the slew disc and the front board
+//   cap its reach (arc r 338, lower corner at arm angle 200), which
+//   is the price of parallel vs. the drive-direction boom's 400 mm
+//   lever. The
 //   ELBOW counterweight is an in-plane top boom + hook on the forearm
 //   center plane: its CG sits on the forearm axis extended through
 //   the elbow (zero gravity torque at every pose); the down-only bend
@@ -201,16 +204,15 @@ rz(pose_yaw) {
             (sr + 25 + cd / 2) * sin(dd) + s * cos(dd)]])
         ty(upper_w / 2) rx(-90) cylinder(d = 14, h = 54);
     }
-    // single central counterweight: boom in the |y| < 25 lane
-    // (y-clear of sector, drum, motor and bridge alike), pointing just
-    // cw_bend above straight-back — near-parallel to the arm, NOT
-    // along the drive boom. At full-up it hangs straight down the well
-    // center: plan radius < 53 stays far inside the hold-down ring
-    // (r 167+) and the mass bottoms at z 82 over the disc top (76)
-    color("slategray") ry(-(180 - cw_bend)) {
-      tx(85) cub([cw_r - 85 - cw_mass[0] / 2, 50, 40], [0, 1, 1]);
-      tx(cw_r - cw_mass[0] / 2) cub(cw_mass, [0, 1, 1]);
-    }
+    // upper-arm counterweight: the block bolts to the INBOARD face of
+    // the boom plate's fan (no separate boom), centered just BELOW the
+    // straight-back line — the drive stack sits above the centerline,
+    // so the closing weight goes under it. y 1..43 keeps it inside the
+    // base boards and under the drum/motor/bridge lanes; the worst
+    // corner sweeps r 325, passing z 95 over the disc top and x 121
+    // at the front board at full-up
+    color("slategray") ry(-(180 - cw_bend))
+      tx(cw_r - cw_mass[0] / 2) ty(43) cub(cw_mass, [0, -1, 1]);
 
     // the scale-reading camera, arm-fixed at arm azimuth 50 deg, r 92:
     // bracket off the (solid) -y plate reaches over the 8 mm gap; the
@@ -351,7 +353,22 @@ module sensor_board_2d() difference() {
 // motor plunge cutout (prototype1 idiom: the motor hangs from a
 // slotted plate at its face; mesh set by press-and-clamp)
 module boom_plate_2d() rz(dd) difference() {
-  sq([sr + 25 + cd + 55, 110], [0, 1], 16);
+  union() {
+    sq([sr + 25 + cd + 55, 110], [0, 1], 16);
+    // SOLID fan below the boom, as far down as travel allows: the
+    // upper-arm counterweight bolts to its inboard face BELOW the arm
+    // centerline (the drive stack rides above it). Boundary = the two
+    // binding constraints: an arc r 338 about the shoulder (any point
+    // past arm angle 170 passes straight down at some pose, height
+    // 420 - r, so 338 keeps 6 over the z 76 disc top), then, past arm
+    // angle ~191 where the FRONT board takes over at full-up
+    // (x = r*cos(angle+100) <= 124 vs the x 130 face), a chord to the
+    // lower corner at arm angle 200, r 248. Local frame: +x' = arm
+    // angle dd (135), so local angle = arm angle - 135
+    polygon(concat([[0, 0]],
+      [for (a = [8 : 4 : 56]) 338 * [cos(a), sin(a)]],
+      [[104.8, 224.8]]));
+  }
   tx(sr + 25) circle(d = 8.4);
   tx(sr + 25 + cd) circle(d = 46);
 }

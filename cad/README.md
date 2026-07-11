@@ -31,7 +31,8 @@ flags (0 = from origin, 1 = centered, -1 = negative-going), and
 | `gear_drum.scad` | 51T stub-addendum herringbone with integrated cable drum (length from the wrap math); two 608 bearings press in, spins on a fixed M8 dead axle | print |
 | `motor_mount.scad` | rigid slotted plate; the motor plunges through the board and hangs from it; mesh set by press-and-clamp | print |
 | `bridge.scad` | spans the gear+drum tangent to the arc; picks up the axle top so the drum axle is simply supported | print |
-| `sector.scad` | cable sector, 3 plywood layers (core rides the cable, flanges keep it captive); pivot bore fits the hub tube | CNC |
+| `sector.scad` | sector core: a SINGLE 12 mm ply plate with a polygonal rim; pivot bore fits the hub tube | CNC |
+| `sector_segment.scad` | printed channel segments: flat inside (clip over one rim facet, two M4s), true cable arc with groove walls outside; print 7 plain + 2 end variants with integral cable anchors | print |
 | `hub_tube.scad` | sector pivot bearing tube: two 608s at its ends, slides through the sector stack | print |
 | `arm.scad` | 0.48 m pendulum arm, bolts across the sector hub; weight holes every 50 mm out to 450 mm | CNC |
 | `baseplate.scad` | vertical rig board (`layer=1`), bench base (`layer=2`), gusset ×2 (`layer=3`), pivot bridge beam (`layer=4`), tab-and-slot | CNC |
@@ -89,22 +90,22 @@ up, each stack acts as one rigid, lightly axially-preloaded column;
 everything rotating spins clear of the bridges' underside pockets.
 
 Cable (~2 m of 1.5 mm Dyneema): anchor at the drum's radial hole (knot
-behind), ~14 resident wraps on the 24 mm drum, both ends knotted at the
-sector's termination holes — route around the arc end face, through the
-hole, knot behind; ease the hole edges and the outboard flange rim where
-the top wraps approach it. Tension by rotating the drum before dropping
-the pinion into mesh; engagement locks it, and one tooth of re-meshing ≈
-0.8 mm of cable. If that proves too coarse, a screw tensioner can be
-retrofitted at a termination.
+behind), ~14 resident wraps on the 24 mm drum, both ends terminating in
+the printed END segments of the channel — the cable passes through the
+2.2 mm hole in the anchor wall and knots in the cavity behind it, in line
+with the groove. Tension by rotating the drum before dropping the pinion
+into mesh; engagement locks it, and one tooth of re-meshing ≈ 0.8 mm of
+cable. If that proves too coarse, a screw tensioner can be built into an
+end segment (it's a 20-minute reprint).
 
 Bench notes: the arm rides ~75 mm proud of the board, so the bench face
 below the clamp line must be clear; at −25° the weights hang ~340 mm below
 bench level. Clamp the base firmly — a horizontal arm puts ~27 N·m of roll
 on it.
 
-Hardware: 4× 608 bearings, 4× M8×120 + nuts/washers, 6× M4×50 (arm/hub),
-misc M4×20–25 + nuts (standoff feet, motor plate, bridge feet), 4× M3×8
-(motor), Dyneema.
+Hardware: 4× 608 bearings, 4× M8×120 + nuts/washers, 6× M4×35 (arm/hub),
+18× M4×20 + nuts (channel segments), misc M4×20–25 + nuts (standoff feet,
+motor plate, bridge feet), 4× M3×8 (motor), Dyneema.
 
 ## Rendering
 
@@ -117,9 +118,9 @@ openscad -o build/hub_tube.stl hub_tube.scad
 openscad -o build/motor_mount.stl motor_mount.scad
 openscad -o build/bridge.stl bridge.scad
 openscad -o build/spacers.stl spacers.scad
-openscad -o build/sector_core.dxf   -D layer=1 sector.scad
-openscad -o build/sector_flange.dxf -D layer=2 sector.scad
-openscad -o build/arm.dxf           -D layer=1 arm.scad
+openscad -o build/sector_core.dxf     -D layer=1 sector.scad
+openscad -o build/sector_segment.stl  sector_segment.scad   # 7 + 2 ends
+openscad -o build/arm.dxf             -D layer=1 arm.scad
 openscad -o build/rig_board.dxf     -D layer=1 baseplate.scad
 openscad -o build/rig_base.dxf      -D layer=2 baseplate.scad
 openscad -o build/rig_gusset.dxf    -D layer=3 baseplate.scad   # cut 2

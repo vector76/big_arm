@@ -23,7 +23,8 @@ sector_standoff_len = -(sector_stack_t / 2) - hub_tube_inboard - board_face_z;
 // board face -> underside of the gear (its lower bearing sits flush there)
 drum_standoff_len = gear_z - board_face_z;
 // the stop sleeves run all the way up to the pivot beam they now carry;
-// the spoke still strikes them at its own height on the way
+// the spoke (single-ply core) still strikes them at its own height, and
+// the arm passing above at z 6..18 clears the sleeve OD
 stop_sleeve_len = pivot_beam_z - board_face_z;
 
 module standoff(od, len, flange_d, bolt_r, n_bolt, a0 = 0, flat = 0) {

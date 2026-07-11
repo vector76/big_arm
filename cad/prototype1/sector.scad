@@ -1,72 +1,61 @@
-// Capstan cable sector: three CNC-cut plywood layers. The middle (core)
-// layer's edge is the cable-riding surface; the two flange layers overhang
-// to keep the cable captive. Pivot bore at the origin.
+// Capstan sector core: a SINGLE CNC plywood plate. The rim is a polygon
+// of seg_n flat facets; printed channel segments (sector_segment.scad)
+// clip over each facet and carry the true cable arc. Pivot bore at the
+// origin fits the hub tube; the six-bolt hub circle stacks the arm.
 //
-// Export DXFs for the CNC:
-//   openscad -o sector_core.dxf   -D layer=1 sector.scad
-//   openscad -o sector_flange.dxf -D layer=2 sector.scad
-// layer=0 renders the 3D stack for inspection.
+// Export: openscad -o build/sector_core.dxf -D layer=1 sector.scad
+// layer=0 renders the core with the printed segments for inspection.
 
 include <params.scad>
 use <../lib/helpers.scad>
+use <sector_segment.scad>
 
 layer = 0;
 
 pivot_d = hub_tube_od + 0.15; // snug slip over the printed bearing tube
 hub_r = sector_hub_r;
 arc_band = 45;                // depth of the rim band
-bolt_d = 4.5;                 // layer-stacking bolts
-flange_r = sector_core_r + cable_d + sector_flange_extra;
 
-module pie(r, ang) {
-  n = max(12, ceil(ang / 4));
-  polygon(concat([[0, 0]], [for (i = [0 : n]) [r * cos(-ang / 2 + ang * i / n),
-                                               r * sin(-ang / 2 + ang * i / n)]]));
-}
-
-module sector_shape(r) {
-  union() {
-    // rim band
-    difference() {
-      pie(r, sector_angle);
-      pie(r - arc_band, sector_angle + 10);
-    }
-    // hub
-    circle(r = hub_r);
-    // spoke: hub to rim mid-arc
-    intersection() {
-      pie(r, sector_angle);
-      sq([r, spoke_w], [0, 1]);
-    }
-  }
-}
-
-module sector_holes() {
-  circle(d = pivot_d);
-  // stacking bolts: along the rim band and around the hub
-  rz([for (a = [-sector_angle / 2 + 8 : 22 : sector_angle / 2 - 8]) a])
-    tx(sector_core_r - arc_band / 2) circle(d = bolt_d);
-  // hub circle: stacks the layers AND mounts the arm across the stack
-  rz([for (i = [0 : hub_bolt_n - 1]) i * 360 / hub_bolt_n])
-    tx(hub_bolt_r) circle(d = hub_bolt_d);
-  // cable termination holes near both ends of the arc
-  rz([-(sector_angle / 2 - 4), sector_angle / 2 - 4])
-    tx(sector_core_r - 12) circle(d = 3.2);
+// pie with a controllable facet count: n = seg_n gives the rim polygon
+module pie(r, ang, n = 0) {
+  nn = n > 0 ? n : max(12, ceil(ang / 4));
+  polygon(concat([[0, 0]], [for (i = [0 : nn]) [r * cos(-ang / 2 + ang * i / nn),
+                                                r * sin(-ang / 2 + ang * i / nn)]]));
 }
 
 module sector_core_2d() {
-  difference() { sector_shape(sector_core_r); sector_holes(); }
-}
-
-module sector_flange_2d() {
-  difference() { sector_shape(flange_r); sector_holes(); }
+  difference() {
+    union() {
+      // rim band: polygonal outer edge (the facets), round inner edge
+      difference() {
+        pie(facet_d / cos(seg_ang / 2), sector_angle, seg_n);
+        pie(facet_d - arc_band, sector_angle + 10);
+      }
+      circle(r = hub_r);
+      // spoke: hub to rim mid-arc
+      intersection() {
+        pie(facet_d, sector_angle);
+        sq([facet_d, spoke_w], [0, 1]);
+      }
+    }
+    circle(d = pivot_d);
+    // hub circle: stacks the arm across the core
+    rz([for (i = [0 : hub_bolt_n - 1]) i * 360 / hub_bolt_n])
+      tx(hub_bolt_r) circle(d = hub_bolt_d);
+    // segment cheek bolts: two per facet (cartesian in each facet frame,
+    // matching the printed segments)
+    rz([for (k = [0 : seg_n - 1]) -sector_angle / 2 + (k + 0.5) * seg_ang])
+      ty([-facet_d * tan(seg_ang / 2) / 2, facet_d * tan(seg_ang / 2) / 2])
+        tx(facet_d - 7) circle(d = 4.5);
+  }
 }
 
 if (layer == 1) sector_core_2d();
-else if (layer == 2) sector_flange_2d();
 else {
-  color("burlywood") tz(sector_flange_t)
+  color("burlywood") tz(-sector_core_t / 2)
     linear_extrude(sector_core_t) sector_core_2d();
-  color("tan") tz([0, sector_flange_t + sector_core_t])
-    linear_extrude(sector_flange_t) sector_flange_2d();
+  for (k = [0 : seg_n - 1])
+    color(k == 0 || k == seg_n - 1 ? "tomato" : "khaki")
+      rz(-sector_angle / 2 + (k + 0.5) * seg_ang)
+        sector_segment(end = k == 0 ? -1 : k == seg_n - 1 ? 1 : 0);
 }

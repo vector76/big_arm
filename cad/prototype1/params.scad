@@ -49,11 +49,20 @@ cable_d = 1.5;              // Dyneema
 drum_core_d = 12;           // cable bend D/d = 8, fine for synthetic line
 drum_eff_r = drum_core_d / 2 + cable_d / 2;      // 6.75 mm
 sector_eff_r = capstan_ratio * drum_eff_r;       // 238.2 mm
-sector_core_r = sector_eff_r - cable_d / 2;      // middle plywood layer radius
+sector_core_r = sector_eff_r - cable_d / 2;      // cable-groove floor radius
 sector_angle = 130;         // deg of arc (120 travel + margin)
-sector_core_t = 12;         // plywood, middle layer (cable rides its edge)
-sector_flange_t = 6;        // plywood, outer flange layers
-sector_flange_extra = 4;    // flange radius beyond cable surface
+// Sector construction: a SINGLE 12 mm ply core whose rim is a polygon of
+// flat facets; printed channel segments clip over each facet (flat on
+// the ply side, true arc with groove walls on the cable side). The two
+// end segments integrate the cable anchors.
+sector_core_t = 12;
+seg_n = 9;                  // facets across the arc (~14.4 deg each)
+seg_wall = 4;               // printed wall at the facet ends (thinnest)
+seg_cheek = 10;             // cheek half-height gripping the ply (z +-)
+seg_grip = 14;              // cheek depth inward of the facet
+seg_ang = sector_angle / seg_n;
+facet_d = (sector_core_r - seg_wall) * cos(seg_ang / 2);  // facet distance
+seg_flange_r = sector_core_r + cable_d + 4;   // groove wall crest
 // Resident cable on the drum is nearly constant (one side pays off as the
 // other winds on): full-travel turns = travel/360 * capstan_ratio (~11.8),
 // plus dead wraps at the anchor and end margin.
@@ -120,13 +129,13 @@ hub_tube_bore = 13;         // between pockets; clears the inner-race spacer
 // Board coordinates: sector pivot at the origin, +Y up (gravity is -Y),
 // +Z out of the board toward the mechanism. Arm travel is defined above
 // the capstan section.
-sector_stack_t = sector_core_t + 2 * sector_flange_t;  // 24
+sector_stack_t = sector_core_t;   // single-ply core (12)
 
 // z stack, sector core mid-plane = 0: the gear sweeps under the sector
-// (2 mm below the lower flange) and over the motor plate (4 mm), pinion
-// z-aligned with the gear; the motor body hangs through the board cutout
-// (~35 mm proud of the back face).
-gear_top = -sector_stack_t / 2 - 2;
+// rim (2 mm below the printed segment cheeks) and over the motor plate
+// (4 mm), pinion z-aligned with the gear; the motor body hangs through
+// the board cutout (~35 mm proud of the back face).
+gear_top = -seg_cheek - 2;
 gear_z = gear_top - gear_width;
 board_face_z = gear_z - 4 - motor_plate_t;
 face_z = board_face_z;      // motor face = board face plane

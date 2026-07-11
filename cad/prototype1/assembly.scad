@@ -16,6 +16,7 @@ use <gear_drum.scad>
 use <motor_mount.scad>
 use <bridge.scad>
 use <sector.scad>
+use <sector_segment.scad>
 use <hub_tube.scad>
 use <spacers.scad>
 use <arm.scad>
@@ -49,12 +50,14 @@ color("silver") {
 color("plum") txy(drum_pos) rz(travel_mid) tz(board_face_z) bridge();
 color("navajowhite") tz(pivot_beam_z) linear_extrude(board_t) pivot_beam_2d();
 
-// ---- sector + hub tube + arm at the commanded pose ----
-color("burlywood") rz(90 + pose) tz(-sector_core_t / 2 - sector_flange_t) {
-  linear_extrude(sector_flange_t) sector_flange_2d();
-  tz(sector_flange_t) linear_extrude(sector_core_t) sector_core_2d();
-  tz(sector_flange_t + sector_core_t)
-    linear_extrude(sector_flange_t) sector_flange_2d();
+// ---- sector (single-ply core + printed channel segments) + hub + arm ----
+rz(90 + pose) {
+  color("burlywood") tz(-sector_core_t / 2)
+    linear_extrude(sector_core_t) sector_core_2d();
+  for (k = [0 : seg_n - 1])
+    color(k == 0 || k == seg_n - 1 ? "tomato" : "khaki")
+      rz(-sector_angle / 2 + (k + 0.5) * seg_ang)
+        sector_segment(end = k == 0 ? -1 : k == seg_n - 1 ? 1 : 0);
 }
 color("khaki") tz(-sector_stack_t / 2 - hub_tube_inboard) hub_tube();
 color("sandybrown") rz(pose - 90) tz(sector_stack_t / 2)

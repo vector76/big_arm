@@ -150,21 +150,23 @@ rz(pose_yaw) {
 
   // ---- upper arm ----
   tz(shoulder_h) ry(-pose_shoulder) {
-    // bottom chord relieved r 85 about the elbow — the folding forearm
-    // root sweeps r 80, and the full-length chord interpenetrated its
-    // last ~38 mm (relief radius computed at the chord's inner face;
-    // slight overcut at the outer face is extra clearance). Hook slot
-    // in the TOP board only, where the elbow counterweight parks at
-    // full extension — 19 mm rails remain each side.
+    // bottom chord relieved elbow_d/2 + 6 about the elbow — the
+    // folding forearm root's plate corners sweep r = elbow_d/2, and
+    // the full-length chord interpenetrated that circle (relief radius
+    // computed at the chord's inner face; slight overcut at the outer
+    // face is extra clearance). Hook slot in the TOP board only, where
+    // the elbow counterweight parks at full extension.
     difference() {
       // plates solid through the joint zones: the whole stub + 80 past
       // the shoulder axis (the camera bracket mounts at x 59..66), and
       // the last 45 at the elbow fork
-      box_truss(-upper_stub, upper_len, upper_w, upper_d,
-                sqrt(85 * 85 - pow(upper_d / 2 - ply_t, 2)),
+      box_truss(-upper_stub, upper_len, upper_w,
+                link_d(upper_len + upper_stub), elbow_d,
+                sqrt(pow(elbow_d / 2 + 6, 2) - pow(elbow_d / 2 - ply_t, 2)),
                 upper_stub + 80, 45);
-      tx(elbow_cw_slot_x) tz(upper_d / 2 - ply_t - 4) linear_extrude(20)
-        sq(elbow_cw_slot, [1, 1], 8);
+      tx(elbow_cw_slot_x)
+        tz(link_d(upper_len - elbow_cw_slot_x) / 2 - ply_t - 8)
+        linear_extrude(28) sq(elbow_cw_slot, [1, 1], 8);
     }
     // the +y plate grows the drive boom at arm angle dd (lap-jointed
     // over the truss plate at concept level)
@@ -247,7 +249,8 @@ rz(pose_yaw) {
         // forearm plates (r <= 20) passes through its bore; tabs tie
         // it to the forearm's root lobes
         worm_wheel_ring(elbow_wheel_d, fore_w / 2 - ply_t);
-        box_truss(0, fore_len, fore_w, fore_d, 0, 45, 45);
+        box_truss(0, fore_len, fore_w, elbow_d, link_d(-fore_len),
+                  0, 45, 45);
         color("burlywood") my([0, 1]) ty(fore_w / 2) rx(90)
           linear_extrude(ply_t) difference() {
             circle(r = 36);
@@ -261,12 +264,17 @@ rz(pose_yaw) {
         // Down-only bend means the boom only sweeps up and away from
         // the upper arm, and at full extension the hook parks in the
         // top-board slot.
+        // boom and riser pad follow the TAPER LINE (parallel, 2 mm
+        // off the edge): the shared taper rises going back, so a
+        // horizontal boom would run into the upper arm's top board
+        // near its tail at full extension
         color("slategray") {
-          tz(fore_d / 2) cub([60, 40, 8], [0, 1, 0]);          // riser
-          tx(elbow_cw_x0) tz(fore_d / 2 + 8)
+          tz(-6) ry(arm_taper) tz(elbow_d / 2)
+            cub([60, 40, 8], [0, 1, 0]);                       // riser
+          tz(2) ry(arm_taper) tz(elbow_d / 2) tx(elbow_cw_x0)
             cub([60 - elbow_cw_x0, 40, 12], [0, 1, 0]);        // boom
           tx(elbow_cw_x0) tz(-45)
-            cub([25, 40, fore_d / 2 + 53], [0, 1, 0]);         // hook
+            cub([25, 40, link_d(-elbow_cw_x0) / 2 + 55], [0, 1, 0]);
           tx(elbow_cw_x0 - 28) tz(-45) cub(elbow_cw_blk, [0, 1, 0]);
         }
         // wrist worm + motor inside the forearm hollow

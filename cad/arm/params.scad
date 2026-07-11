@@ -61,11 +61,27 @@ upper_len = 450;
 upper_stub = 120;     // SHORT: just closes the box; the drive boom and
                       // counterweight take over behind the joint
 upper_w = 110;        // side plates clear the drive wheel (y 14..41) by 2
-upper_d = 165;        // deep: the elbow worm MOTOR hangs to z -68 inside
 fore_len = 450;
 fore_w = 80;          // roots inside the upper arm's elbow fork
-fore_d = 160;         // deep enough to swallow the wrist worm + motor
 ee_len = 90;
+
+// ---- link taper ----
+// Both links TAPER at the same angle and share the same depth at the
+// elbow, so at full extension the top and bottom edges read as one
+// continuous taper from the shoulder stub to the wrist. link_d() gives
+// the local depth anywhere on that shared line (`back` = distance
+// behind the elbow: positive up the upper arm, negative down the
+// forearm). ANCHORED AT THE SHOULDER: the depth at the shoulder axis
+// stays at the original 165 box depth, and the taper thins everything
+// distal of it — elbow ~132, wrist ~99 (2.1 deg is what connects 165
+// to ~100 over the 900 mm arm). KNOWN OPEN ITEMS, deferred to detail
+// design: both worm MOTORS now outgrow their hollows — the elbow's (z
+// to -68) passes through the upper arm's bottom chord near the elbow,
+// and the wrist's pokes ~24 below the forearm's bottom edge.
+shoulder_d = 165;     // depth at the shoulder axis (the original)
+arm_taper = 2.1;      // deg per edge
+elbow_d = shoulder_d - 2 * upper_len * tan(arm_taper);   // ~132
+function link_d(back) = elbow_d + 2 * back * tan(arm_taper);
 
 // ---- counterweights ----
 // Shoulder: a SINGLE central boom in the |y| < 25 lane (y-clear of the
@@ -112,7 +128,8 @@ elbow_cw_slot_x = 205;         // ...centered at upper_len - 245
 //     drivetrain compliance in the measurement
 // (3) FRONT board tying the two into a stiff U. With the sector static,
 //     only the ARM truss sweeps the front: at shoulder_min its bottom
-//     face passes z~291 at the board plane, so the top rises to 275.
+//     edge passes z~291 at the board plane (the taper is anchored at
+//     the shoulder, so this matches the old box), top rises to 275.
 //     The arm swings between the side boards (110 wide in a 126 gap).
 // ALL THREE boards tab straight into the disc — mortises through both
 // ply layers, panel shoulders landing on the disc top (no angle

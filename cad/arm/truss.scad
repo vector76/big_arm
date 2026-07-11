@@ -3,8 +3,12 @@
 // between them. Tab-and-slot joinery is deferred to detailed design —
 // what matters here is the envelope and the look of the structure.
 //
-// Local frame: runs x0..x1 along +X, width w across Y, depth d across Z,
-// centered on the link axis (y = 0, z = 0).
+// Local frame: runs x0..x1 along +X, width w across Y, depth across Z,
+// centered on the link axis (y = 0, z = 0). The links TAPER: depth d0
+// at x0, d1 at x1, symmetric about the axis, so the side plates are
+// trapezoids and the chords are sloped boards lying on the tapered
+// edges (upper and forearm share the taper angle and the elbow depth,
+// making the extended arm's edges one continuous line — see params).
 
 include <params.scad>
 use <../lib/helpers.scad>
@@ -19,25 +23,30 @@ use <../lib/helpers.scad>
 // the joint gusset. s0/s1 keep the plate SOLID for that length at the
 // start/end — the joint zones, where the bearing stations mount and
 // the load concentrates, get no cutouts.
-module truss_plate_2d(l, d, margin = 14, s0 = 0, s1 = 0) {
+module truss_plate_2d(l, d0, d1, margin = 14, s0 = 0, s1 = 0) {
   g = 7;                                    // half-width of a diagonal
-  h = d - 2 * margin;
+  dm = (d0 + d1) / 2;                       // mean depth sizes the bays
+  h = dm - 2 * margin;
+  k = (d1 - d0) / (2 * l);                  // edge slope (z per x)
   lp = l - s0 - s1;                         // patterned span
-  n = max(2, floor((lp - 2 * margin) / (d * 0.36)) - 1);   // triangles
+  n = max(2, floor((lp - 2 * margin) / (dm * 0.36)) - 1);  // triangles
   p = (lp - 2 * margin) / (n + 1);          // half-bay pitch
   s = min(g * sqrt(h * h + p * p) / h,      // horizontal edge inset...
           0.45 * p);                        // ...capped for short links
-  ya = h * (1 - s / p);                     // apex height after inset
+  rec = s * h / p;                          // apex recede (the miter)
+  // margin lines follow the tapered edges
+  function yb(x) = -(d0 / 2 + k * x) + margin;
+  function yt(x) =  (d0 / 2 + k * x) - margin;
   difference() {
-    sq([l, d], [0, 1]);
+    polygon([[0, -d0 / 2], [l, -d1 / 2], [l, d1 / 2], [0, d0 / 2]]);
     for (i = [0 : n - 1]) {
       x0 = s0 + margin + i * p;
       up = (i % 2 == 0);
       polygon(up
-        ? [[x0 + s, -h / 2], [x0 + 2 * p - s, -h / 2],
-           [x0 + p, -h / 2 + ya]]
-        : [[x0 + s, h / 2], [x0 + 2 * p - s, h / 2],
-           [x0 + p, h / 2 - ya]]);
+        ? [[x0 + s, yb(x0 + s)], [x0 + 2 * p - s, yb(x0 + 2 * p - s)],
+           [x0 + p, yt(x0 + p) - rec]]
+        : [[x0 + s, yt(x0 + s)], [x0 + 2 * p - s, yt(x0 + 2 * p - s)],
+           [x0 + p, yb(x0 + p) + rec]]);
     }
   }
 }
@@ -47,24 +56,28 @@ module truss_plate_2d(l, d, margin = 14, s0 = 0, s1 = 0) {
 // chord back in a circular arc of that radius about the joint axis at
 // x1 — the swept circle of a folding child link's root — so the chords
 // are drawn individually rather than mz-mirrored as a pair
-module box_truss(x0, x1, w, d, bot_relief = 0, solid0 = 0, solid1 = 0) {
+module box_truss(x0, x1, w, d0, d1, bot_relief = 0, solid0 = 0, solid1 = 0) {
   l = x1 - x0;
+  a = atan((d0 - d1) / 2 / l);   // taper angle per edge
+  lc = l / cos(a);               // chord length along the sloped edge
   // side plates (2D drawn in XY, stood into XZ); NOT relieved — they
   // run full length past the axis as the joint fork, solid in the
   // solid0/solid1 joint zones
   color("burlywood") my([0, 1]) ty(w / 2) rx(90) linear_extrude(ply_t)
-    tx(x0) truss_plate_2d(l, d, 14, solid0, solid1);
-  color("sienna") tz(d / 2 - ply_t) linear_extrude(ply_t)
-    chord_2d(x0, x1, w);
-  color("sienna") mz(1) tz(d / 2 - ply_t) linear_extrude(ply_t)
-    chord_2d(x0, x1, w, bot_relief);
+    tx(x0) truss_plate_2d(l, d0, d1, 14, solid0, solid1);
+  // chords lie ON the tapered edges: outer face on the edge line,
+  // board thickness inward
+  color("sienna") tx(x0) tz(d0 / 2) ry(a) tz(-ply_t) linear_extrude(ply_t)
+    chord_2d(lc, w);
+  color("sienna") tx(x0) tz(-d0 / 2) ry(-a) linear_extrude(ply_t)
+    chord_2d(lc, w, bot_relief);
 }
 
-// chord board 2D: plain plate with rectangular lightening holes and an
-// optional end relief circle about the joint at x1
-module chord_2d(x0, x1, w, rr = 0) {
-  l = x1 - x0;
-  tx(x0) difference() {
+// chord board 2D, drawn along its own (sloped) axis from 0..l: plain
+// plate with rectangular lightening holes and an optional end relief
+// circle about the joint at x = l
+module chord_2d(l, w, rr = 0) {
+  difference() {
     sq([l, w - 2 * ply_t], [0, 1]);
     nb = max(1, floor(l / 150));
     for (i = [0 : nb - 1])

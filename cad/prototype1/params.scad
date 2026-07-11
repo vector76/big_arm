@@ -1,9 +1,15 @@
 // Shared parameters for the Phase 1a shoulder drivetrain prototype:
-// herringbone primary + capstan cable sector, mounted on a vertical-board
-// pendulum test stand (arm travel -25..+95 deg from straight-down, so
-// horizontal — max gravity torque — is covered).
+// herringbone primary + capstan cable sector.
 // Total ratio = (z_gear/z_pinion) * (sector_eff_r/drum_eff_r)
 //             = 4.25 * 35.3 = 150.
+//
+// The vertical-board PENDULUM TEST STAND these parts originally
+// mounted to is SUPERSEDED — the drivetrain now gets tested on the
+// real base + upper arm (see ../arm/testbench.scad), with the sector
+// inverted onto the left base board. The stand's files (assembly,
+// baseplate, arm, spacers, hub_tube) were removed; git history has
+// them, and their rig/hub parameters below are retained because the
+// surviving part files reference them.
 
 // ---- herringbone primary (4.25:1) ----
 gear_module = 2;

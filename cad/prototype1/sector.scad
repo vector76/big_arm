@@ -1,7 +1,9 @@
 // Capstan sector core: a SINGLE CNC plywood plate. The rim is a polygon
 // of seg_n flat facets; printed channel segments (sector_segment.scad)
-// clip over each facet and carry the true cable arc. Pivot bore at the
-// origin fits the hub tube; the six-bolt hub circle stacks the arm.
+// clip over each facet and carry the true cable arc. The pivot bore and
+// six-bolt hub circle belong to the superseded pendulum stand — in the
+// arm the sector is FIXED, one piece with the left base board, and this
+// file survives as the reference for that board's rim construction.
 //
 // Export: openscad -o build/sector_core.dxf -D layer=1 sector.scad
 // layer=0 renders the core with the printed segments for inspection.

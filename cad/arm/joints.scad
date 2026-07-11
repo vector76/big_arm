@@ -2,8 +2,10 @@
 // use PAIRED PRELOADED BEARING STATIONS (bearing_station() below; the
 // annotated standalone diagram with rationale is bearing_station.scad).
 // The wrist still uses the older proxy idiom: a fixed dead axle with a
-// printed hub tube (joint_axle). Capstan sectors / worm wheels fixed to
-// the moving link, driven from the parent link, as before.
+// printed hub tube (joint_axle). The elbow and wrist DRIVES are being
+// overhauled with something different — their old worm proxies are
+// gone, and those joints carry bare stations/axles in the model until
+// the redesign lands.
 //
 // Conventions: pitch joints rotate about local Y. Sectors are drawn in
 // the child link's frame with their arc bisector at 180 deg (opposite
@@ -51,18 +53,6 @@ module drive_unit(out = 180) {
         cub([motor_w, motor_w, motor_len], [1, 1, 0]);
     }
   }
-}
-
-// worm drive (elbow/wrist): wheel on the joint axis (child-fixed), worm
-// + motor lying along the parent link, entirely inside its truss hollow
-module worm_wheel(wheel_d)
-  color("steelblue") ty(10) rx(90) cylinder(d = wheel_d, h = 20);
-
-module worm_motor(wheel_d) {
-  wz = -(wheel_d / 2 + worm_d / 2);
-  color("tomato") tz(wz) tx(-22) ry(90) cylinder(d = worm_d, h = 44);
-  color("dimgray") tz(wz) tx(-26 - motor_len)
-    cub([motor_len, motor_w, motor_w], [0, 1, 1]);
 }
 
 // ---- preloaded joint bearing station ----
@@ -161,14 +151,6 @@ module bearing_station(gap = 8) {
     ty(-16) rx(90) cylinder(d = 6.9, h = 2.4, $fn = 6);
     ty(-18.5) rx(90) cylinder(d = 6.9, h = 2.4, $fn = 6);
   }
-}
-
-// worm wheel as a RING (bore 48): the station hardware inboard of the
-// child plates (r <= 20) passes through it; tabs tie the ring to the
-// child link's root lobes at both plates
-module worm_wheel_ring(wheel_d, tab_y) color("steelblue") {
-  ty(10) rx(90) tube(wheel_d, 48, 20);
-  my([0, 1]) ry([0, 120, 240]) tx(30) ycyl(9, 10, tab_y);
 }
 
 // dead axle + printed hub tube, spanning `span` across the joint (Y)

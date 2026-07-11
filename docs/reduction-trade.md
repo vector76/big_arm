@@ -77,21 +77,26 @@ margin-1.6; elbow and wrist can.
 
 ## Prototype & measurement plan
 
-Build one test rig, swap mechanisms through it:
+Measure on the real structure, staged:
 
-- **Rig:** vertical plywood board at the bench edge, mechanism under test
-  driving a 0.45 m pendulum arm (real upper-arm scale); weights hang
-  directly in calibrated arm holes, so τ = m·g·r·sin(θ) is known exactly
-  with no pulley friction in the load path. Travel −25°…+95° from
-  straight-down: asymmetric so the horizontal pose is covered (6.05 kg at
-  450 mm = 26.7 N·m, the worst-case shoulder torque), while one hung mass
-  still sweeps torque from −42% to +100% of max across travel and the
-  zero crossing at θ = 0 exposes lash as load transfers between flanks.
-  Failure-safe: rest is a stable equilibrium and torque ramps with the
-  commanded angle during bring-up. The gear mesh is set by press-and-clamp
-  (no radial-preload flexure on the rig); if the plain snug mesh shows
-  measurable lash at the zero crossing, the preload mechanism gets added
-  back and re-measured. Drive from a spare Marlin board.
+- **Rig:** originally a standalone pendulum stand; superseded — the
+  shoulder mechanism is measured on the real base + upper arm
+  ([`cad/arm/testbench.scad`](../cad/arm/testbench.scad)): the slew
+  disc clamps flat to the desk, the fixed sector and arm-riding drive
+  are the final parts, and weight plates ride barbell-style on a rod
+  through the empty elbow bearing bores, so τ = m·g·450·cos(pose) is
+  known exactly with no pulley friction in the load path. Travel
+  −20°…+100° from horizontal covers the worst-case pose (~6 kg at
+  450 mm ≈ 26.5 N·m — the forearm assembly's own numbers), and the
+  zero crossing at 90° exposes lash as load transfers between flanks
+  (past vertical the flank load reverses, to −17%). Failure-safe: rest
+  is a stable equilibrium and torque ramps with the commanded angle
+  during bring-up. The gear mesh is set by press-and-clamp (no
+  radial-preload flexure on the rig); if the plain snug mesh shows
+  measurable lash at the zero crossing, the preload mechanism gets
+  added back and re-measured. Drive from a spare Marlin board. Worm
+  candidates (elbow/wrist) get measured the same staged way — on the
+  real links — in a later phase.
 - **Measurements per mechanism:**
   1. Lifting efficiency: max weight raised without stalling at slow speed →
      η = (torque out) / (0.41 × ratio).
@@ -102,11 +107,13 @@ Build one test rig, swap mechanisms through it:
      disqualifying).
   5. Repeat lifting test at speed (e.g., 300 rpm motor) to spot-check the
      torque curve interaction.
-- **CAD:** the complete test stand — drivetrain parts, pendulum arm, rig
-  board/base/gussets, bearing hub, axle standoffs, and travel stops — is
-  in [`cad/prototype1/`](../cad/prototype1/) (parametric OpenSCAD; see
-  [`cad/README.md`](../cad/README.md) for geometry, cable, and bench
-  notes).
+- **CAD:** the drivetrain parts are in
+  [`cad/prototype1/`](../cad/prototype1/) (parametric OpenSCAD). The
+  pendulum test stand originally designed to carry them was superseded
+  before it was built: the measurements now run on the real base +
+  upper arm with the sector inverted onto the left base board —
+  [`cad/arm/testbench.scad`](../cad/arm/testbench.scad); see
+  [`cad/README.md`](../cad/README.md) for geometry and cable notes.
 - **Build order:** (1) herringbone-primary + capstan-sector at shoulder
   scale — the leading shoulder hypothesis, and it doubles as the start of
   the Phase 2 testbed drivetrain if it measures well; (2) threaded-rod worm

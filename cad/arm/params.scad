@@ -11,9 +11,10 @@
 //     straight-back. The YAW is a single-stage herringbone ring:
 //     printed gear segments on a doubled two-ply slew disc, driven
 //     directly by the m2 12T pinion (the shoulder primary pinion).
-//     Elbow + wrist are worms (the trade-study lean for those joints),
-//     which tuck entirely inside the parent truss and free the joint
-//     plane
+//     Elbow + wrist drives are BEING OVERHAULED with something
+//     different (the worm lean is dropped — its motors outgrew the
+//     truss hollows); the model carries bare stations/axles at those
+//     joints until the redesign lands
 //
 // Y-LANE ZONING (why nothing collides), y in mm at the shoulder:
 // truss chords 0..43, counterweight block 1..43 (bolted inboard of
@@ -53,9 +54,8 @@ yaw_pitch_r = yaw_disc_r + 7;   // gear-segment pitch radius; with the
                                 // gravity-neutral vertical axis
 yaw_seg_arc = yaw_travel + 20;  // segment arc: travel + mesh margin
 shoulder_ratio = 150; shoulder_min = -20; shoulder_max = 100;  // capstan
-elbow_travel = 135;   elbow_wheel_d = 75;  // 90:1 worm, downward bend only
-wrist_travel = 180;   wrist_wheel_d = 60;  // 40:1 worm, +-90
-worm_d = 20;
+elbow_travel = 135;   // downward bend only; drive TBD (redesign underway)
+wrist_travel = 180;   // +-90; drive TBD (redesign underway)
 
 // ---- links ----
 upper_len = 450;
@@ -75,10 +75,9 @@ ee_len = 90;
 // forearm). ANCHORED AT THE SHOULDER: the depth at the shoulder axis
 // stays at the original 165 box depth, and the taper thins everything
 // distal of it — elbow ~132, wrist ~99 (2.1 deg is what connects 165
-// to ~100 over the 900 mm arm). KNOWN OPEN ITEMS, deferred to detail
-// design: both worm MOTORS now outgrow their hollows — the elbow's (z
-// to -68) passes through the upper arm's bottom chord near the elbow,
-// and the wrist's pokes ~24 below the forearm's bottom edge.
+// to ~100 over the 900 mm arm). The tapered hollows are a hard
+// constraint on the elbow/wrist drive overhaul: the old worm motors
+// outgrew them (one reason the worms were dropped).
 shoulder_d = 165;     // depth at the shoulder axis (the original)
 arm_taper = 2.1;      // deg per edge
 elbow_d = shoulder_d - 2 * upper_len * tan(arm_taper);   // ~132
@@ -167,6 +166,23 @@ roller_r = 185;       // support/hold-down roller stations
 // otherwise free.
 shoulder_bend = 45;
 sector_plane_y = col_w / 2 - ply_t / 2;   // 69: the left board mid-plane
+
+// ---- testbench (the assembly modules recomposed; testbench.scad) ----
+// The REAL base + upper arm double as the shoulder test rig: the slew
+// disc lies flat on the desk (desk top = disc_z0, so every part keeps
+// its final-assembly coordinates), clamped dead; no forearm — weight
+// plates ride BARBELL-STYLE on the ends of an M8 rod through the
+// empty elbow pilot bores. Their CG sits exactly ON the elbow axis,
+// which is a statically EXACT forearm stand-in (the elbow CW puts the
+// forearm+CW CG there too), and they sweep only r ~67 about the axis
+// in the empty |y| > 55 lane — clear of everything at every pose.
+tb_desk = [900, 700, 25];
+tb_clamp_az = [45, 135, 225, 315]; // hold-down bars; keep hardware off
+                                   // the rim near azimuth 180, where
+                                   // the CW sweep dips to z 82
+tb_stack = 30;                     // plate stack per rod end: ~2 std
+tb_plate_d = 134;                  // 2.5 kg plates each side, ~6 kg
+                                   // total ~ the forearm assembly
 
 // ---- pose ----
 pose_yaw = 0;

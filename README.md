@@ -30,6 +30,13 @@ computed live over a crude 3D view with sliders. A second page, the
 rigid-body meshes exported from [`cad/arm/`](cad/) — posed live by the
 four joint angles.
 
+Both pages are live:
+
+- [Concept calculator](https://vector76.github.io/big_arm/index.html) —
+  the parametric design model
+- [CAD twin](https://vector76.github.io/big_arm/twin.html) — the
+  OpenSCAD assembly, posable
+
 ```sh
 cd model
 npm install

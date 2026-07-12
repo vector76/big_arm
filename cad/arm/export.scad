@@ -31,7 +31,11 @@ use <assembly.scad>
 
 if (group == "static") bench_env();
 else if (group == "yaw") slew_base();
-else if (group == "upper") { upper_arm(); tx(upper_len) elbow_stations(); }
+// housings = false: the twin is an illustration — the printed drive
+// covers would hide the gear mesh and capstan, so the viewer's mesh
+// leaves the motor/wheel/drum floating on their stations
+else if (group == "upper")
+  { upper_arm(housings = false); tx(upper_len) elbow_stations(); }
 else if (group == "fore") forearm();
 else if (group == "ee") end_effector();
 else if (group == "frames")
@@ -40,6 +44,7 @@ else if (group == "frames")
     ",\"upper_len\":", upper_len,
     ",\"fore_len\":", fore_len,
     ",\"ee_len\":", ee_len,
+    ",\"plate_t\":", ply_t,
     ",\"yaw_travel\":", yaw_travel,
     ",\"shoulder_min\":", shoulder_min,
     ",\"shoulder_max\":", shoulder_max,

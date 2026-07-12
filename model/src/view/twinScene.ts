@@ -9,6 +9,7 @@ export interface Frames {
   upper_len: number;
   fore_len: number;
   ee_len: number;
+  plate_t: number;
   yaw_travel: number;
   shoulder_min: number;
   shoulder_max: number;
@@ -63,6 +64,18 @@ export class TwinScene {
   private elbowGroup = new THREE.Group();
   private wristGroup = new THREE.Group();
 
+  // ee-mesh drag → IK (wired by twin.ts): onEeDragStart fires at the
+  // grab (the caller captures the ee pitch to hold), then onEeDrag
+  // streams tip targets in the CAD frame (mm, Z-up) as the pointer
+  // moves on a camera-facing plane through the grab point.
+  onEeDragStart: (() => void) | null = null;
+  onEeDrag: ((tip: { x: number; y: number; z: number }) => void) | null = null;
+
+  private root = new THREE.Group();
+  private eeBody: THREE.Group | null = null;
+  private eeLen: number;
+  private raycaster = new THREE.Raycaster();
+
   constructor(container: HTMLElement, frames: Frames) {
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
     this.renderer.setSize(window.innerWidth, window.innerHeight);
@@ -89,10 +102,14 @@ export class TwinScene {
     this.scene.add(fill);
     this.scene.add(new THREE.GridHelper(3, 30, 0x3a414b, 0x272c33));
 
-    // OpenSCAD mm / Z-up -> display meters / Y-up
-    const root = new THREE.Group();
+    // OpenSCAD mm / Z-up -> display meters / Y-up. The CAD datum is
+    // the bench plate's TOP (the plate spans z -plate_t..0), so lift
+    // the whole model by plate_t: the plate's BOTTOM sits on the
+    // display grid instead of the grid slicing through it.
+    const root = this.root;
     root.rotation.x = -Math.PI / 2;
     root.scale.setScalar(0.001);
+    root.position.y = frames.plate_t * 0.001;
     this.scene.add(root);
 
     root.add(this.yawGroup);
@@ -111,6 +128,9 @@ export class TwinScene {
       fore: this.elbowGroup,
       ee: this.wristGroup,
     };
+
+    this.eeLen = frames.ee_len;
+    this.initEeDrag();
 
     window.addEventListener('resize', () => {
       this.camera.aspect = window.innerWidth / window.innerHeight;
@@ -135,9 +155,75 @@ export class TwinScene {
         const group = await loader.loadAsync(`${baseUrl}${body}.3mf`);
         fixMaterials(group);
         parent.add(group);
+        if (body === 'ee') this.eeBody = group;
         onProgress(body);
       }),
     );
+  }
+
+  // Click-drag the end effector: grab it with a raycast, then slide
+  // the tip target on a camera-facing plane through the grab point.
+  // The pointer's 2 DOF are enough because IK projects the target
+  // onto the arm's reachable envelope — orbit the camera to approach
+  // from another direction. OrbitControls sleeps while dragging.
+  private initEeDrag(): void {
+    const el = this.renderer.domElement;
+    const ndc = new THREE.Vector2();
+    const plane = new THREE.Plane();
+    const grabToTip = new THREE.Vector3();
+    const hit = new THREE.Vector3();
+    let dragging = false;
+
+    const setRay = (ev: PointerEvent) => {
+      ndc.set(
+        (ev.clientX / window.innerWidth) * 2 - 1,
+        -(ev.clientY / window.innerHeight) * 2 + 1,
+      );
+      this.raycaster.setFromCamera(ndc, this.camera);
+    };
+    const pick = (ev: PointerEvent): THREE.Intersection | null => {
+      if (!this.eeBody) return null;
+      setRay(ev);
+      return this.raycaster.intersectObject(this.eeBody, true)[0] ?? null;
+    };
+    // the dragged tip = the ee flange center, ee_len out along the
+    // wrist frame's +x (the IK target point in core/ik.ts)
+    const tipWorld = (): THREE.Vector3 =>
+      this.wristGroup.localToWorld(new THREE.Vector3(this.eeLen, 0, 0));
+
+    el.addEventListener('pointerdown', (ev) => {
+      const h = pick(ev);
+      if (!h) return;
+      dragging = true;
+      this.controls.enabled = false;
+      el.setPointerCapture(ev.pointerId);
+      el.style.cursor = 'grabbing';
+      grabToTip.copy(tipWorld()).sub(h.point);
+      plane.setFromNormalAndCoplanarPoint(
+        this.camera.getWorldDirection(new THREE.Vector3()),
+        h.point,
+      );
+      this.onEeDragStart?.();
+    });
+    el.addEventListener('pointermove', (ev) => {
+      if (!dragging) {
+        el.style.cursor = pick(ev) ? 'grab' : '';
+        return;
+      }
+      setRay(ev);
+      if (!this.raycaster.ray.intersectPlane(plane, hit)) return;
+      const mm = this.root.worldToLocal(hit.add(grabToTip).clone());
+      this.onEeDrag?.({ x: mm.x, y: mm.y, z: mm.z });
+    });
+    const drop = (ev: PointerEvent) => {
+      if (!dragging) return;
+      dragging = false;
+      this.controls.enabled = true;
+      el.releasePointerCapture(ev.pointerId);
+      el.style.cursor = '';
+    };
+    el.addEventListener('pointerup', drop);
+    el.addEventListener('pointercancel', drop);
   }
 
   // Signs mirror assembly.scad: rz(yaw), ry(-shoulder), ry(elbow), ry(-wrist)

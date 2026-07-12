@@ -1,4 +1,5 @@
 import GUI from 'lil-gui';
+import { solveIk } from './core/ik';
 import { Frames, TwinPose, TwinScene } from './view/twinScene';
 
 // The CAD twin viewer: renders the actual OpenSCAD assembly (five rigid
@@ -29,10 +30,25 @@ async function main(): Promise<void> {
   status.remove();
 
   scene.setPose(pose);
-  buildPanel(frames, pose, () => {
+  const gui = buildPanel(frames, pose, () => {
     scene.setPose(pose);
     savePose(pose);
   });
+
+  // Drag the end effector, IK fills in the joints. The ee pitch vs
+  // horizontal (shoulder - elbow + wrist) is captured at the grab and
+  // HELD through the drag — the tool keeps its attitude while azimuth
+  // follows the slew — so dragging moves the tip, never the tool angle.
+  let heldPitch = 0;
+  scene.onEeDragStart = () => {
+    heldPitch = pose.shoulder - pose.elbow + pose.wrist;
+  };
+  scene.onEeDrag = (tip) => {
+    Object.assign(pose, solveIk(tip, heldPitch, frames, pose.yaw));
+    scene.setPose(pose);
+    gui.controllersRecursive().forEach((c) => c.updateDisplay());
+    savePose(pose);
+  };
 }
 
 function buildPanel(frames: Frames, pose: TwinPose, onChange: () => void): GUI {

@@ -291,7 +291,11 @@ module slew_base(segs = true) {
 // Drawn about the shoulder axis in the arm frame; the elbow fork
 // lobes at tx(upper_len) are part of this link's plates — the elbow
 // STATIONS and everything distal are forearm_install().
-module upper_arm() {
+// housings = false omits the two printed drive housings, leaving the
+// motor/wheel/drum floating on their stations: the twin viewer's
+// export (export.scad "upper") uses it so the covers don't hide the
+// mesh and capstan — illustration only, never a build configuration.
+module upper_arm(housings = true) {
   // bottom chord cut STRAIGHT fold_cut behind the elbow — the folded
   // forearm's bottom face (the 45-deg offset plane, see params) ran
   // through the full-length chord ~150 out, and the old circular
@@ -406,7 +410,7 @@ module upper_arm() {
   // so the hs_in screws go in against a bare outboard face, and only
   // the drum-side pair ever needs the cable slacked to retighten
   // (driver passes the near span by ~1 there).
-  color("khaki") {
+  if (housings) color("khaki") {
     ty(26) rx(90) linear_extrude(8) rz(dd) difference() {
       hull() { tx(da) circle(84); tx(da + cd + 28) circle(30); }
       tx(da + cd) circle(12);
@@ -434,7 +438,7 @@ module upper_arm() {
   // access holes into blade-foot and boss pilots (hs_out); the plate
   // is drilled d 9 over the drum-side inboard pair so the whole stack
   // stays serviceable from outside.
-  color("khaki") ty(drum_y1 + 8) rx(90) {
+  if (housings) color("khaki") ty(drum_y1 + 8) rx(90) {
     linear_extrude(8) rz(dd) difference() {
       union() {
         tx(da) sq([86, 168], [1, 1], 16);

@@ -48,7 +48,7 @@ efficiencies):
 | Structure densities | 1.2 / 0.9 / 0.6 kg/m; stubs 1.0 kg/m |
 | Stub fractions | 0.5 of parent link (shoulder and elbow) |
 | Hardware masses | elbow 0.8 kg, wrist 0.5 kg, end effector 0.7 kg |
-| Reductions | yaw 60:1, shoulder 150:1, **elbow 90:1, wrist 40:1** — elbow/wrist kept low so single-stage reductions avoid bulky gears; closed-loop sensing absorbs the thinner margin |
+| Reductions | yaw 60:1, shoulder 150:1, **elbow 90:1, wrist 40:1** — elbow/wrist kept low so single-stage reductions avoid bulky gears; closed-loop sensing absorbs the thinner margin. *(2026-07-12 CAD update: the worm-era elbow/wrist ratios are superseded by capstan drives — yaw ~26:1 ring, elbow ~65:1 nose capstan, wrist ~20:1 cable loop; margins ~1.67 / ~2.4 at measured-pending η. See [reduction-trade.md](reduction-trade.md).)* |
 | Efficiency assumption | 0.7 (0.8 yaw) — to be measured in Phase 1a |
 | Motor model | pull-out **and** holding 0.41 N·m (quoted 0.59 N·m holding treated as optimistic), flat to 450 rpm, linear to 0.17 N·m at 1200 rpm |
 

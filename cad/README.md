@@ -33,11 +33,17 @@ flags (0 = from origin, 1 = centered, -1 = negative-going), and
   bearing-station idiom flipped onto the flat baseplate
   (`arm/hub_station.scad` is its annotated standalone detail); the
   WRIST is a second herringbone primary + capstan cable loop with the
-  motor remote-mounted on the (enlarged) elbow-CW fin — the elbow
-  counterweight block is TEMPORARILY not drawn while the fin hosts
-  the new stack; block + fin get resized together at the next mass
-  audit. The elbow drive is still being overhauled (worms dropped)
-  and carries a bare joint. See the header of
+  motor remote-mounted on the (enlarged) elbow-CW fin, and the ELBOW
+  is a third primary (the wheel grown to 66T) into a NOSE capstan:
+  a printed ~150° grooved arc fixed around the upper arm's +y fork
+  cap anchors both cable ends, the gear+drum stack rides the fin
+  beside the wrist's, and two CROSSED 608-cored idler sheaves on the
+  forearm land both tangencies together so the nose stays
+  travel-sized (~65:1 total, margin ~1.67; see the elbow section in
+  `params.scad` for the geometry argument). The elbow counterweight
+  block is TEMPORARILY not drawn while the fin hosts the two stacks
+  (~1.5 kg of drive is CW credit); block + fin get resized together
+  at the next mass audit. See the header of
   `arm/assembly.scad` for the architecture notes and `arm/params.scad`
   for poses and the capstan wrap math. `arm/testbench.scad` recomposes
   the same modules into the shoulder test rig (below).
@@ -53,6 +59,8 @@ flags (0 = from origin, 1 = centered, -1 = negative-going), and
 | `gear_drum.scad` | the shoulder's gear+drum, FLIPPED stack: the 51T stub-addendum herringbone wheel INBOARD (straddling the boom plate through its kidney cutout), a short neck, the helically grooved capstan core across the sector band's lane (the lay is positively located; TWO cables share the one groove — length = travel + gap + end dead wraps), an anchor hole near each core end, and a bearing BOSS outboard; two 608s pocket into the ends (wheel face + boss, full-shoulder floors with inner-race reliefs), spins on a fixed M8 dead axle between two printed supports | print |
 | `wrist_drive.scad` | the WRIST's gear+capstan — gear_drum's stack at wrist scale: 51T wheel, neck, FAT helically grooved capstan (Ø32 core, ~10 mm wall over the bore), bearing boss; rides the enlarged elbow-CW fin on an M8 dead axle, driven by another print of the same 8T pinion (remote motor = free counterweight). ~20:1 wrist total (6.375 × 50/16), margin ~2.4 | print |
 | `wrist_drum.scad` | the wrist DRUM: full-circle ring on the EE fork's left plate, cable centerline r 50 (the nose-cap radius — nothing protrudes at any pose), TWO PLAIN circular V-grooves (fleet ~0.2°, no ramps needed), radial knot anchors, open center around the joint's green flange, 6 wood screws into the ply disc. Two straight tangent runs (~650 mm, drawn as rods in the assembly) connect it to the capstan — no idlers, no joint crossing | print |
+| `elbow_drive.scad` | the ELBOW's gear+capstan — gear_drum's stack with the wheel grown to 66T (primary 8.25; same 0.45 stub addendum, riding the same 0.1 inside the 8T interference limit at C = 74) and the shoulder-size grooved core (eff_r 10.125 — the 1.1 cord's bend floor); two-cable end anchors, 608s, M8 dead axle off the fin, a third print of the same 8T pinion. ~65:1 elbow total (8.25 × 80/10.125), margin ~1.67 with the idler losses | print |
+| `elbow_nose.scad` | the elbow NOSE: the fixed sector shrunk to one ~150° printed arc around the upper arm's +y fork cap, cable centerline r 80, both cable ends anchored in its arc ends. Foot ring seats flush on the cap rim (tension presses print onto wood), solid band outboard of the plate face with TWO PLAIN circular V-tracks (the forearm's two CROSSED idler sheaves pin the span planes, so the march never reaches the nose), 7 wood screws through sector-segment counterbores. One print, no segmentation | print |
 | `sector_segment.scad` | printed channel segments, TWO-TRACK RAMPED and WEDGE-BACKED: the band seats flush on the left board's circular rim (cable tension presses print onto wood) and outboard of the board face the section fills solid down to the leg — ample radial backing; the leg screws to the outboard ply face through deep 7.5 mm counterbores (pilot circle CNC'd into the board). 45° V track slots climb at the drum groove's ~1.4° lead — zero fleet. Three ~180 mm prints (`-D idx=0..2`; on the end prints the anchored run's slot stops short of the arc end, and the cord knots in a recess on the end face) | print |
 
 Gear width follows the one-tooth phase rule: each herringbone half
@@ -123,6 +131,8 @@ openscad -o build/sector_segment_1.stl -D idx=1 sector_segment.scad
    # 3 distinct segments: idx = 0..2 (0 and 2 carry the anchors)
 openscad -o build/wrist_drive.stl wrist_drive.scad
 openscad -o build/wrist_drum.stl  wrist_drum.scad
+openscad -o build/elbow_drive.stl elbow_drive.scad
+openscad -o build/elbow_nose.stl  elbow_nose.scad
 openscad -o build/arm.png       --viewall --autocenter assembly.scad
 openscad -o build/testbench.png --viewall --autocenter testbench.scad
 openscad -o build/testbench_up.png -D pose_shoulder=100 --viewall --autocenter testbench.scad

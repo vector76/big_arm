@@ -1,6 +1,8 @@
 // Full-arm CONCEPT model parameters. Deliberately coarse: correct major
 // dimensions and architecture (v0 design point: 0.45 m links, ratios
-// 60/150/90/40, counterweights), placeholder detail. Premises:
+// 60/150/65/20 — elbow and wrist relaxed from the worm-era 90/40 by
+// their capstan redesigns — counterweights), placeholder detail.
+// Premises:
 //   - plywood box-truss links, wide sections preferred
 //   - ALL THREE pitch joints are PAIRED PRELOADED BEARING STATIONS
 //     (see bearing_station.scad / joints.scad): internal preload loop,
@@ -13,11 +15,13 @@
 //     straight-back. The YAW is a single-stage herringbone ring:
 //     printed gear segments on a doubled two-ply slew disc, driven
 //     directly by the m2 8T pinion (the shoulder primary pinion).
-//     Elbow + wrist drives are BEING OVERHAULED (the worm lean is
-//     dropped — its motors outgrew the truss hollows). The WRIST
-//     redesign has landed: a second herringbone primary + cable loop,
-//     remote-mounted on the elbow-CW fin (see the wrist capstan drive
-//     section below). The elbow still carries a bare station
+//     Elbow + wrist worms are GONE (their motors outgrew the truss
+//     hollows). The WRIST is a second herringbone primary + cable
+//     loop, remote-mounted on the elbow-CW fin (see the wrist capstan
+//     drive section). The ELBOW is a third primary (66T wheel) into a
+//     NOSE capstan: a printed grooved arc around the upper arm's +y
+//     fork cap, drive on the fin, two crossed idler sheaves (see the
+//     elbow capstan drive section)
 //
 // Y-LANE ZONING (why nothing collides), y in mm at the shoulder:
 // truss chords 0..43, counterweight block 1..43 (bolted inboard of
@@ -531,19 +535,21 @@ wr_cap_len = ceil(wr_band + wr_ramp + 2); // 11: grooved core
 // LANES (+y side): the fin (28..40) hosts the stack exactly as the
 // boom plate hosts the shoulder's — wheel + pinion straddle it
 // through a kidney (27..54), grooved core out at the cable plane,
-// bearing boss + bridge outboard. The cable plane hugs the WOOD:
-// the only material in its way is the 55 outer face shared by the
-// upper-arm fork plates (at the elbow) and the EE fork plates (at
-// the wrist) — every piece of joint HARDWARE off those faces (green
-// flanges r 24, screw heads r 23, bolt heads) is cleared RADIALLY,
-// the runs' closest pass to either joint axis being ~75. So the
-// first groove sits at 59: cord edge ~3.5 off the wood, and the
-// groove mouth (+-2.2 at the crest) leaves a printable ~1.8 lip to
-// the drum ring's inboard face. (The capstan's y is otherwise FREE:
+// bearing boss + bridge outboard. The cable plane rides OUTBOARD of
+// the ELBOW drive's hardware (see the elbow section below): at the
+// elbow the +y lane now stacks plate 43..55, nose band + idler
+// sheaves 55..70.2, WRIST RUNS 73.5..80.7 — cord edge 3.25 over the
+// elbow hardware's crest, and the elbow drum's boss (which shares
+// this y band) passes ~16 away IN-PLANE. Joint HARDWARE off the 55
+// faces (green flanges r 24, screw heads r 23, bolt heads) is still
+// cleared RADIALLY, the runs' closest pass to either joint axis
+// being ~75. At the wrist the EE drum ring simply grows deeper (its
+// foot stays on the 55 face). (The capstan's y is otherwise FREE:
 // the axle is carried on both sides, so the band goes wherever the
 // cable plane asks and the neck length absorbs the difference —
 // wr_cab_y below ~59 would drive the neck negative into the wheel.)
-wr_cab_y = 59;               // first groove centerline
+wr_cab_y = 74;               // first groove centerline (was 59, moved
+                             // out when the elbow drive claimed 55..70)
 wr_whl_y0 = 27;              // wheel inboard face (fin kidney idiom)
 wr_core_y0 = wr_cab_y + wr_band / 2 - wr_cap_len / 2;   // 56.5
 wr_y1 = wr_core_y0 + wr_cap_len + 2 + bearing_w;        // 76.5: part end
@@ -563,6 +569,100 @@ function wr_tan_p2(s) = wr_axle + wr_cap_r * wr_tan_n(s);
 // goes on after the joint is assembled
 wr_hub_id = 58;
 wr_screw_r = 41;             // 6 wood screws into the EE plate
+
+// ---- elbow capstan drive (~65:1; second 8T primary + NOSE capstan) ----
+// The shoulder recipe at the elbow with the sector shrunk to a NOSE:
+// a printed ~150-deg grooved arc (cable centerline el_nose_r = 80)
+// fixed around the upper arm's +y fork cap, cable ends ANCHORED IN
+// THE NOSE (rolling lay, zero slip — the shoulder's capstan physics),
+// and the gear+drum stack riding the fin, its mass counterweight
+// credit like the wrist's. The wheel grows to 66T (the worm-era 90:1
+// relaxes to ~65:1) because the DRUM can't shrink: eff_r 10.125 is
+// the 1.1 cord's D/d ~18 bend floor, and nose tension RISES as the
+// arc shrinks (166 N worst here vs 112 at the shoulder — thinner
+// cord would be backwards). Margin: 0.41 x 65.2 x ~0.83 / 13.3 =
+// ~1.67 (eta = gear 0.9 x capstan 0.95 x one idler per run 0.97).
+// TWO IDLER SHEAVES (608-cored prints riding the forearm) CROSS the
+// runs so both nose tangent points land together near azimuth 100:
+// fed straight from the drum the two take-off sweeps union to
+// travel + 2*acos((80 - 10.1)/179) = ~250 deg of nose, and run B's
+// tangency would fall inside the upper-arm plate's silhouette. The
+// sheaves also pin their downstream spans to fixed planes, so the
+// NOSE GROOVES ARE PLAIN CIRCLES (the wrist-drum simplification) and
+// the drum's march is eaten as fleet in the drum->sheave spans only
+// (+-el_ramp/2 = +-2.2 over spans >= ~95: +-1.3 deg, wide-mouthed
+// sheave grooves absorb it).
+// Wrap bookkeeping: the shoulder's TWO-CABLE SHARED-CHANNEL scheme
+// (this drive and the shoulder validate it together) — same
+// gap_turns/track_sep, same dead_w, same end anchors, so the nose
+// tracks sit track_sep = 6 apart and the take-offs march together.
+el_teeth = 66;        // interference: at C = 74 the stub (0.45) tips
+                      // reach r 66.9 vs the 8T limit 67.0 — the same
+                      // 0.1 the 51T wheel runs at C = 59
+el_primary = el_teeth / pinion_teeth;                  // 8.25
+el_cd = gear_module * (pinion_teeth + el_teeth) / 2;   // 74
+el_nose_r = 80;       // cable centerline; crest 81.4 vs the cap's 66
+elbow_ratio = el_primary * el_nose_r / drum_eff_r;     // 65.2
+el_axle = [-52, 172]; // drum dead axle (forearm frame x,z), HIGH on
+                      // the fin: the r 67 wheel tips pass ~34 over
+                      // the upper arm's top chord at full extension
+                      // (the fin's bottom-edge rule, applied to a
+                      // Ø134 disc), the boss passes ~16 in-plane
+                      // under the upper wrist run, and r 179.7 buys
+                      // both fleet spans. Wheel-to-wrist-stack: 17 to
+                      // the wrist wheel's tips, 5.5 to its slab hull
+el_mesh_a = 215;      // pinion direction: down past straight-back
+                      // (the wrist drive's motor-lowering move) —
+                      // motor bottom z ~106 vs the chord line ~71
+el_pin = el_axle + el_cd * [cos(el_mesh_a), sin(el_mesh_a)];
+el_turns = elbow_travel / 360 * el_nose_r / drum_eff_r;  // 2.96
+el_ramp = el_turns * groove_p;                 // 4.4: the march
+el_core_len = ceil(track_sep + el_ramp + 2 * dead_w);    // 17
+// LANES (+y side, around the elbow): nose FOOT ring 43..55 seated on
+// the fork cap rim (radial: cable tension presses print onto wood),
+// LEG plate on the 55 face reaching down to r 46 (station flange r 24
+// + heads r 23 cleared radially), grooved BAND 55..70.2 growing
+// outboard of the plate face with PLAIN circular tracks at 60 / 66
+// (el_cab_y + track_sep), idler sheaves in the same two planes
+// (flanges <= 70.2), the drum core across them, boss + bridge beyond
+// (in-plane clear of the wrist runs), wrist runs 73.5+ outboard of
+// everything. Forearm-fixed vs the STATIC upper-arm plate: only
+// bracket material CROSSING the plate lane 43..55 can ever collide —
+// bracket A crosses at azimuth ~135 / r ~115, whose plate shadow
+// starts ~144 (sweeping DOWN from there, always safe); bracket B's
+// whole sweep is az -81..54 vs a shadow at 138+ — never close.
+// Sheaves, band, bridge: outboard of 55, no plate to hit; wheel,
+// motor, slab: inboard lanes governed by the chord-line rule above.
+el_cab_y = 60;                 // first (inboard) track plane
+el_whl_y0 = 17;                // wheel inboard face (fin kidney idiom)
+el_core_y0 = el_cab_y - dead_w - el_ramp / 2;  // 54.7: take-off A's
+                               // mid-travel station lands ON el_cab_y
+el_y1 = el_core_y0 + el_core_len + 2 + bearing_w;  // 80.7: part end
+// idler sheaves: 608-cored printed spools, groove floor r 13.05
+// (D/d ~25 for the 1.1 cord) — [azimuth, radius] in the FOREARM
+// frame, both r 100. A feeds the inboard track and CROSSES B: A's
+// tangency at az_A - beta, B's at az_B + beta, ~5 deg apart, so the
+// nose arc is travel + margins instead of travel + 2*beta
+el_pul_r = 13.6;               // cable centerline on the sheave
+el_pul_az = [146, 54];
+el_pul_d = 100;
+el_beta = acos((el_nose_r - el_pul_r) / el_pul_d);   // 48.4
+el_touch = [el_pul_az[0] - el_beta, el_pul_az[1] + el_beta];
+                               // 97.6 / 102.4: tangencies at extension,
+                               // sweeping 1:1 with the bend (down 135)
+el_arc = [min(el_touch[0], el_touch[1]) - elbow_travel - 5,
+          max(el_touch[0], el_touch[1]) + 5];   // [-42.4, 107.4]: the
+                               // nose arc, UA frame — clear of the
+                               // plate silhouette (az 147..213) and of
+                               // the scale-strip cap (that's -y)
+el_apex_r = el_nose_r - track_seat;   // 79.2: nose track V apex
+el_crest_r = el_nose_r + 1.4;         // 81.4: cord captive by ~0.85
+function el_pul_p(i) = el_pul_d * [cos(el_pul_az[i]), sin(el_pul_az[i])];
+// common tangent of two circles, for drawing the cable spans: unit
+// normal n, tangent points p_i + r_i * n; s = +-1 picks the side
+function cab_tan_n(p1, r1, p2, r2, s) =
+  let (v = p2 - p1, a = atan2(v[1], v[0]) + s * acos((r1 - r2) / norm(v)))
+  [cos(a), sin(a)];
 
 // ---- the capstan lane on the arm ----
 // FLIPPED STACK: the sector band is flush on the left board's inner

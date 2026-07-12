@@ -43,11 +43,11 @@
 // the drum flanges, the lowest of them, pass 2.8 over it (r 242.4:
 // the axis sits CLOSE IN so the take-off pull is mostly tangential)
 // — and the base boards have no material beyond x = -80 up high,
-// which is the only region the swept drive fan (base angles 115..235)
+// which is the only region the swept drive fan (base angles 105..225)
 // reaches. The wheel/pinion/motor never enter y > 55: they dip to
 // r 204, but only in |y| < 55, and the swept back fan holds no
 // static material there (the boards own |y| >= 58) — at full-up the
-// wheel's low point passes z 139 and the motor's z ~109, far over
+// wheel's low point passes z ~159 and the motor's z ~140, far over
 // the z 48 disc top.
 
 ply_t = 12;
@@ -159,6 +159,25 @@ function link_d(back) = elbow_d + 2 * back * tan(arm_taper);
 // EXTENSION the hanger parks inside the upper arm through the
 // centered slot in its top board (it enters nearly vertically: arc
 // r ~245, vertical tangent at 0 deg).
+// ---- elbow fold clearance (the upper arm's bottom, behind the joint) ----
+// At FULL BEND (135) the folded forearm's bottom face lies on the
+// 45-deg plane tangent to the r = elbow_d/2 circle about the elbow
+// (its bottom edge runs elbow_d/2 below the folded axis; the taper
+// only ever adds clearance, so elbow_d/2 is the conservative radius).
+// The upper arm's bottom chord used to cross that plane ~150 behind
+// the joint: it is now cut STRAIGHT (square plank end, box_truss
+// bot_short) where its lowest corner reaches the fold_gap offset
+// plane, and a diagonal CROSS BOARD between the side plates lies ON
+// that offset plane — parallel to the folded forearm, fold_gap clear
+// — restoring the box closure the chord cut opened (the plates are
+// solid through that whole zone, so the board lands on solid wood).
+// Sweep check: the forearm root's chamfer corner passes r 67.1 vs the
+// plane's 74, so nothing folding gets closer than ~7.
+fold_gap = 8;
+fold_off = elbow_d / 2 + fold_gap;              // offset plane, 74
+fold_cut = (elbow_d / 2 + sqrt(2) * fold_off)   // chord setback behind
+           / (1 - tan(arm_taper));              // the elbow, 177
+
 cw_bend = -2;                  // deg above straight-back: NEGATIVE =
                                // 2 deg below the centerline
 cw_r = 265;                    // block center; worst corner sweeps 325
@@ -234,11 +253,17 @@ roller_r = 185;       // support/hold-down roller stations
 // and a short printed bridge picks up the axle's boss end outboard,
 // so the dead axle is simply supported. The bend is
 // the packaging knob: at full-up the drive bottoms out at base angle
-// 280 - shoulder_bend (235: the wheel's low point passes z 139 over
-// the z 48 disc top, the motor's z ~109), at full-down it parks
-// up-back at 160 - shoulder_bend where nothing lives. With the
+// 280 - shoulder_bend (225: the wheel's low point passes z ~159 over
+// the z 48 disc top, the motor's z ~140), at full-down it parks
+// up-back at 160 - shoulder_bend (105) where nothing lives. With the
 // sector out of every arm plane, the bend is otherwise free.
-shoulder_bend = 45;
+// 45 -> 55: lifted the whole swept drive corridor 10 deg off the base
+// woodwork — the blade corner that passed 5.6 off the boards' rear
+// edge at full-up now stops at base angle ~241 (was ~251), well clear
+// of the heels and rear gussets, and the sector arc rides up with it
+// (base 100..230). The drive stack's CG rises with the bend, so
+// re-check cw_bend/cw_mass at the next mass audit.
+shoulder_bend = 55;
 
 // ---- capstan stage (~23.5:1; total joint ratio 150) ----
 capstan_ratio = shoulder_ratio / primary_ratio;  // 23.5
@@ -385,7 +410,7 @@ tb_plate_d = 134;                  // 2.5 kg plates each side, ~6 kg
 
 // ---- pose ----
 pose_yaw = 0;
-pose_shoulder = 100;
+pose_shoulder = 40;
 pose_elbow = 70;      // 0..135 downward
 pose_wrist = -10;     // +-90
 

@@ -64,9 +64,13 @@ module truss_plate_2d(l, d0, d1, margin = 28, s0 = 0, s1 = 0, cut0 = 0) {
 // are drawn individually rather than mz-mirrored as a pair. cut0 > 0
 // applies the 45-deg root truncation (see truss_plate_2d) to the side
 // plates AND squares the bottom chord back — a straight (not beveled)
-// end cut placed so the chord's lowest edge just meets the same line
+// end cut placed so the chord's lowest edge just meets the same line.
+// bot_short > 0 stops the bottom chord that far (link x) BEFORE x1,
+// again a square plank end — the fold-clearance cut at a joint whose
+// child link folds under (the plates keep their full length: they sit
+// outside the folding link's width)
 module box_truss(x0, x1, w, d0, d1, bot_relief = 0, solid0 = 0, solid1 = 0,
-                 cut0 = 0) {
+                 cut0 = 0, bot_short = 0) {
   l = x1 - x0;
   a = atan((d0 - d1) / 2 / l);   // taper angle per edge
   lc = l / cos(a);               // chord length along the sloped edge
@@ -85,7 +89,7 @@ module box_truss(x0, x1, w, d0, d1, bot_relief = 0, solid0 = 0, solid1 = 0,
   c0 = cut0 <= 0 ? 0
      : max(0, (d0 / 2 - cut0 * sqrt(2)) / (cos(a) + sin(a)));
   color("sienna") tx(x0) tz(-d0 / 2) ry(-a) linear_extrude(ply_t)
-    tx(c0) chord_2d(lc - c0, w, bot_relief);
+    tx(c0) chord_2d(lc - c0 - bot_short / cos(a), w, bot_relief);
 }
 
 // chord board 2D, drawn along its own (sloped) axis from 0..l: plain

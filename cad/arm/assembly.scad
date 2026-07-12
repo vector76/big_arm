@@ -102,15 +102,16 @@ sh_mid = (shoulder_min + shoulder_max) / 2;   // 40
 yoke_y = col_w / 2 - ply_t;      // 63: side board inner faces
 gus_x = -60;     // perpendicular base-gusset plane (x -60..-48): BACK,
                  // where the boards lack the front plate's bracing.
-                 // The limit is the outboard housing's blade corridor
-                 // (base angles to ~251 at shoulder r 252..304): going
-                 // down this strip the profile's base angle passes 251
-                 // before its radius reaches 252, clearing the full-up
-                 // blade corner by ~27 mm — hugging the rear edge
-                 // (x -72) would shave that to ~15, and behind -80
-                 // there is no full-height board face to glue to
-dd = 180 - shoulder_bend;        // drive boom direction, ARM frame (135)
-sector_bis = dd + sh_mid;        // fixed sector bisector, BASE frame (175)
+                 // Deepest sweep into this quadrant (bend 55) is the
+                 // bridge plate's y 101..109 lane, base angles to ~245
+                 // at shoulder r 213..240: going down this strip the
+                 // profile's base angle passes 245 before its radius
+                 // reaches 213, clearing the full-up corner by 8+ deg
+                 // (~35 mm); the blades (to ~241 at r 252..304) clear
+                 // by 15 deg. Behind -80 there is no full-height board
+                 // face to glue to
+dd = 180 - shoulder_bend;        // drive boom direction, ARM frame (125)
+sector_bis = dd + sh_mid;        // fixed sector bisector, BASE frame (165)
 drum_a = da * [cos(dd), sin(dd)];         // drum axle, arm frame
 pin_a = (da + cd) * [cos(dd), sin(dd)];   // pinion/motor, arm frame
 // drive-housing plan stations (2D boom frame: x' radial along dd,
@@ -260,7 +261,7 @@ module slew_base(segs = true) {
   // drivetrain parts), three segments, the end ones carrying the
   // anchors. rx(-90) maps local station a to base angle
   // sector_bis - a, landing run A's end-face knot at the lower
-  // (gusset) end, 240 — where the nick note applies
+  // (gusset) end, 230 — where the nick note applies
   color("khaki") tz(shoulder_h) ty(cab_y0 + sector_core_t / 2) rx(-90)
     for (i = [0 : seg_n - 1])
       rz(seg_bis(i) - sector_bis)
@@ -291,35 +292,37 @@ module slew_base(segs = true) {
 // lobes at tx(upper_len) are part of this link's plates — the elbow
 // STATIONS and everything distal are forearm_install().
 module upper_arm() {
-  // bottom chord relieved elbow_d/2 + 6 about the elbow — the
-  // folding forearm root's plate corners sweep r = elbow_d/2, and
-  // the full-length chord interpenetrated that circle (relief radius
-  // computed at the chord's inner face; slight overcut at the outer
-  // face is extra clearance). Hook slot in the TOP board only, where
-  // the elbow counterweight parks at full extension.
+  // bottom chord cut STRAIGHT fold_cut behind the elbow — the folded
+  // forearm's bottom face (the 45-deg offset plane, see params) ran
+  // through the full-length chord ~150 out, and the old circular
+  // root-sweep relief only handled the root corners, not the folded
+  // body. The fold-clearance CROSS BOARD below restores the box
+  // closure. Hook slot in the TOP board only, where the elbow
+  // counterweight parks at full extension.
   difference() {
     union() {
       // plates solid through the joint zones: the whole stub + 80 past
       // the shoulder axis (the camera bracket mounts at x 59..66), and
-      // the last 45 at the elbow fork
+      // the whole fold-clearance zone at the elbow, so the cross board
+      // and the cut chord's end both land on solid plate
       box_truss(-upper_stub, upper_len, upper_w,
-                link_d(upper_len + upper_stub), elbow_d,
-                sqrt(pow(elbow_d / 2 + 6, 2) - pow(elbow_d / 2 - ply_t, 2)),
-                upper_stub + 80, 45);
+                link_d(upper_len + upper_stub), elbow_d, 0,
+                upper_stub + 80, fold_cut + ply_t, bot_short = fold_cut);
       // the +y plate grows the drive boom at arm angle dd (lap-jointed
       // over the truss plate at concept level)
       color("burlywood") ty(upper_w / 2) rx(90) linear_extrude(ply_t)
         boom_plate_2d();
-      // elbow fork lobes: the truss plates end exactly at the axis,
-      // and the lobe hulls the plate's full end edge with the r 35
-      // ring, so the fork outline runs CONVEX from the taper edges
-      // around the bore (no waisted notch at the junction; the folding
-      // forearm stays inside |y| 40, under these plates' 43..55 lane).
-      // With the green bushings carrying the bearings, the old khaki
-      // fork doublers are superseded
+      // elbow fork end: the plates end in a FULL CIRCULAR CAP about
+      // the axis, radius elbow_d/2 * cos(arm_taper) — tangent to both
+      // taper edges, so the outline flows straight into the arc (the
+      // folding forearm stays inside |y| 40, under these plates'
+      // 43..55 lane). The -y cap's rim doubles as the elbow angle
+      // scale lobe: a printed strip wraps it (below), read by the
+      // camera tab on the forearm's right plate — the shoulder
+      // sensing idiom re-used
       color("burlywood") tx(upper_len) my([0, 1]) ty(upper_w / 2) rx(90)
         linear_extrude(ply_t) hull() {
-          circle(r = 35);
+          circle(r = elbow_d / 2 * cos(arm_taper));
           tx(-2) sq([2, elbow_d], [0, 1]);
         }
     }
@@ -336,6 +339,35 @@ module upper_arm() {
     tx(upper_len) ty(-upper_w / 2 - 1) rx(-90)
       cylinder(d = 28.5, h = upper_w + 2);
   }
+  // the fold-clearance CROSS BOARD: a chord-width plank between the
+  // (solid) side plates, its inner face lying ON the 45-deg offset
+  // plane — parallel to the fully folded forearm's bottom face,
+  // fold_gap clear of it — with thickness going away from the fold.
+  // Local frame: at the elbow, ry(-45) points +x up the plane toward
+  // the joint and +z along its outward normal; s = plane coordinate
+  // from the perpendicular foot. The foot corner meets the cut
+  // chord's end-top corner, the head's outer corner just kisses the
+  // top chord's underside — square plank ends, both
+  fb_s = [(-(elbow_d / 2 - ply_t) * sqrt(2)
+           - fold_off * (1 + tan(arm_taper))) / (1 - tan(arm_taper)),
+          ((elbow_d / 2 - ply_t) * sqrt(2)
+           - (fold_off + ply_t) * (1 - tan(arm_taper)))
+          / (1 + tan(arm_taper))];
+  color("sienna") tx(upper_len) ry(-45) tz(fold_off) tx(fb_s[0])
+    cub([fb_s[1] - fb_s[0], upper_w - 2 * ply_t, ply_t], [0, 1, 0]);
+  // the ELBOW joint-angle scale: a printed adhesive strip around the
+  // -y fork cap's rim, read by the camera on the forearm's tab (the
+  // shoulder idiom re-used, roles swapped: here the strip rides the
+  // parent link and the camera the child). Camera forearm azimuth 60:
+  // rim angle = 60 - bend, so the read head runs +60 (extension) to
+  // -75 (full fold); the strip overshoots 10 past each extreme — 155
+  // deg centered at -7.5 — and stays ~3 inside the cap arc's +-87.9
+  // tangent span
+  color("white") tx(upper_len) ty(-(upper_w / 2 - ply_t)) rx(90)
+    linear_extrude(ply_t) difference() {
+      rz(-7.5) pie(elbow_d / 2 * cos(arm_taper) + 0.8, 155);
+      circle(r = elbow_d / 2 * cos(arm_taper));
+    }
   // drive hardware — REAL parts (the detail-file modules, so the
   // concept can't drift from the prints). FLIPPED stack: gear_drum's
   // herringbone wheel sits INBOARD (27..54), straddling the boom
@@ -471,6 +503,15 @@ module forearm() {
       // CNC piece, replacing the bolted-on boom + riser)
       color("burlywood") ty(fore_w / 2) rx(90) linear_extrude(ply_t)
         fore_cw_fin_2d();
+      // ... and the RIGHT plate a small SENSOR TAB at forearm azimuth
+      // 60, reaching r 88: the footing for the camera that reads the
+      // elbow scale strip on the upper fork cap's rim. Azimuth 60 is
+      // what keeps the read head on the cap arc (+-87.9) through the
+      // whole 0..135 bend: rim angle runs +60 down to -75, and the
+      // sweep stays ahead of the elbow (never over the upper arm's
+      // chords, which share the tab's y lane)
+      color("burlywood") my(1) ty(fore_w / 2) rx(90) linear_extrude(ply_t)
+        rz(60) tx(50) sq([38, 24], [0, 1], 8);
     }
     // joint bores cut through plates AND lobes together — the plates
     // start at the elbow axis and end at the wrist axis, so a bore cut
@@ -479,6 +520,15 @@ module forearm() {
     ty(-fore_w / 2 - 1) rx(-90) cylinder(d = 15.5, h = fore_w + 2);
     tx(fore_len) ty(-fore_w / 2 - 1) rx(-90)
       cylinder(d = 8.5, h = fore_w + 2);
+  }
+  // the elbow scale camera on the tab: bracket bridges the 3 mm gap,
+  // body straddles the strip's y lane (the fork plate's 43..55), lens
+  // ~6 off the strip crest at r 66.7 — the shoulder camera verbatim,
+  // one joint down
+  ry(-60) tx(78) {
+    color("seagreen") ty(-(fore_w / 2 + 4)) cub([10, 14, 14], [0, -1, 1]);
+    color("dimgray") ty(-(fore_w / 2 + 9)) ry(-90) cylinder(d = 6, h = 5);
+    color("khaki") ty(-(fore_w / 2 + 4)) cub([10, 6, 14], [0, 0, 1]);
   }
   // elbow counterweight, CENTERED for lateral symmetry: a
   // dog-leg hanger crosses from the fin's inboard face (y 28)
@@ -512,8 +562,9 @@ module end_effector() {
 // disc layers (the rearmost sits under each board's HEEL — the
 // per-board foot extension down-back that widens the stance against
 // fore-aft racking). Keeping material x >= -80 up high matters: the
-// arm's drive boom sweeps the back fan (base angles 115..235) at
-// r > 250 in the board's own y-lane.
+// outboard drive housing sweeps the board's own y-lane down to base
+// angle ~241 at shoulder r >= 252 (bend 55), and the rear edge's
+// r-242 crossing sits at base angle ~251 — 10 deg in hand.
 module board_core_2d() {
   txy([-80, disc_z0 + 2 * ply_t])
     sq([front_x + 80, shoulder_h - disc_z0 - 2 * ply_t], [0, 0], 10);
@@ -541,6 +592,9 @@ module board_slots_2d() {
 // front plate braces the front, so the rib stands BACK (see gus_x).
 // Apex z 340 keeps ~79 off the axis hardware; the foot's far corner
 // holds yaw r <= 153 vs the hold-down arms reaching in to r 191.
+// (At bend 45 the bridge plate's corridor reached base angle ~255
+// and forced a knee in this profile; bend 55 lifted it clear — the
+// corridor numbers live at gus_x.)
 module base_gusset_2d() {
   polygon([[yoke_y + ply_t, disc_z0 + 2 * ply_t],
            [yoke_y + ply_t + 70, disc_z0 + 2 * ply_t],
@@ -555,12 +609,13 @@ module base_gusset_2d() {
 // pilot circle (three per segment, matching the legs). A gusset
 // triangle blends the sector's lower tip back into the board's rear
 // edge (fills the notch where the lower edge crossed x -80,
-// stiffening the cantilevered tip); it lives at base angles 240..253,
-// outside the drive fan's 115..235 sweep, so the radial rule holds.
+// stiffening the cantilevered tip); at bend 55 it spans base angles
+// 230..250 and holds r <= rim_r throughout — under the drum/blade
+// annuli (r >= 242), so the radial rule holds with room to spare.
 // (The lower end's cable knot pokes past the arc end within the board
 // plane — nick this gusset's corner to clear it.)
 module left_board_2d() {
-  a0 = sector_bis + sector_angle / 2;      // lower sector edge (240)
+  a0 = sector_bis + sector_angle / 2;      // lower sector edge (230)
   difference() {
     union() {
       board_core_2d();
@@ -569,14 +624,14 @@ module left_board_2d() {
                [rim_r * cos(a0), shoulder_h + rim_r * sin(a0)],
                [-80, shoulder_h + rim_r * sin(a0) - 40]]);
       // rear HEEL over the third disc tab. On THIS side the outboard
-      // housing's blades sweep base angles up to ~251 at shoulder
-      // r 252..304 (the near corner passes (-86, 144) at full-up,
-      // 5.6 off the rear edge — the tightest standing clearance in
-      // the base), so the heel stays r >= 315 behind the 253 ray:
-      // the V-notch it leaves under the sector gusset IS the blade
-      // corridor, not waste
-      polygon([[-80, shoulder_h - 80 * tan(253 - 180)],
-               [315 * cos(253), shoulder_h + 315 * sin(253)],
+      // housing's blades sweep base angles up to ~241 at shoulder
+      // r 252..304 (bend 55; the near corner passes (-127, 163) at
+      // full-up), so the heel's upper boundary is the 244 ray out to
+      // r 315, past the blades' reach: the shallow V it leaves
+      // against the sector gusset's chord IS the blade corridor,
+      // not waste
+      polygon([[-80, shoulder_h - 80 * tan(244 - 180)],
+               [315 * cos(244), shoulder_h + 315 * sin(244)],
                [-150, disc_z0 + 2 * ply_t],
                [-80, disc_z0 + 2 * ply_t]]);
     }
@@ -646,13 +701,16 @@ module boom_plate_2d() rz(dd) difference() {
     // binding constraints: an arc r 338 about the shoulder (any point
     // past arm angle 170 passes straight down at some pose, height
     // 392 - r, so 338 keeps 6 over the z 48 disc top), then, past arm
-    // angle ~191 where the FRONT board takes over at full-up
+    // angle ~185 where the FRONT board takes over at full-up
     // (x = r*cos(angle+100) <= 124 vs the x 130 face), a chord to the
-    // lower corner at arm angle 200, r 248. Local frame: +x' = arm
-    // angle dd (135), so local angle = arm angle - 135
+    // lower corner at arm angle 200, r 248. Both constraints are
+    // ARM-angle anchored, so the local stations moved when the bend
+    // went 45 -> 55. Local frame: +x' = arm angle dd (125), so local
+    // angle = arm angle - 125; the arc starts at 8 where the boom
+    // strip's edge takes over.
     polygon(concat([[0, 0]],
-      [for (a = [8 : 4 : 56]) 338 * [cos(a), sin(a)]],
-      [[104.8, 224.8]]));
+      [for (a = [8 : 4 : 60]) 338 * [cos(a), sin(a)]],
+      [[64.2, 239.6]]));
   }
   // the kidney: wheel + pinion clearance, Ø110 blended into Ø26
   hull() { tx(da) circle(55); tx(da + cd) circle(13); }

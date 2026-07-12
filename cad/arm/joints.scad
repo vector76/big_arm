@@ -7,11 +7,9 @@
 // gone, and those joints carry bare stations/axles in the model until
 // the redesign lands.
 //
-// Conventions: pitch joints rotate about local Y. Sectors are drawn in
-// the child link's frame with their arc bisector at 180 deg (opposite
-// the link direction), exactly like the prototype1 rig; the drive unit
-// (gear + drum + motor, drawn as envelope proxies) is drawn in the
-// parent's frame along the direction of the child's mid-travel bisector.
+// Conventions: pitch joints rotate about local Y. The shoulder sector
+// is drawn in the base frame with its arc bisector opposite the
+// mid-travel arm direction; the drive rides the arm (assembly.scad).
 
 include <params.scad>
 use <../lib/helpers.scad>
@@ -24,40 +22,23 @@ module pie(r, ang) {
 }
 
 // the sector's rim cable channel: WEDGE-BACKED printed segments
-// (detail design: prototype1/sector_segment.scad) capping the board
-// web's circular rim — the two-track band hugs rim (r-3) to crest
-// (r+1.4), and outboard of the board face the section fills solid
-// down past the rim to the screw leg (radial backing; the concept
-// profile here mirrors seg_profile). ONE-SIDED: y0 is the flush
-// (arm-side) face, w the full band width. Joint axis = Y, bisector at
-// `bis` degrees from +X toward +Z. The sector WEB itself is no
-// separate part: the fixed sector is a solid web CNC'd as one piece
-// with the left base board (see the assembly's left_board_2d)
-module sector_channel(r, ang, bis = 180, y0 = 0, w = 48.5) {
+// (detail part: sector_segment.scad) capping the board web's circular
+// rim — the two-track band hugs rim_r to crest_r, and outboard of the
+// board face the section fills solid down past the rim to the screw
+// leg (radial backing; this concept envelope mirrors seg_profile,
+// same params). ONE-SIDED: cab_y0 is the flush (arm-side) face. Joint
+// axis = Y, bisector at `bis` degrees from +X toward +Z. The sector
+// WEB itself is no separate part: the fixed sector is a solid web
+// CNC'd as one piece with the left base board (see the assembly's
+// left_board_2d)
+module sector_channel(ang, bis = 180) {
   color("khaki") rx(-90) rz(-bis - ang / 2)
     rotate_extrude(angle = ang, $fn = 180)
-      polygon([[r - 3, y0], [r + 1.4, y0], [r + 1.4, y0 + w],
-               [r - 17, y0 + w], [r - 25, y0 + ply_t + 5],
-               [r - 25, y0 + ply_t], [r - 3, y0 + ply_t]]);
-}
-
-// drive unit envelope: 51T wheel + drum on a dead axle, pinion + NEMA
-// at center distance, drawn with the drum axis at the local origin
-// (joint axis = Y); `out` is the direction (deg in XZ from +X) from the
-// drum toward the pinion/motor — radially away from the sector
-module drive_unit(out = 180) {
-  rx(90) rz(out) {
-    color("steelblue") tz(-gear_w - 14) {
-      cylinder(d = gear_od, h = gear_w);            // wheel
-      tz(gear_w) cylinder(d = drum_od, h = 26);     // drum + flanges
-    }
-    color("silver") tz(-70) cylinder(d = 8, h = 140, $fn = 24);
-    tx(cd) {
-      color("tomato") tz(-gear_w - 14) cylinder(d = 28, h = gear_w);
-      color("dimgray") tz(-gear_w - 16 - motor_len)
-        cub([motor_w, motor_w, motor_len], [1, 1, 0]);
-    }
-  }
+      polygon([[rim_r, cab_y0], [crest_r, cab_y0],
+               [crest_r, cab_y0 + cab_w],
+               [rim_r - seg_back, cab_y0 + cab_w],
+               [rim_r - leg_d, cab_y0 + ply_t + leg_t],
+               [rim_r - leg_d, cab_y0 + ply_t], [rim_r, cab_y0 + ply_t]]);
 }
 
 // ---- preloaded joint bearing station ----

@@ -107,11 +107,13 @@ Measure on the real structure, staged:
      disqualifying).
   5. Repeat lifting test at speed (e.g., 300 rpm motor) to spot-check the
      torque curve interaction.
-- **CAD:** the drivetrain parts are in
-  [`cad/prototype1/`](../cad/prototype1/) (parametric OpenSCAD). The
-  pendulum test stand originally designed to carry them was superseded
-  before it was built: the measurements now run on the real base +
-  upper arm with the sector inverted onto the left base board —
+- **CAD:** the drivetrain part files live with the machine in
+  [`cad/arm/`](../cad/arm/) (`pinion.scad`, `gear_drum.scad`,
+  `sector_segment.scad` — parametric OpenSCAD, drawn verbatim by the
+  concept assembly). The pendulum test stand originally designed to
+  carry them (`cad/prototype1/`, now in git history only) was
+  superseded before it was built: the measurements run on the real
+  base + upper arm with the sector inverted onto the left base board —
   [`cad/arm/testbench.scad`](../cad/arm/testbench.scad); see
   [`cad/README.md`](../cad/README.md) for geometry and cable notes.
 - **Build order:** (1) herringbone-primary + capstan-sector at shoulder

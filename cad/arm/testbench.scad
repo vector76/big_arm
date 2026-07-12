@@ -1,5 +1,5 @@
 // Shoulder testbench — the REAL base + upper arm ARE the test rig
-// (supersedes the prototype1 pendulum stand). Same modules, same
+// (supersedes the retired phase-1a pendulum stand). Same modules, same
 // coordinates as assembly.scad; only the environment differs:
 //
 // - The two-ply slew disc lies FLAT on the desk, clamped dead. The

@@ -24,20 +24,21 @@
 // the boom plate's downward tail), link side plates 43..55 (the +y
 // one grows the drive boom plate), then a 3 mm running gap — SAME as
 // the elbow's, so ONE bearing-station design serves every joint.
-// Static: base boards 58..70; the fixed sector band 58..94.3
+// Static: base boards 58..70; the fixed sector band 58..87.8
 // (wedge-backed printed segments on the left board's circular rim,
 // r 213..240, FLUSH on the board's inner face and growing outboard —
-// from the wrap math below: two ramped tracks, band + march + walls);
+// from the two-cable wrap math below: two ramped tracks, track_sep
+// apart, + march + walls);
 // green joint bushings + bolt heads |y| ~53..78 at
 // the axis. Riding the arm — the drive stack is FLIPPED (wheel
 // INBOARD): wheel + pinion 27..54, straddling the boom plate through
 // its kidney cutout and stopping 4 short of the band/board face at
 // 58; motor -30..18, its face on the printed inboard support slab,
-// body pointing back into the arm side; drum 60..101 (grooved band
-// 62..92 matching the sector tracks, r 242..270, then the outboard
+// body pointing back into the arm side; drum 60..96 (grooved band
+// 62..87 matching the sector tracks, r 242..270, then the outboard
 // bearing boss); inboard housing (slab + kidney-tracing wall +
-// bosses) 18..43; outboard housing 55..109 — its shear walls cross
-// the band lane holding shoulder r >= 261, bridge plate 101..109.
+// bosses) 18..43; outboard housing 55..104 — its shear walls cross
+// the band lane holding shoulder r >= 261, bridge plate 96..104.
 // The joint-angle sensor is a camera
 // on the arm (-56..-70 lane, r 92 about the axis) reading a printed
 // scale strip on the sensor-board lobe rim (r 80).
@@ -133,7 +134,7 @@ yaw_lobe_r = yaw_pitch_r + 7 - 0.8;  // 213.2: the disc is NOT a plain
                                 // azimuth registers for the end
                                 // segments
 shoulder_ratio = 150; shoulder_min = -20; shoulder_max = 100;  // capstan
-elbow_travel = 135;   // downward bend only; drive TBD (redesign underway)
+elbow_travel = 135;   // downward bend only; nose-capstan drive (below)
 wrist_travel = 180;   // +-90; capstan drive, remote motor (below)
 
 // ---- links ----
@@ -401,41 +402,76 @@ leg_screw_r = rim_r - 10;   // screw circle: keeps the counterbore
                             // fully inside the wedge (seg_back 14)
 cb_d = 7.5;                 // screw-head counterbore (heads ~7)
 
-// WRAP MATH — the band MARCHES. The resident wraps between the two
-// take-offs are frozen to the drum (no slip; the mid-anchor pins them),
-// so every wrap the joint motion adds lands one pitch beyond the band
-// edge: BOTH take-offs walk axially, one groove pitch per drum rev,
-// while the anchor stays put mid-band. Deterministic and repeatable —
-// the groove makes it exact — but the drum must be as long as the band
-// PLUS its march, and the sector needs TWO tracks (one per run) at
-// constant separation band_w, each ramping by `ramp` across the arc.
-// Drum groove and sector tracks are one continuous helix at the shared
-// lead angle atan(groove_p / (2*PI*drum_eff_r)) ~ 1.35 deg, so the free
-// spans leave both surfaces square: zero fleet angle at every pose.
-// (Assembly check — now DRAWN REAL and verified at the tangency: the
+// WRAP MATH — TWO CABLES, SHARED CHANNELS (SHOULDER ONLY; the wrist
+// drive below still runs the pinned-midpoint scheme until this one is
+// validated). Each cable anchors at one AXIAL END of the drum core
+// and at its own arc end of the sector. Both lays ride the SAME
+// helical groove: as the joint moves, one cable winds on exactly as
+// the other pays off, so the groove one vacates is the groove the
+// other will claim, the resident wraps total a CONSTANT
+// travel + 2*dead turns, and the drum core is barely more than half
+// the pinned-midpoint length (which gave each run PRIVATE groove:
+// band + march). Still no slip anywhere — cable lands and lifts only
+// at the take-off edges, each lay pinned by its own end anchor — so
+// the walk stays deterministic: BOTH take-offs march one groove pitch
+// per drum rev at CONSTANT separation track_sep (that property came
+// from the shared helix, never from the mid anchor), and the sector
+// still carries TWO tracks, now only track_sep apart, each ramping by
+// `ramp` across the arc. Drum groove and sector tracks remain one
+// continuous helix at the shared lead angle
+// atan(groove_p / (2*PI*drum_eff_r)) ~ 1.35 deg, so the free spans
+// leave both surfaces square: zero fleet at every pose — PROVIDED
+// each cable installs at its nominal wrap count (the groove quantizes
+// it; a whole turn of error shows as ~1.4 deg of fleet on that run,
+// not as a position error).
+// (Assembly check — DRAWN REAL and verified at the tangency: the
 // groove is LEFT-hand. With the segments placed so run A's knot lands
 // at the lower/gusset end, the winding sense forces the LH lay; the
 // wrong hand puts the two helices in opposition, crossing the tracks
-// at 2x the lead angle and doubling the fleet instead of killing it.)
+// at 2x the lead angle and doubling the fleet instead of killing it.
+// The end anchors don't change the winding sense — the hand argument
+// carries over from the mid-anchor scheme unchanged.)
 travel_turns = (shoulder_max - shoulder_min) / 360 * capstan_ratio; // 7.8
-dead_turns = 2.5;           // strain-relief margin, ~1.25 per run
-band_w = (travel_turns + dead_turns) * groove_p; // 15.5: frozen band =
-                                                 // track separation
-ramp = travel_turns * groove_p;                  // 11.8: the march
-drum_len = ceil(band_w + ramp + 2);              // 30: grooved core
+dead_turns = 1.25;          // PER-CABLE resident wraps at its drum-end
+                            // anchor: capstan friction unloads the knot
+gap_turns = 4;              // empty shared groove between the take-offs
+                            // = sector track separation. Floor: the two
+                            // V mouths (2.7 half-width at the crest)
+                            // plus a printable land, 2*2.7 + 0.6 = 6.0;
+                            // the rest is install-registration margin —
+                            // the take-offs can NEVER meet (the gap is
+                            // exactly constant), only mis-tension moves
+                            // them, fractions of a turn
+track_sep = gap_turns * groove_p;  // 6: take-off AND track separation
+ramp = travel_turns * groove_p;    // 11.8: the march (unchanged)
+ramp_arc = ramp * sector_angle / (shoulder_max - shoulder_min);
+                            // 12.7: the march over the FULL arc incl
+                            // the 5-deg end margins (overshoot land)
+anchor_off = 1.2;           // drum-end anchor holes: center past the
+                            // core end (clears the flange corner;
+                            // drilled in gear_drum.scad)
+dead_w = dead_turns * groove_p + anchor_off;  // 3.1: anchor + dead
+                            // wraps beyond EACH take-off extreme
+drum_len = ceil(track_sep + ramp_arc + 2 * dead_w);  // 25: grooved
+                            // core (was 30 under pinned-midpoint)
 // sector track stations: z in the web frame (board mid-plane = 0), a
 // in deg from the arc bisector. The band is ONE-SIDED: it starts FLUSH
 // at the board's arm-side face (band_z0) and grows outboard. The
 // tangent point sweeps 1 deg of arc per deg of joint, so the ramp
 // completes over the TRAVEL span and the 5-deg end margins extend at
 // the same slope to the anchors. Run A (run = -1) anchors at the -half
-// end, run B (+1) at +half — the diagonal extremes; between them the
-// tracks run parallel, band_w apart.
+// end, run B (+1) at +half — the diagonal extremes (each cable's OTHER
+// end anchors at its drum core end: A inboard, B outboard); between
+// them the tracks run parallel, track_sep apart. The band's inboard
+// wall is dead_w WIDER than the outboard one: that extra width faces
+// the drum's inboard anchor + dead-wrap zone (no cable ever lands on
+// the sector there) and keeps the core start — and with it the whole
+// wheel/pinion stack — where the pinned-midpoint scheme put it.
 band_z0 = -sector_core_t / 2;             // the FLUSH (arm-side) face
-band_wt = band_w + ramp * sector_angle / (shoulder_max - shoulder_min)
-          + 2 * seg_wall;                 // 36.3: full band width
-function track_z(a, run) = band_z0 + band_wt / 2
-  + run * band_w / 2 + ramp * a / (shoulder_max - shoulder_min);
+band_wt = dead_w + track_sep + ramp_arc
+          + 2 * seg_wall;                 // 29.8: full band width
+function track_z(a, run) = band_z0 + (band_wt + dead_w) / 2
+  + run * track_sep / 2 + ramp * a / (shoulder_max - shoulder_min);
 
 // ---- axle & bearings ----
 // the gear+drum spins on 608s pocketed into its ends (one into the
@@ -480,10 +516,13 @@ wr_mesh_a = 215;     // pinion direction from the capstan axle, deg
                      // passes z ~95 vs the line's ~77 at that x
                      // (~18 in hand; ~230 would spend it all)
 wr_pin = wr_axle + cd * [cos(wr_mesh_a), sin(wr_mesh_a)];
-// wrap bookkeeping — the shoulder's wrap math at wrist scale. The
-// march is so short here (~2.3 mm over a ~650 mm span, ~0.2 deg of
-// fleet) that the DRUM grooves stay PLAIN CIRCLES; only the capstan
-// keeps the helical groove
+// wrap bookkeeping — DELIBERATELY still the PINNED-MIDPOINT scheme
+// (one cable, mid-anchor, frozen band + march: the shoulder's OLD
+// math; the shoulder moved to two-cable shared channels — fold that
+// in here only once it's validated on the shoulder). The march is so
+// short here (~2.3 mm over a ~650 mm span, ~0.2 deg of fleet) that
+// the DRUM grooves stay PLAIN CIRCLES; only the capstan keeps the
+// helical groove
 wr_turns = wrist_travel / 360 * wr_drum_r / wr_cap_r;   // 1.56
 wr_band = (wr_turns + 2.5) * groove_p;    // 6.1: frozen band = the
                                           // drum's groove separation
@@ -527,8 +566,8 @@ wr_screw_r = 41;             // 6 wood screws into the EE plate
 
 // ---- the capstan lane on the arm ----
 // FLIPPED STACK: the sector band is flush on the left board's inner
-// face, growing outboard (58..94.3), and the drum's grooved core
-// spans the same y so the shared two-track helix lines up (62..92).
+// face, growing outboard (58..87.8), and the drum's grooved core
+// spans the same y so the shared two-track helix lines up (62..87).
 // The WHEEL sits INBOARD of the band, straddling the boom plate
 // through its kidney cutout; outboard, past the core's flange, the
 // part ends in a bearing BOSS — free air where the wheel used to be,
@@ -536,13 +575,17 @@ wr_screw_r = 41;             // 6 wood screws into the EE plate
 // the free end against the boom plate, where a 608 pocket severed
 // the core: pocket 22.1 vs core 20.4).
 cab_y0 = col_w / 2 - ply_t;   // 58: band start = board inner face
-cab_w = band_wt;              // 36.3
-core_y0 = cab_y0 + 4;         // 62: grooved core start = the first
-                              // track's V mouth (seg_wall inboard)
+cab_w = band_wt;              // 29.8
+core_y0 = cab_y0 + 4;         // 62: grooved core start, UNCHANGED from
+                              // the pinned-midpoint stack (the wheel/
+                              // pinion lane is untouched); run A's
+                              // anchor + dead wraps fill core_y0..
+                              // core_y0+dead_w before the first
+                              // take-off station
 whl_y0 = core_y0 - 8 - gear_width;  // 27: wheel's inboard face; the 8
                               // = neck (6) + inboard flange (2)
 drum_boss_l = bearing_w;      // 7: outboard bearing boss past the flange
-drum_y1 = core_y0 + drum_len + 2 + drum_boss_l;  // 101: part's
+drum_y1 = core_y0 + drum_len + 2 + drum_boss_l;  // 96: part's
                               // outboard end; bridge just past it
 
 // ---- testbench (the assembly modules recomposed; testbench.scad) ----

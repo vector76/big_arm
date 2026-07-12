@@ -22,7 +22,12 @@
 // the segment END face, load path straight along the cord, no bend.
 // Run A anchors at the idx-0 end, run B at the far end, the tracks'
 // diagonal extremes; the other track runs wall-to-wall (its cable
-// never reaches that end anyway).
+// never reaches that end anyway). TWO SEPARATE CABLES (params
+// wrap-math note): each run's other end knots at its own drum core
+// end, not at a shared mid-drum pin — which is why the tracks now sit
+// only track_sep apart, and why the band's inboard wall is dead_w
+// wider than the outboard one (it faces the drum's inboard anchor +
+// dead-wrap zone, where no cable ever lands on the sector).
 //
 // Print INVERTED, on the wide outboard end face: the arc lies in the
 // bed plane, the V walls and the wedge diagonal print at >= 45 deg,

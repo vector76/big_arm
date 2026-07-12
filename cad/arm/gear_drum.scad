@@ -2,7 +2,8 @@
 // herringbone wheel INBOARD — it straddles the boom plate through the
 // plate's kidney cutout — then a short neck, the helically grooved
 // capstan core laying across the fixed sector band's tracks (the lay
-// is positively located; length = wrap band + its march), and past
+// is positively located; length = the shared two-cable lay: travel +
+// gap + end dead wraps), and past
 // the core's outboard flange a bearing BOSS. A gear-outboard stack
 // jammed the free end against the boom plate, where no 608 could
 // seat without severing the core (pocket 22.1 vs core 20.4);
@@ -11,11 +12,16 @@
 // floor and an inner-race relief, and the part spins on a fixed M8
 // dead axle (printed inboard support slab + outboard bridge).
 // The drum core carries a HELICAL GROOVE at groove_p pitch: the lay
-// is positively located, so the wrap band's deterministic march (see
-// the wrap-math note in params.scad) can never bunch or climb —
-// drum_len covers band + march. Cable anchors in a radial hole
-// MID-GROOVE (knot or crimp in the bore annulus behind it), splitting
-// the wraps into the two runs.
+// is positively located, so the take-offs' deterministic march (see
+// the two-cable wrap-math note in params.scad) can never bunch or
+// climb. TWO CABLES share the one groove — each anchors in a radial
+// hole near ITS core end (knot or crimp in the bore annulus behind
+// it): run A's at the inboard (z 0) end, run B's at the outboard end,
+// with dead_turns of resident wraps between each anchor and its
+// take-off extreme. The empty groove between the two take-offs stays
+// exactly gap_turns wide at every pose — one cable winds on as the
+// other pays off — so drum_len covers travel + gap + both dead zones,
+// barely more than half the old pinned-midpoint band + march.
 // Local frame: +z outboard, z 0 = the wheel's inboard face (the
 // assembly places it at whl_y0).
 
@@ -33,8 +39,8 @@ groove_turns = drum_len / groove_p;
 z_core = core_y0 - whl_y0;      // 35: grooved core start, from the
                                 // lane math — locked to the tracks
 
-// flange + grooved core + flange + mid-groove anchor hole, z 0 = the
-// lower flange's bottom face
+// flange + grooved core + flange + one anchor hole per core end,
+// z 0 = the lower flange's bottom face
 module drum_body() difference() {
   union() {
     cylinder(d = drum_flange_d, h = 2);
@@ -42,11 +48,13 @@ module drum_body() difference() {
     tz(2 + drum_len) cylinder(d = drum_flange_d, h = 2);
   }
   drum_groove();
-  // cable anchor: radial hole mid-groove, rotated to the groove's
-  // phase at that height so it lands in the groove floor (the phase
+  // cable anchors: a radial hole anchor_off in from each core end
+  // (run A inboard, run B outboard), each rotated to the groove's
+  // phase at its height so it lands in the groove floor (the phase
   // sign mirrors the twist's)
-  tz(2 + drum_len / 2) rz(360 * (drum_len / 2 + groove_p / 2) / groove_p)
-    ry(90) cylinder(d = anchor_d, h = drum_flange_d, $fn = 24);
+  for (h = [anchor_off, drum_len - anchor_off])
+    tz(2 + h) rz(360 * (h + groove_p / 2) / groove_p)
+      ry(90) cylinder(d = anchor_d, h = drum_flange_d, $fn = 24);
 }
 
 // the groove cutter, by twisted extrude. Under twist, a 2D shape's

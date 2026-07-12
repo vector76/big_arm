@@ -19,12 +19,12 @@
 //   angle 180 - shoulder_bend. The stack is FLIPPED (wheel INBOARD):
 //   the 51T wheel + 8T pinion straddle the boom plate through its
 //   kidney cutout (y 27..54), the drum's grooved band spans the
-//   sector band's lane (62..92) ending in a bearing boss (..101),
+//   sector band's lane (62..87) ending in a bearing boss (..96),
 //   and the motor points back into the arm side (-30..18), its face
 //   on the printed inboard support slab that also seats the drum
 //   axle's wheel end — so the mesh center distance is printed-exact
 //   and the separating force loops close inside the print; the
-//   outboard housing's bridge plate (101..109) picks up the boss end:
+//   outboard housing's bridge plate (96..104) picks up the boss end:
 //   the dead axle is simply supported. Both supports are walled
 //   HOUSINGS, wood-screwed to the boom plate from opposite faces
 //   through staggered stations. The drive mass behind the joint is free
@@ -110,7 +110,7 @@ yoke_y = col_w / 2 - ply_t;      // 63: side board inner faces
 gus_x = -60;     // perpendicular base-gusset plane (x -60..-48): BACK,
                  // where the boards lack the front plate's bracing.
                  // Deepest sweep into this quadrant (bend 55) is the
-                 // bridge plate's y 101..109 lane, base angles to ~245
+                 // bridge plate's y 96..104 lane, base angles to ~245
                  // at shoulder r 213..240: going down this strip the
                  // profile's base angle passes 245 before its radius
                  // reaches 213, clearing the full-up corner by 8+ deg
@@ -412,8 +412,8 @@ module upper_arm(housings = true) {
   // concept can't drift from the prints). FLIPPED stack: gear_drum's
   // herringbone wheel sits INBOARD (27..54), straddling the boom
   // plate through its kidney cutout, its grooved core lays across the
-  // fixed band's lane (62..92) and the part ends outboard in a
-  // bearing boss (..101); the 8T pinion meshes at cd in the wheel's
+  // fixed band's lane (62..87) and the part ends outboard in a
+  // bearing boss (..96); the 8T pinion meshes at cd in the wheel's
   // plane, its motor hung under the inboard support slab, body
   // pointing back into the arm side (-30..18) — its mass is free
   // counterweight. The mesh is entirely arm-internal, guarded inside

@@ -50,7 +50,7 @@ flags (0 = from origin, 1 = centered, -1 = negative-going), and
 | File | Part | Make |
 |------|------|------|
 | `pinion.scad` | 8T herringbone, cut opposite-hand to mesh the +helix wheels, press-on 5 mm D-bore (proven grub-free fit: Ø5.1 with flat at nominal 2.0 mm); drives the shoulder primary AND the yaw ring | print |
-| `gear_drum.scad` | the shoulder's gear+drum, FLIPPED stack: the 51T stub-addendum herringbone wheel INBOARD (straddling the boom plate through its kidney cutout), a short neck, the helically grooved capstan core across the sector band's lane (the lay is positively located; length = wrap band + its march), mid-groove anchor hole, and a bearing BOSS outboard; two 608s pocket into the ends (wheel face + boss, full-shoulder floors with inner-race reliefs), spins on a fixed M8 dead axle between two printed supports | print |
+| `gear_drum.scad` | the shoulder's gear+drum, FLIPPED stack: the 51T stub-addendum herringbone wheel INBOARD (straddling the boom plate through its kidney cutout), a short neck, the helically grooved capstan core across the sector band's lane (the lay is positively located; TWO cables share the one groove — length = travel + gap + end dead wraps), an anchor hole near each core end, and a bearing BOSS outboard; two 608s pocket into the ends (wheel face + boss, full-shoulder floors with inner-race reliefs), spins on a fixed M8 dead axle between two printed supports | print |
 | `wrist_drive.scad` | the WRIST's gear+capstan — gear_drum's stack at wrist scale: 51T wheel, neck, FAT helically grooved capstan (Ø32 core, ~10 mm wall over the bore), bearing boss; rides the enlarged elbow-CW fin on an M8 dead axle, driven by another print of the same 8T pinion (remote motor = free counterweight). ~20:1 wrist total (6.375 × 50/16), margin ~2.4 | print |
 | `wrist_drum.scad` | the wrist DRUM: full-circle ring on the EE fork's left plate, cable centerline r 50 (the nose-cap radius — nothing protrudes at any pose), TWO PLAIN circular V-grooves (fleet ~0.2°, no ramps needed), radial knot anchors, open center around the joint's green flange, 6 wood screws into the ply disc. Two straight tangent runs (~650 mm, drawn as rods in the assembly) connect it to the capstan — no idlers, no joint crossing | print |
 | `sector_segment.scad` | printed channel segments, TWO-TRACK RAMPED and WEDGE-BACKED: the band seats flush on the left board's circular rim (cable tension presses print onto wood) and outboard of the board face the section fills solid down to the leg — ample radial backing; the leg screws to the outboard ply face through deep 7.5 mm counterbores (pilot circle CNC'd into the board). 45° V track slots climb at the drum groove's ~1.4° lead — zero fleet. Three ~180 mm prints (`-D idx=0..2`; on the end prints the anchored run's slot stops short of the arc end, and the cord knots in a recess on the end face) | print |
@@ -85,24 +85,29 @@ See the header of `arm/testbench.scad` for what the rig exercises
 as-final, the clamp zoning around the counterweight sweep, and the
 torque math; `-D pose_shoulder=<deg>` (−20…100) poses it.
 
-Cable (~2 m of 1.1 mm stiff aramid cord): anchor at the drum's
-mid-groove radial hole (knot behind), ~14 resident wraps riding the
-helical groove of the 41 mm drum, both ends terminating in the printed
-END segments of the channel — each run's slot stops just short of the
-arc end, the cord continues through a 2.2 mm hole in line with its
-track, and the knot seats in a shallow recess on the segment's end
-face (tied in the open, drawn back by tension). The wrap band MARCHES
-one groove pitch per drum rev (see the wrap-math note in
-`arm/params.scad`): the groove and the two ramped sector tracks make
-the walk exact and fleet-free — check at assembly that the groove hand
-matches the track ramp direction. Aramid is slippery and weak in
-knots: figure-8 with a backup, or seize the tail. Tension by rotating
-the drum before dropping the pinion into mesh — the free drum
-equalizes both runs through torque balance, so a single tensioned end
-pretensions the whole loop; engagement locks it, and one tooth of
-re-meshing ≈ 0.8 mm of cable. Set pretension above half the max
-working tension swing (~56 N + margin) so both runs stay taut at full
-load; a screw tensioner in one end segment replaces the
+Cable: TWO separate lengths (~0.8 m each) of 1.1 mm stiff aramid
+cord sharing the drum's one helical groove (see the two-cable
+wrap-math note in `arm/params.scad`). Each cable knots at a radial
+hole near its OWN end of the drum core (knot or crimp in the bore
+annulus behind it) and at its own end of the sector channel — the
+run's slot stops just short of the arc end, the cord continues
+through a 2.2 mm hole in line with its track, and the knot seats in a
+shallow recess on the segment's end face (tied in the open, drawn
+back by tension). One cable winds on exactly as the other pays off,
+so the resident wraps total a constant ~10 turns and the empty groove
+between the two take-offs never changes width; both take-offs MARCH
+one groove pitch per drum rev, exact and fleet-free against the two
+ramped sector tracks — check at assembly that the groove hand matches
+the track ramp direction, and install each cable at its NOMINAL wrap
+count (the groove quantizes it; a miscounted turn shows up as ~1.4°
+of fleet on that run, not a position error). Aramid is slippery and
+weak in knots: figure-8 with a backup, or seize the tail. Tension by
+rotating the drum before dropping the pinion into mesh — the free
+drum equalizes the two cables through torque balance, so a single
+tensioned sector end pretensions both; engagement locks it, and one
+tooth of re-meshing ≈ 0.8 mm of cable. Set pretension above half the
+max working tension swing (~56 N + margin) so both runs stay taut at
+full load; a screw tensioner in one end segment replaces the
 tooth-quantized adjustment when it proves too coarse (a 20-minute
 reprint).
 
@@ -147,10 +152,10 @@ module would silently freeze that joint in the viewer.
 - `gear_backlash = 0` deliberately: no backlash is cut into the teeth —
   set the mesh snug by pressing the gears together before clamping the
   motor sleeve's feet.
-- `drum_len` is computed from the wrap math (resident band + its march;
-  ~41 mm at the current ratios) — if the ratios, cable, or groove pitch
-  change, the drum groove and every sector track follow, so regenerate
-  every output.
+- `drum_len` is computed from the wrap math (travel + the shared
+  two-cable gap + both end dead zones; 25 mm at the current ratios) —
+  if the ratios, cable, or groove pitch change, the drum groove and
+  every sector track follow, so regenerate every output.
 - The sector segments print INVERTED, on the wide outboard end face:
   the arc sits in the bed plane, the V walls and the wedge diagonal
   print at ≥45°, the leg's board-side land faces up, and the

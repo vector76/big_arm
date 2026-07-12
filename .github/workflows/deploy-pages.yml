@@ -25,7 +25,20 @@ jobs:
           node-version: 22
           cache: npm
           cache-dependency-path: model/package-lock.json
+      # OpenSCAD nightly renders the CAD twin's meshes (export:cad).
+      # Pinned to the version the export pipeline was verified against;
+      # bump deliberately. --appimage-extract avoids needing FUSE.
+      - name: Install OpenSCAD nightly
+        run: |
+          curl -fsSLo /tmp/openscad.AppImage \
+            https://files.openscad.org/snapshots/OpenSCAD-2026.06.21-x86_64.AppImage
+          chmod +x /tmp/openscad.AppImage
+          (cd /tmp && ./openscad.AppImage --appimage-extract > /dev/null)
+          echo "OPENSCAD=/tmp/squashfs-root/AppRun" >> "$GITHUB_ENV"
       - run: npm ci
+      - run: npm run export:cad
+        env:
+          QT_QPA_PLATFORM: offscreen  # no display on the runner
       - run: npm run build
       - uses: actions/upload-pages-artifact@v5
         with:

@@ -23,9 +23,11 @@
 //   and the motor points back into the arm side (-30..18), its face
 //   on the printed inboard support slab that also seats the drum
 //   axle's wheel end — so the mesh center distance is printed-exact
-//   and the separating force loops close inside the print; a short
-//   printed bridge (101..109) picks up the boss end: the dead axle is
-//   simply supported. The drive mass behind the joint is free
+//   and the separating force loops close inside the print; the
+//   outboard housing's bridge plate (101..109) picks up the boss end:
+//   the dead axle is simply supported. Both supports are walled
+//   HOUSINGS, wood-screwed to the boom plate from opposite faces
+//   through staggered stations. The drive mass behind the joint is free
 //   counterweight, and the gear mesh is entirely arm-internal,
 //   guarded inside the cutout.
 // - COUNTERWEIGHT: the drive boom plate is a SOLID FAN reaching from
@@ -97,10 +99,29 @@ dd = 180 - shoulder_bend;        // drive boom direction, ARM frame (135)
 sector_bis = dd + sh_mid;        // fixed sector bisector, BASE frame (175)
 drum_a = da * [cos(dd), sin(dd)];         // drum axle, arm frame
 pin_a = (da + cd) * [cos(dd), sin(dd)];   // pinion/motor, arm frame
-leg_a = [for (s = [-72, 72]) drum_a + s * [-sin(dd), cos(dd)]];
-                 // support columns / bridge legs flank the drum,
-                 // clear of the wheel and the cable runs, footed on
-                 // the boom plate's kidney ring
+// drive-housing plan stations (2D boom frame: x' radial along dd,
+// y' lateral). Both printed supports are HOUSINGS -- plate + shear
+// walls + screw bosses -- and the two screw sets are STAGGERED in
+// plan, so every station takes a wood screw THROUGH the boom plate
+// from the opposite side: d 4 clearance hole in the ply, pilot in
+// the printed end, head landing on open ply over the far side's bay.
+hb_x = [252, 294];   // outboard blade radial run: the inner edge
+                     // keeps 13 off the cable take-off corridor
+                     // (spans pass x' ~239 out there) and the whole
+                     // blade holds shoulder r >= 261 vs the fixed
+                     // band's 240 crest
+hb_l = 72;           // blade lateral stations (the old legs': r 266
+                     // at the drum, feet inside the kidney ring)
+hs_out = [[256, -hb_l], [256, hb_l], [289, -hb_l], [289, hb_l],
+          [da + cd + 38, 0]];
+                     // outboard screws: two per blade foot + the
+                     // spine boss past the pinion
+hs_in = concat([for (s = [-1, 1]) [da + 68 * cos(100), 68 * s * sin(100)]],
+               [for (s = [-1, 1]) [da + cd, 27 * s]]);
+                     // inboard bosses: drum pair at azimuth +-100
+                     // (heads at shoulder r 253, 13 over the band
+                     // crest), pinion pair straight abeam at r 27
+                     // (clear of the NEMA face screws at r 21.9)
 
 // ---- the machine, final configuration ----
 // The kinematic tree, whole and in one place: every pose transform
@@ -294,31 +315,66 @@ module upper_arm() {
     color("dimgray") ty(18 - motor_len) rx(-90)
       cub([motor_w, motor_w, motor_len], [1, 1, 0]);
   }
-  // printed INBOARD support: an 8-thick slab spanning both axes 1
-  // under the gear plane, standoff columns rising to the plate's
-  // inner face around the kidney (two flanking the drum at leg_a, one
-  // past the pinion). It seats the drum axle's wheel end AND the
+  // printed INBOARD housing (one print, y 18..43): the 8-thick slab
+  // 1 under the gear plane seats the drum axle's wheel end AND the
   // motor face (NEMA boss through the d 24 clearance hole; mesh
   // center distance printed-exact, the separating force loops closing
-  // inside the print). Bolts to the plate — detail deferred
+  // inside the print), and a shear wall tracing the kidney -- foot 1
+  // outside the ply edge, 4 over the wheel tips, swung wide around
+  // the pinion so the NEMA face screws stay inside its bay -- rises
+  // to the plate's inner face: a closed box where the loose standoffs
+  // stood. Four d 13 bosses merged into the wall take wood screws
+  // driven from the OUTBOARD face (hs_in; pilots in the boss ends).
+  // The slab is drilled d 10 at all five hs_out stations: the
+  // outboard housing's screws drive from this side, every driver line
+  // passing the wall and bosses and 16 clear of the motor body.
+  // Assembly order: motor onto the slab, housing onto the plate,
+  // wheel + drum in through the kidney from outboard, axle, bridge --
+  // so the hs_in screws go in against a bare outboard face, and only
+  // the drum-side pair ever needs the cable slacked to retighten
+  // (driver passes the near span by ~1 there).
   color("khaki") {
     ty(26) rx(90) linear_extrude(8) rz(dd) difference() {
-      hull() tx([da, da + cd]) circle(30);
+      hull() { tx(da) circle(84); tx(da + cd + 28) circle(30); }
       tx(da + cd) circle(12);
+      txy(hs_out) circle(d = 10);
     }
-    txz(leg_a) ty(26) rx(-90)
-      cylinder(d = 14, h = upper_w / 2 - ply_t - 26);
-    txz((da + cd + 42) * [cos(dd), sin(dd)]) ty(26) rx(-90)
-      cylinder(d = 14, h = upper_w / 2 - ply_t - 26);
+    ty(upper_w / 2 - ply_t) rx(90)
+      linear_extrude(upper_w / 2 - ply_t - 26) rz(dd) {
+        difference() {
+          hull() { tx(da) circle(62); tx(da + cd) circle(32); }
+          hull() { tx(da) circle(56); tx(da + cd) circle(26); }
+        }
+        txy(hs_in) circle(d = 13);
+      }
   }
-  // ... and the short printed OUTBOARD bridge over the drum's bearing
-  // boss (the rig idiom: the dead axle ends up simply supported);
-  // legs flank the drum at leg_a, clear of the cable runs
-  color("khaki") {
-    ty(drum_y1 + 8) rx(90) linear_extrude(8) rz(dd)
-      tx(da) sq([70, 172], [1, 1], 16);
-    txz(leg_a) ty(upper_w / 2) rx(-90)
-      cylinder(d = 14, h = drum_y1 + 6 - upper_w / 2);
+  // ... and the printed OUTBOARD housing (one print, y 55..109): the
+  // bridge plate over the drum's bearing boss (the rig idiom: the
+  // dead axle ends up simply supported), carried by a C of shear
+  // walls OPENING TOWARD THE SHOULDER -- the sector side must stay
+  // open for the fixed band and both cable take-off corridors -- plus
+  // a spine wall running out to a fifth boss past the pinion, so the
+  // footprint triangulates in plan. Where walls cross the kidney they
+  // hang 1 over the wheel face (the plate's own margin); everything
+  // in the band's y-lane keeps shoulder r >= 261 vs the 240 crest.
+  // Five wood screws drive from the INBOARD side through the slab's
+  // access holes into blade-foot and boss pilots (hs_out); the plate
+  // is drilled d 9 over the drum-side inboard pair so the whole stack
+  // stays serviceable from outside.
+  color("khaki") ty(drum_y1 + 8) rx(90) {
+    linear_extrude(8) rz(dd) difference() {
+      union() {
+        tx(da) sq([86, 168], [1, 1], 16);
+        hull() txy([[hb_x[1], 0], hs_out[4]]) circle(15);
+      }
+      txy([hs_in[0], hs_in[1]]) circle(d = 9);
+    }
+    linear_extrude(drum_y1 + 8 - upper_w / 2) rz(dd) {
+      ty([-hb_l, hb_l]) tx(hb_x[0]) sq([hb_x[1] - hb_x[0], 8], [0, 1]);
+      tx(hb_x[1] - 8) sq([8, 2 * hb_l + 8], [0, 1]);
+      tx(hb_x[1]) sq([hs_out[4][0] - hb_x[1], 8], [0, 1]);
+      txy(hs_out[4]) circle(d = 16);
+    }
   }
   // upper-arm counterweight: the block bolts to the INBOARD face of
   // the boom plate's fan (no separate boom), centered just BELOW the
@@ -467,10 +523,12 @@ module sensor_board_2d() difference() {
 // the arm's drive boom plate, drawn in the +y truss plate's plane:
 // a strip at arm angle dd, widened into a RING around the kidney
 // cutout the wheel + pinion straddle the plate through (mesh inside
-// it); the ring is also the footing for the inboard support columns
-// and the bridge legs (leg_a, lateral +-72). The dead axle no longer
+// it); the ring is also the footing for both housings — the inboard
+// wall + bosses on its inner face, the outboard blade feet on its
+// outer — and it carries the staggered screw stations (hs_out driven
+// from inboard, hs_in from outboard). The dead axle no longer
 // pierces the plate — it crosses inside the kidney, carried by the
-// printed supports on either face
+// printed housings on either face
 // the forearm's LEFT plate fin, drawn in the forearm frame (elbow at
 // the origin): bottom edge 2 mm above the shared taper line behind
 // the axis — clears the upper arm's top chord at full extension, and
@@ -495,8 +553,9 @@ module boom_plate_2d() rz(dd) difference() {
   union() {
     sq([da + cd + 55, 110], [0, 1], 16);
     // the kidney would sever the 110 strip: widen it into a ring
-    // (>= 25 of ply all around the cutout)
-    hull() { tx(da) circle(82); tx(da + cd) circle(35); }
+    // (>= 25 of ply all around the cutout; 88 also gives the blade
+    // feet and every screw hole 7+ of edge distance)
+    hull() { tx(da) circle(88); tx(da + cd) circle(35); }
     // SOLID fan below the boom, as far down as travel allows: the
     // upper-arm counterweight bolts to its inboard face BELOW the arm
     // centerline (the drive stack rides above it). Boundary = the two
@@ -513,6 +572,10 @@ module boom_plate_2d() rz(dd) difference() {
   }
   // the kidney: wheel + pinion clearance, Ø110 blended into Ø26
   hull() { tx(da) circle(55); tx(da + cd) circle(13); }
+  // housing screw stations, d 4 clearance through the ply: hs_out
+  // driven from the inboard face, hs_in from the outboard — staggered
+  // so every head lands on open ply over the far housing's bay
+  txy(concat(hs_out, hs_in)) circle(d = 4);
 }
 
 module tube(od, id, h) difference() {

@@ -32,8 +32,10 @@
 // 58; motor -30..18, its face on the printed inboard support slab,
 // body pointing back into the arm side; drum 60..101 (grooved band
 // 62..92 matching the sector tracks, r 242..270, then the outboard
-// bearing boss); inboard support slab + standoffs 18..43, outboard
-// bridge 101..109. The joint-angle sensor is a camera
+// bearing boss); inboard housing (slab + kidney-tracing wall +
+// bosses) 18..43; outboard housing 55..109 — its shear walls cross
+// the band lane holding shoulder r >= 261, bridge plate 101..109.
+// The joint-angle sensor is a camera
 // on the arm (-56..-70 lane, r 92 about the axis) reading a printed
 // scale strip on the sensor-board lobe rim (r 80).
 // The radial rule that makes the lane crossings safe: every moving

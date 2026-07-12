@@ -206,7 +206,11 @@ elbow_cw_slot_x = 205;         // ...centered at upper_len - 245
 // ALL THREE boards tab straight into the disc — mortises through both
 // ply layers, panel shoulders landing on the disc top (no angle
 // blocks); the front board runs disc-top-to-front_z1, closing the U
-// into a torsion box with the disc as its floor.
+// into a torsion box with the disc as its floor. Rear HEELS on both
+// side boards (third disc tab each; the left one notched around the
+// drive-blade corridor) plus a perpendicular disc-tabbed GUSSET
+// outboard of each board face (assembly.scad) brace the box against
+// torsion and lateral racking above the front board's top edge.
 base_plate = 520;
 col_w = 140;          // side board spacing (inner faces at +-58: a
                       // 3 mm running gap to the arm plates, matching
@@ -381,7 +385,7 @@ tb_plate_d = 134;                  // 2.5 kg plates each side, ~6 kg
 
 // ---- pose ----
 pose_yaw = 0;
-pose_shoulder = 40;
+pose_shoulder = 100;
 pose_elbow = 70;      // 0..135 downward
 pose_wrist = -10;     // +-90
 

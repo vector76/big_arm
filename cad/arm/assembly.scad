@@ -64,7 +64,12 @@
 //   measurement); front board runs disc-top-to-247 (limited only by
 //   the arm truss at shoulder_min). All three boards tab straight
 //   into the disc through mortises in both ply layers — the U plus
-//   disc make one torsion box, no angle blocks.
+//   disc make one torsion box, no angle blocks. Rear HEELS widen
+//   both side boards' feet down-back over a third disc tab (the
+//   left one notched around the drive-blade corridor), and a
+//   perpendicular GUSSET outboard of each board ties face to disc —
+//   lateral stiffness above front_z1, where the boards' own bending
+//   was previously all that backed up the front board.
 //
 // STRUCTURE: the machine is a module kit of RIGID BODIES — bench_env()
 // (final bench hardware only), slew_base() (disc + boards + fixed
@@ -95,6 +100,15 @@ da = sr + 18;    // drum axis radius, 256.2: CLOSE IN, so the take-off
                  // (r 13.8) passing 2.8 over the band's crest (239.6)
 sh_mid = (shoulder_min + shoulder_max) / 2;   // 40
 yoke_y = col_w / 2 - ply_t;      // 63: side board inner faces
+gus_x = -60;     // perpendicular base-gusset plane (x -60..-48): BACK,
+                 // where the boards lack the front plate's bracing.
+                 // The limit is the outboard housing's blade corridor
+                 // (base angles to ~251 at shoulder r 252..304): going
+                 // down this strip the profile's base angle passes 251
+                 // before its radius reaches 252, clearing the full-up
+                 // blade corner by ~27 mm — hugging the rear edge
+                 // (x -72) would shave that to ~15, and behind -80
+                 // there is no full-height board face to glue to
 dd = 180 - shoulder_bend;        // drive boom direction, ARM frame (135)
 sector_bis = dd + sh_mid;        // fixed sector bisector, BASE frame (175)
 drum_a = da * [cos(dd), sin(dd)];         // drum axle, arm frame
@@ -234,6 +248,10 @@ module slew_base(segs = true) {
         cub([ply_t, col_w, front_z1 - disc_z0 - 2 * ply_t], [0, 1, 0]);
       ty([-60, 20]) tz(disc_z0) cub([ply_t, 40, 2 * ply_t + 2]);
     }
+    // ... and the perpendicular gussets, one outboard of each side
+    // board (base_gusset_2d)
+    my([0, 1]) tx(gus_x) rz(90) rx(90) linear_extrude(ply_t)
+      base_gusset_2d();
   }
 
   // the FIXED shoulder sector web is drawn as part of left_board_2d
@@ -280,21 +298,44 @@ module upper_arm() {
   // face is extra clearance). Hook slot in the TOP board only, where
   // the elbow counterweight parks at full extension.
   difference() {
-    // plates solid through the joint zones: the whole stub + 80 past
-    // the shoulder axis (the camera bracket mounts at x 59..66), and
-    // the last 45 at the elbow fork
-    box_truss(-upper_stub, upper_len, upper_w,
-              link_d(upper_len + upper_stub), elbow_d,
-              sqrt(pow(elbow_d / 2 + 6, 2) - pow(elbow_d / 2 - ply_t, 2)),
-              upper_stub + 80, 45);
+    union() {
+      // plates solid through the joint zones: the whole stub + 80 past
+      // the shoulder axis (the camera bracket mounts at x 59..66), and
+      // the last 45 at the elbow fork
+      box_truss(-upper_stub, upper_len, upper_w,
+                link_d(upper_len + upper_stub), elbow_d,
+                sqrt(pow(elbow_d / 2 + 6, 2) - pow(elbow_d / 2 - ply_t, 2)),
+                upper_stub + 80, 45);
+      // the +y plate grows the drive boom at arm angle dd (lap-jointed
+      // over the truss plate at concept level)
+      color("burlywood") ty(upper_w / 2) rx(90) linear_extrude(ply_t)
+        boom_plate_2d();
+      // elbow fork lobes: the truss plates end exactly at the axis,
+      // and the lobe hulls the plate's full end edge with the r 35
+      // ring, so the fork outline runs CONVEX from the taper edges
+      // around the bore (no waisted notch at the junction; the folding
+      // forearm stays inside |y| 40, under these plates' 43..55 lane).
+      // With the green bushings carrying the bearings, the old khaki
+      // fork doublers are superseded
+      color("burlywood") tx(upper_len) my([0, 1]) ty(upper_w / 2) rx(90)
+        linear_extrude(ply_t) hull() {
+          circle(r = 35);
+          tx(-2) sq([2, elbow_d], [0, 1]);
+        }
+    }
     tx(elbow_cw_slot_x)
       tz(link_d(upper_len - elbow_cw_slot_x) / 2 - ply_t - 8)
       linear_extrude(28) sq(elbow_cw_slot, [1, 1], 8);
+    // joint bores cut through EVERYTHING in the plate planes — the
+    // plates run through/past both axes (and the boom plate's corner
+    // touches the shoulder axis), so a bore cut only in the lobe
+    // pieces stays blocked and the stations can't assemble. Shoulder:
+    // d 15.5 passes pink's sleeve (moving side); elbow: d 28.5 pilots
+    // green's snout (fixed side)
+    ty(-upper_w / 2 - 1) rx(-90) cylinder(d = 15.5, h = upper_w + 2);
+    tx(upper_len) ty(-upper_w / 2 - 1) rx(-90)
+      cylinder(d = 28.5, h = upper_w + 2);
   }
-  // the +y plate grows the drive boom at arm angle dd (lap-jointed
-  // over the truss plate at concept level)
-  color("burlywood") ty(upper_w / 2) rx(90) linear_extrude(ply_t)
-    boom_plate_2d();
   // drive hardware — REAL parts (the detail-file modules, so the
   // concept can't drift from the prints). FLIPPED stack: gear_drum's
   // herringbone wheel sits INBOARD (27..54), straddling the boom
@@ -398,15 +439,6 @@ module upper_arm() {
     color("khaki") ty(-(yoke_y - 2)) cub([10, 6, 14], [0, 0, 1]);
   }
 
-  // elbow fork lobes: full ply rings around the 28.5 pilot bores —
-  // the truss plates end exactly at the axis — and with the green
-  // bushings carrying the bearings, the old khaki fork doublers are
-  // superseded
-  color("burlywood") tx(upper_len) my([0, 1]) ty(upper_w / 2) rx(90)
-    linear_extrude(ply_t) difference() {
-      circle(r = 35);
-      circle(d = 28.5);
-    }
 }
 
 // ---- elbow stations: the upper-arm-fixed side of the joint ----
@@ -424,17 +456,30 @@ module elbow_stations() {
 // ---- forearm: truss + fin + elbow CW + wrist axle ----
 // Drawn at the elbow origin in its OWN (elbow-bent) frame.
 module forearm() {
-  box_truss(0, fore_len, fore_w, elbow_d, link_d(-fore_len),
-            0, 45, 45);
-  color("burlywood") my([0, 1]) ty(fore_w / 2) rx(90)
-    linear_extrude(ply_t) difference() {
-      circle(r = 36);
-      circle(d = 15.5);
+  difference() {
+    union() {
+      // cut0 = 36: the root's lower-rear corner is truncated on the
+      // 45-deg line tangent to the r 36 lobe (the lobe circle itself
+      // is untouched), and the bottom chord is square-shortened so
+      // its low edge stops at the same line — see box_truss
+      box_truss(0, fore_len, fore_w, elbow_d, link_d(-fore_len),
+                0, 45, 45, 36);
+      // root lobes at the elbow axis
+      color("burlywood") my([0, 1]) ty(fore_w / 2) rx(90)
+        linear_extrude(ply_t) circle(r = 36);
+      // the LEFT forearm plate grows a FIN back over the elbow (one
+      // CNC piece, replacing the bolted-on boom + riser)
+      color("burlywood") ty(fore_w / 2) rx(90) linear_extrude(ply_t)
+        fore_cw_fin_2d();
     }
-  // the LEFT forearm plate grows a FIN back over the elbow (one
-  // CNC piece, replacing the bolted-on boom + riser)
-  color("burlywood") ty(fore_w / 2) rx(90) linear_extrude(ply_t)
-    fore_cw_fin_2d();
+    // joint bores cut through plates AND lobes together — the plates
+    // start at the elbow axis and end at the wrist axis, so a bore cut
+    // only in the lobe pieces stays half-blocked. Elbow: d 15.5 passes
+    // pink's sleeve (moving side); wrist: d 8.5 passes the dead axle
+    ty(-fore_w / 2 - 1) rx(-90) cylinder(d = 15.5, h = fore_w + 2);
+    tx(fore_len) ty(-fore_w / 2 - 1) rx(-90)
+      cylinder(d = 8.5, h = fore_w + 2);
+  }
   // elbow counterweight, CENTERED for lateral symmetry: a
   // dog-leg hanger crosses from the fin's inboard face (y 28)
   // to the center plane, then drops through the upper arm's
@@ -463,24 +508,44 @@ module end_effector() {
 
 // shared side board core: full-height body from the disc top to the
 // shoulder (its front edge at front_x carries the front board), a
-// bearing lobe at the axis, and two tabs that mortise through both
-// disc layers. Keeping material x >= -80 up high matters: the arm's
-// drive boom sweeps the back fan (base angles 115..235) at r > 250 in
-// the board's own y-lane.
+// bearing lobe at the axis, and three tabs that mortise through both
+// disc layers (the rearmost sits under each board's HEEL — the
+// per-board foot extension down-back that widens the stance against
+// fore-aft racking). Keeping material x >= -80 up high matters: the
+// arm's drive boom sweeps the back fan (base angles 115..235) at
+// r > 250 in the board's own y-lane.
 module board_core_2d() {
   txy([-80, disc_z0 + 2 * ply_t])
     sq([front_x + 80, shoulder_h - disc_z0 - 2 * ply_t], [0, 0], 10);
   txy([0, shoulder_h]) circle(r = 80);
-  txy([-60, disc_z0]) sq([40, 2 * ply_t + 2], [0, 0]);
-  txy([20, disc_z0]) sq([40, 2 * ply_t + 2], [0, 0]);
+  tx([-140, -60, 20]) ty(disc_z0) sq([40, 2 * ply_t + 2], [0, 0]);
 }
 
-// the mortise pattern cut through both slew-disc layers: two slots per
-// side board (at the board planes y 63..75) and two for the front
-// board (at x 130..142)
+// the mortise pattern cut through both slew-disc layers: three slots
+// per side board (the rearmost under the heel), two for the front
+// board (at x 130..142), and one per perpendicular gusset outboard of
+// each side board plane
 module board_slots_2d() {
-  my([0, 1]) ty(yoke_y) tx([-60, 20]) sq([40, ply_t], [0, 0]);
+  my([0, 1]) ty(yoke_y) tx([-140, -60, 20]) sq([40, ply_t], [0, 0]);
   tx(front_x) ty([-60, 20]) sq([ply_t, 40], [0, 0]);
+  my([0, 1]) txy([gus_x, yoke_y + ply_t + 10]) sq([ply_t, 48], [0, 0]);
+}
+
+// perpendicular base gusset, drawn in its own (y, z) plane: a
+// triangular ply rib standing on the disc against the side board's
+// OUTER face (the arm owns the inside with only the 3 mm running
+// gap), glued + screwed to the board and tabbed through both disc
+// layers like the boards themselves. It braces the board against
+// out-of-plane lean: above the front board's top edge (front_z1) the
+// boards' own bending was all that resisted lateral racking — and the
+// front plate braces the front, so the rib stands BACK (see gus_x).
+// Apex z 340 keeps ~79 off the axis hardware; the foot's far corner
+// holds yaw r <= 153 vs the hold-down arms reaching in to r 191.
+module base_gusset_2d() {
+  polygon([[yoke_y + ply_t, disc_z0 + 2 * ply_t],
+           [yoke_y + ply_t + 70, disc_z0 + 2 * ply_t],
+           [yoke_y + ply_t, 340]]);
+  txy([yoke_y + ply_t + 10, disc_z0]) sq([48, 2 * ply_t + 2], [0, 0]);
 }
 
 // LEFT board: grows the FIXED shoulder sector as a SOLID web —
@@ -503,6 +568,17 @@ module left_board_2d() {
       polygon([[-80, shoulder_h - 80 * tan(a0 - 180)],
                [rim_r * cos(a0), shoulder_h + rim_r * sin(a0)],
                [-80, shoulder_h + rim_r * sin(a0) - 40]]);
+      // rear HEEL over the third disc tab. On THIS side the outboard
+      // housing's blades sweep base angles up to ~251 at shoulder
+      // r 252..304 (the near corner passes (-86, 144) at full-up,
+      // 5.6 off the rear edge — the tightest standing clearance in
+      // the base), so the heel stays r >= 315 behind the 253 ray:
+      // the V-notch it leaves under the sector gusset IS the blade
+      // corridor, not waste
+      polygon([[-80, shoulder_h - 80 * tan(253 - 180)],
+               [315 * cos(253), shoulder_h + 315 * sin(253)],
+               [-150, disc_z0 + 2 * ply_t],
+               [-80, disc_z0 + 2 * ply_t]]);
     }
     txy([0, shoulder_h]) circle(d = 28.5);   // green snout pilot bore
     // segment leg screw pilots
@@ -516,7 +592,15 @@ module left_board_2d() {
 // RIGHT sensor board: near-twin; same pilot bore — its green bushing
 // mounts the same way, the sensor rings ride the arm/board gap
 module sensor_board_2d() difference() {
-  board_core_2d();
+  union() {
+    board_core_2d();
+    // rear HEEL, full triangle: nothing sweeps this side's board
+    // lane (the scale camera never drops below z ~424), so the foot
+    // extension runs straight up the rear edge to z 320
+    polygon([[-80, 320],
+             [-150, disc_z0 + 2 * ply_t],
+             [-80, disc_z0 + 2 * ply_t]]);
+  }
   txy([0, shoulder_h]) circle(d = 28.5);   // green snout pilot bore
 }
 

@@ -23,7 +23,12 @@ use <../lib/helpers.scad>
 // the joint gusset. s0/s1 keep the plate SOLID for that length at the
 // start/end — the joint zones, where the bearing stations mount and
 // the load concentrates, get no cutouts.
-module truss_plate_2d(l, d0, d1, margin = 28, s0 = 0, s1 = 0) {
+// cut0 > 0 truncates the ROOT corner: everything behind the 45-deg
+// line tangent (from below-behind) to an r = cut0 lobe circle at the
+// x = 0 joint axis — i.e. x + y < -cut0*sqrt(2) — is cut off, so the
+// plate's lower-rear corner chamfers into the lobe instead of jutting
+// past it (the tangency means the lobe circle itself is untouched)
+module truss_plate_2d(l, d0, d1, margin = 28, s0 = 0, s1 = 0, cut0 = 0) {
   g = 14;                                   // half-width of a diagonal
   dm = (d0 + d1) / 2;                       // mean depth sizes the bays
   h = dm - 2 * margin;
@@ -39,6 +44,7 @@ module truss_plate_2d(l, d0, d1, margin = 28, s0 = 0, s1 = 0) {
   function yt(x) =  (d0 / 2 + k * x) - margin;
   difference() {
     polygon([[0, -d0 / 2], [l, -d1 / 2], [l, d1 / 2], [0, d0 / 2]]);
+    if (cut0 > 0) tx(-cut0 * sqrt(2)) rz(45) sq([600, 600], [-1, 1]);
     for (i = [0 : n - 1]) {
       x0 = s0 + margin + i * p;
       up = (i % 2 == 0);
@@ -55,8 +61,12 @@ module truss_plate_2d(l, d0, d1, margin = 28, s0 = 0, s1 = 0) {
 // of each box section reads in renders. bot_relief > 0 cuts the bottom
 // chord back in a circular arc of that radius about the joint axis at
 // x1 — the swept circle of a folding child link's root — so the chords
-// are drawn individually rather than mz-mirrored as a pair
-module box_truss(x0, x1, w, d0, d1, bot_relief = 0, solid0 = 0, solid1 = 0) {
+// are drawn individually rather than mz-mirrored as a pair. cut0 > 0
+// applies the 45-deg root truncation (see truss_plate_2d) to the side
+// plates AND squares the bottom chord back — a straight (not beveled)
+// end cut placed so the chord's lowest edge just meets the same line
+module box_truss(x0, x1, w, d0, d1, bot_relief = 0, solid0 = 0, solid1 = 0,
+                 cut0 = 0) {
   l = x1 - x0;
   a = atan((d0 - d1) / 2 / l);   // taper angle per edge
   lc = l / cos(a);               // chord length along the sloped edge
@@ -64,13 +74,18 @@ module box_truss(x0, x1, w, d0, d1, bot_relief = 0, solid0 = 0, solid1 = 0) {
   // run full length past the axis as the joint fork, solid in the
   // solid0/solid1 joint zones
   color("burlywood") my([0, 1]) ty(w / 2) rx(90) linear_extrude(ply_t)
-    tx(x0) truss_plate_2d(l, d0, d1, 28, solid0, solid1);
+    tx(x0) truss_plate_2d(l, d0, d1, 28, solid0, solid1, cut0);
   // chords lie ON the tapered edges: outer face on the edge line,
   // board thickness inward
   color("sienna") tx(x0) tz(d0 / 2) ry(a) tz(-ply_t) linear_extrude(ply_t)
     chord_2d(lc, w);
+  // bottom chord start station: its outer-face corner sits on the
+  // taper line, so along the sloped axis the cut line is met at
+  // (d0/2 - cut0*sqrt(2)) / (cos a + sin a) from the axis
+  c0 = cut0 <= 0 ? 0
+     : max(0, (d0 / 2 - cut0 * sqrt(2)) / (cos(a) + sin(a)));
   color("sienna") tx(x0) tz(-d0 / 2) ry(-a) linear_extrude(ply_t)
-    chord_2d(lc, w, bot_relief);
+    tx(c0) chord_2d(lc - c0, w, bot_relief);
 }
 
 // chord board 2D, drawn along its own (sloped) axis from 0..l: plain

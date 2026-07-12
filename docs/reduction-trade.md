@@ -46,10 +46,13 @@ move).
   - **Elbow (~65:1, relaxed from the worm-era 90:1):** third 8T
     primary with the wheel grown to 66T (the drum can't shrink — the
     1.1 mm cord's bend ratio floors it at eff_r 10.125, and tension
-    rises as the arc shrinks) into a **nose capstan**: a printed
-    ~150° grooved arc (r 80) around the upper arm's fork cap anchors
-    both cable ends; two crossed idler sheaves on the forearm land
-    both tangencies together, keeping the nose travel-sized.
+    rises as the arc shrinks) into a **nose capstan folded into the
+    board's thickness**: the upper arm's fork cap grows a CNC lobe
+    and a slim printed liner rides its rim (cable centerline r 80),
+    one shared groove carrying both cables as complementary seated
+    arcs; two crossed idler sheaves on the forearm land the two
+    tangencies a constant few degrees apart, keeping the liner
+    travel-sized and the whole drive inside the plate's 12 mm.
     η ≈ 0.83 with the idlers → margin ~1.67. Power-off is now
     back-drivable at every joint (the worms' free self-locking is
     gone): a loaded gripper sags slowly on power loss — brake or

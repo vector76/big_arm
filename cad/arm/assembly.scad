@@ -44,17 +44,21 @@
 //   them, above the axis line) — block, hanger and fin outline get
 //   resized together at the next mass audit.
 // - ELBOW DRIVE: the shoulder recipe with the sector shrunk to a
-//   NOSE — a printed ~150-deg grooved arc (cable centerline r 80)
-//   fixed around the upper arm's +y fork cap, both cable ends
-//   anchored in it (zero slip); a third 8T primary with the wheel
-//   grown to 66T + the shoulder-size grooved drum rides the fin
-//   (el_axle, high enough that the Ø134 wheel clears the top chord
-//   at full extension), and two CROSSED 608-cored idler sheaves on
-//   the forearm drop the runs onto the nose with both tangencies
-//   near azimuth 100 — so the nose is travel-sized, the nose tracks
-//   are PLAIN circles, and the drum's march is eaten as fleet in the
-//   drum->sheave spans. ~65:1 total, margin ~1.67. The wrist cable
-//   plane moved outboard (wr_cab_y 74) to clear the nose band.
+//   NOSE folded into the board's own thickness — the +y fork cap
+//   grows a CNC lobe to r 77 and a slim printed groove LINER rides
+//   its rim (cable centerline r 80, ONE shared V-channel in the
+//   plate's mid-plane carrying both cables as complementary seated
+//   arcs; ends anchored at the liner's arc ends, zero slip). A third
+//   8T primary with the wheel grown to 66T + the shoulder-size
+//   grooved drum rides the fin (el_axle, high enough that the Ø134
+//   wheel clears the top chord at full extension), and two CROSSED
+//   608-cored idler sheaves sitting +-1 mm astride the channel plane
+//   drop the runs into it with a constant ~6.7-deg bare gap between
+//   the seats — the liner is travel-sized, its channel is a PLAIN
+//   circle, and the drum's march is eaten as fleet in the
+//   drum->sheave spans. ~65:1 total, margin ~1.67. Nothing at the
+//   elbow stands outboard of the 55 face but three thin liner tabs
+//   (<= 58), so the wrist cable plane hugs back in (wr_cab_y 61.5).
 // - BASE: a DOUBLED two-ply slew disc (r 200, 24 thick) rides bare-608
 //   support rollers under its rim (stub axles at z 13 off small
 //   blocks: crowns at the z 24 disc bottom) and hold-downs over it.
@@ -106,57 +110,30 @@ use <truss.scad>
 use <joints.scad>
 use <pinion.scad>      // the REAL drivetrain parts, verbatim from
 use <gear_drum.scad>   // the detail files — same params.scad
+use <drive_housing.scad>  // the two printed drive housings (annotated
+                          // standalone diagram in the same file)
 use <sector_segment.scad>
 use <wrist_drive.scad> // wrist gear+capstan (rides the forearm fin)
 use <wrist_drum.scad>  // wrist drum ring (rides the EE fork)
 use <elbow_drive.scad> // elbow gear+capstan (rides the fin, 66T)
 use <elbow_nose.scad>  // elbow nose arc (fixed on the upper fork cap)
 
-sr = sector_r(shoulder_ratio);   // 238.2
-da = sr + 18;    // drum axis radius, 256.2: CLOSE IN, so the take-off
-                 // pull on the drum is mostly tangential (spans leave
-                 // 14 deg off tangential — radial ~25% of tension —
-                 // vs 19 deg at the old +25), bounded by the flanges
-                 // (r 13.8) passing 2.8 over the band's crest (239.6)
+// the boom direction dd, the drum/pinion stations (da, drum_a, pin_a)
+// and the housing plan stations (hv_x/hf/hs_out/hs_in) live in
+// params.scad with the rest of the shoulder-drive layout; the printed
+// housings themselves are drive_housing.scad
 sh_mid = (shoulder_min + shoulder_max) / 2;   // 40
 yoke_y = col_w / 2 - ply_t;      // 63: side board inner faces
 gus_x = -60;     // perpendicular base-gusset plane (x -60..-48): BACK,
                  // where the boards lack the front plate's bracing.
                  // Deepest sweep into this quadrant (bend 55) is the
-                 // bridge plate's y 96..104 lane, base angles to ~245
-                 // at shoulder r 213..240: going down this strip the
-                 // profile's base angle passes 245 before its radius
-                 // reaches 213, clearing the full-up corner by 8+ deg
-                 // (~35 mm); the blades (to ~241 at r 252..304) clear
-                 // by 15 deg. Behind -80 there is no full-height board
+                 // drive's outboard Y: the roof reaches base angles
+                 // ~243 only at shoulder r >= 269, and the arms (to
+                 // ~241 at r 254..282) clear by 15 deg — the old full
+                 // bridge plate's 245-at-r-213 case went with it.
+                 // Behind -80 there is no full-height board
                  // face to glue to
-dd = 180 - shoulder_bend;        // drive boom direction, ARM frame (125)
 sector_bis = dd + sh_mid;        // fixed sector bisector, BASE frame (165)
-drum_a = da * [cos(dd), sin(dd)];         // drum axle, arm frame
-pin_a = (da + cd) * [cos(dd), sin(dd)];   // pinion/motor, arm frame
-// drive-housing plan stations (2D boom frame: x' radial along dd,
-// y' lateral). Both printed supports are HOUSINGS -- plate + shear
-// walls + screw bosses -- and the two screw sets are STAGGERED in
-// plan, so every station takes a wood screw THROUGH the boom plate
-// from the opposite side: d 4 clearance hole in the ply, pilot in
-// the printed end, head landing on open ply over the far side's bay.
-hb_x = [252, 294];   // outboard blade radial run: the inner edge
-                     // keeps 13 off the cable take-off corridor
-                     // (spans pass x' ~239 out there) and the whole
-                     // blade holds shoulder r >= 261 vs the fixed
-                     // band's 240 crest
-hb_l = 72;           // blade lateral stations (the old legs': r 266
-                     // at the drum, feet inside the kidney ring)
-hs_out = [[256, -hb_l], [256, hb_l], [289, -hb_l], [289, hb_l],
-          [da + cd + 38, 0]];
-                     // outboard screws: two per blade foot + the
-                     // spine boss past the pinion
-hs_in = concat([for (s = [-1, 1]) [da + 68 * cos(100), 68 * s * sin(100)]],
-               [for (s = [-1, 1]) [da + cd, 27 * s]]);
-                     // inboard bosses: drum pair at azimuth +-100
-                     // (heads at shoulder r 253, 13 over the band
-                     // crest), pinion pair straight abeam at r 27
-                     // (clear of the NEMA face screws at r 21.9)
 
 // ---- the machine, final configuration ----
 // The kinematic tree, whole and in one place: every pose transform
@@ -378,6 +355,13 @@ module upper_arm(housings = true) {
           circle(r = elbow_d / 2 * cos(arm_taper));
           tx(-2) sq([2, elbow_d], [0, 1]);
         }
+      // ... and the +y cap alone grows the LINER LOBE: wood out to
+      // el_lobe_r under the elbow drive's groove liner and its three
+      // screw tabs (the liner arc + 8 deg each end). One CNC outline
+      // change; the -y cap keeps r 66 for the scale strip
+      color("burlywood") tx(upper_len) ty(upper_w / 2) rx(90)
+        linear_extrude(ply_t) rz((el_arc[0] + el_arc[1]) / 2)
+          pie(el_lobe_r, el_arc[1] - el_arc[0] + 16);
     }
     tx(elbow_cw_slot_x)
       tz(link_d(upper_len - elbow_cw_slot_x) / 2 - ply_t - 8)
@@ -432,75 +416,38 @@ module upper_arm(housings = true) {
   // counterweight. The mesh is entirely arm-internal, guarded inside
   // the cutout.
   txz(drum_a) {
-    color("silver") ty(18) rx(-90) cylinder(d = 8, h = drum_y1 + 6 - 18, $fn = 24);
+    // M8 THROUGH-BOLT dead axle (head inboard, nut outboard),
+    // clamping the two housings across their inner-race shoulders —
+    // a light bearing preload, set by feel (drive_housing.scad). The
+    // nut pillar (y to ~111 at r 256) sweeps in the blade corridor
+    // class: 15 deg in hand at the base woodwork
+    color("silver") {
+      ty(18) rx(-90) cylinder(d = 8, h = drum_y1 + 8 - 18 + 7.5, $fn = 24);
+      ty(12.7) rx(-90) cylinder(d = 15, h = 5.3, $fn = 6);
+      ty(drum_y1 + 8 + 0.2) rx(-90) cylinder(d = 15, h = 6.5, $fn = 6);
+    }
     color("steelblue") ty(whl_y0) rx(-90) gear_drum();
   }
   txz(pin_a) {
     color("tomato") ty(whl_y0) rx(-90) pinion();
     color("silver") ty(18) rx(-90) cylinder(d = 5, h = 24, $fn = 24);
-    color("dimgray") ty(18 - motor_len) rx(-90)
+    // flats square to the boom, matching the slab's M3 face-screw
+    // pattern (drive_housing.scad)
+    color("dimgray") ry(-dd) ty(18 - motor_len) rx(-90)
       cub([motor_w, motor_w, motor_len], [1, 1, 0]);
   }
-  // printed INBOARD housing (one print, y 18..43): the 8-thick slab
-  // 1 under the gear plane seats the drum axle's wheel end AND the
-  // motor face (NEMA boss through the d 24 clearance hole; mesh
-  // center distance printed-exact, the separating force loops closing
-  // inside the print), and a shear wall tracing the kidney -- foot 1
-  // outside the ply edge, 4 over the wheel tips, swung wide around
-  // the pinion so the NEMA face screws stay inside its bay -- rises
-  // to the plate's inner face: a closed box where the loose standoffs
-  // stood. Four d 13 bosses merged into the wall take wood screws
-  // driven from the OUTBOARD face (hs_in; pilots in the boss ends).
-  // The slab is drilled d 10 at all five hs_out stations: the
-  // outboard housing's screws drive from this side, every driver line
-  // passing the wall and bosses and 16 clear of the motor body.
-  // Assembly order: motor onto the slab, housing onto the plate,
-  // wheel + drum in through the kidney from outboard, axle, bridge --
-  // so the hs_in screws go in against a bare outboard face, and only
-  // the drum-side pair ever needs the cable slacked to retighten
-  // (driver passes the near span by ~1 there).
-  if (housings) color("khaki") {
-    ty(26) rx(90) linear_extrude(8) rz(dd) difference() {
-      hull() { tx(da) circle(84); tx(da + cd + 28) circle(30); }
-      tx(da + cd) circle(12);
-      txy(hs_out) circle(d = 10);
-    }
-    ty(upper_w / 2 - ply_t) rx(90)
-      linear_extrude(upper_w / 2 - ply_t - 26) rz(dd) {
-        difference() {
-          hull() { tx(da) circle(62); tx(da + cd) circle(32); }
-          hull() { tx(da) circle(56); tx(da + cd) circle(26); }
-        }
-        txy(hs_in) circle(d = 13);
-      }
-  }
-  // ... and the printed OUTBOARD housing (one print, y 55..109): the
-  // bridge plate over the drum's bearing boss (the rig idiom: the
-  // dead axle ends up simply supported), carried by a C of shear
-  // walls OPENING TOWARD THE SHOULDER -- the sector side must stay
-  // open for the fixed band and both cable take-off corridors -- plus
-  // a spine wall running out to a fifth boss past the pinion, so the
-  // footprint triangulates in plan. Where walls cross the kidney they
-  // hang 1 over the wheel face (the plate's own margin); everything
-  // in the band's y-lane keeps shoulder r >= 261 vs the 240 crest.
-  // Five wood screws drive from the INBOARD side through the slab's
-  // access holes into blade-foot and boss pilots (hs_out); the plate
-  // is drilled d 9 over the drum-side inboard pair so the whole stack
-  // stays serviceable from outside.
-  if (housings) color("khaki") ty(drum_y1 + 8) rx(90) {
-    linear_extrude(8) rz(dd) difference() {
-      union() {
-        tx(da) sq([86, 168], [1, 1], 16);
-        hull() txy([[hb_x[1], 0], hs_out[4]]) circle(15);
-      }
-      txy([hs_in[0], hs_in[1]]) circle(d = 9);
-    }
-    linear_extrude(drum_y1 + 8 - upper_w / 2) rz(dd) {
-      ty([-hb_l, hb_l]) tx(hb_x[0]) sq([hb_x[1] - hb_x[0], 8], [0, 1]);
-      tx(hb_x[1] - 8) sq([8, 2 * hb_l + 8], [0, 1]);
-      tx(hb_x[1]) sq([hs_out[4][0] - hb_x[1], 8], [0, 1]);
-      txy(hs_out[4]) circle(d = 16);
-    }
+  // the two printed drive housings — REAL parts (drive_housing.scad,
+  // where the construction rationale and the annotated standalone
+  // diagram live), drawn in the boom frame and swung up to arm angle
+  // dd. INBOARD (y 18..43): motor-face slab seating the axle's wheel
+  // end (mesh center distance printed-exact) + kidney-tracing shear
+  // wall + four hs_in screw bosses. OUTBOARD (y 55..104): a wide-Y
+  // of walls — two arms + the spine meeting just past the drum, bay
+  // open toward the shoulder — under a triangular roof picking up
+  // the axle's boss end. Screw sets staggered (see params).
+  if (housings) color("khaki") ry(-dd) {
+    inboard_housing();
+    outboard_housing();
   }
   // upper-arm counterweight: the block bolts to the INBOARD face of
   // the boom plate's fan (no separate boom), centered just BELOW the
@@ -536,11 +483,11 @@ module elbow_stations() {
   // sits flush with the fixed plate's inner face instead of proud)
   my([0, 1]) ty(fore_w / 2 - ply_t)
     bearing_station(upper_w / 2 - ply_t - fore_w / 2);
-  // the elbow NOSE — the drive's fixed capstan arc around the +y fork
-  // cap (the REAL print, elbow_nose.scad): foot ring on the cap rim,
-  // solid band outboard of the plate face, both cable ends anchored
-  // in its arc ends. Upper-arm-fixed, so it lives here with the
-  // stations (and stays off the testbench with them)
+  // the elbow NOSE — the drive's fixed capstan surface (the REAL
+  // print, elbow_nose.scad): a slim groove LINER riding the +y cap's
+  // CNC lobe inside the board's thickness, one shared channel, both
+  // cable ends anchored at its arc ends. Upper-arm-fixed, so it
+  // lives here with the stations (and stays off the testbench)
   color("steelblue") elbow_nose();
 }
 
@@ -663,35 +610,38 @@ module forearm() {
   // ---- elbow capstan drive (see the params section; ratio ~65) ----
   // The third flipped stack on the fin, one bay closer to the joint
   // than the wrist's: the 66T wheel + pinion straddle the fin through
-  // their own kidney (lane 17..44 — the axle rides HIGH, el_axle,
+  // their own kidney (lane 10..37 — the axle rides HIGH, el_axle,
   // so the Ø134 wheel obeys the fin's taper-line rule at full
-  // extension), the grooved core spans the two track planes out at
-  // 55..73, boss + concept bridge beyond (in-plane clear of the
-  // wrist runs passing 73.5+). The cable drops to two CROSSED idler
-  // sheaves near the nose and lands tangent on the fixed arc — see
-  // the elbow section in params for the sweep-safety argument.
+  // extension), the grooved core sits astride the liner's channel
+  // plane (take-offs 46 / 52), boss + concept bridge beyond
+  // (in-plane clear of the wrist runs). The cables drop to the two
+  // CROSSED idler sheaves and land in the liner's ONE shared channel
+  // — see the elbow section in params for the seat-tiling and
+  // sweep-safety arguments.
   txz(el_axle) {
-    color("silver") ty(8) rx(-90)
-      cylinder(d = 8, h = el_y1 + 6 - 8, $fn = 24);
+    color("silver") ty(1) rx(-90)
+      cylinder(d = 8, h = el_y1 + 6 - 1, $fn = 24);
     color("steelblue") ty(el_whl_y0) rx(-90) elbow_gear_capstan();
   }
   txz(el_pin) {
     color("tomato") ty(el_whl_y0) rx(-90) pinion();
-    color("silver") ty(8) rx(-90) cylinder(d = 5, h = 24, $fn = 24);
-    color("dimgray") ty(8 - motor_len) rx(-90)
+    color("silver") ty(1) rx(-90) cylinder(d = 5, h = 24, $fn = 24);
+    color("dimgray") ty(1 - motor_len) rx(-90)
       cub([motor_w, motor_w, motor_len], [1, 1, 0]);
   }
   color("khaki") {
-    // inboard support slab (y 8..16): motor face + axle wheel end
-    ty(16) rx(90) linear_extrude(8) difference() {
+    // inboard support slab (y 1..9): motor face + axle wheel end
+    ty(9) rx(90) linear_extrude(8) difference() {
       hull() { txy(el_axle) circle(78); txy(el_pin) circle(30); }
       txy(el_pin) circle(12);
     }
-    // ring wall closing the slab to the fin's inner face (16..28),
-    // ringing OUTSIDE the wheel's kidney (r 70..76 vs tips at 67)
-    ty(28) rx(90) linear_extrude(12) difference() {
+    // ring wall closing the slab to the fin's inner face (9..28),
+    // ringing OUTSIDE the wheel's kidney (r 70..76 vs tips at 67);
+    // clipped where the wrist stack's slab hull passes 2 away
+    ty(28) rx(90) linear_extrude(19) difference() {
       hull() { txy(el_axle) circle(76); txy(el_pin) circle(30); }
       hull() { txy(el_axle) circle(70); txy(el_pin) circle(24); }
+      txy(wr_axle) circle(66);
     }
     // outboard bridge: plate over the boss + rear wall to the fin
     txz(el_axle) {
@@ -699,15 +649,17 @@ module forearm() {
       ty(40) tx(-72) cub([8, el_y1 + 1 - 40, 70], [0, 0, 1]);
     }
   }
-  // the two idler sheaves (608-cored printed spools) with concept
-  // brackets. A (inboard track) roots on the fin at (-65, 80) —
-  // azimuth 129 at r 103, inside the plate-shadow limit ~139 — rises
-  // outboard there, and reaches the axle from the sheave's outboard
-  // face; B roots on the +y plate's solid top margin ahead of the
-  // joint (its whole sweep stays out of the plate shadow) and
-  // carries its axle from the inboard side
-  for (i = [0, 1]) txz(el_pul_p(i)) ty(el_cab_y + i * track_sep) {
-    color("silver") ty(-7) rx(-90) cylinder(d = 8, h = 15.5, $fn = 24);
+  // the two idler sheaves (608-cored printed spools) astride the
+  // channel plane, with concept brackets. dn roots on the fin
+  // strip straight above it at (-2, 110) — its plate-lane crossing
+  // holds azimuth ~91, 48 deg inside the shadow limit, sweeping
+  // away — and takes the axle from an arm outboard of the spool;
+  // up roots on the +y plate's solid top margin ahead of the joint
+  // (whole sweep -86..49, never near the shadow), arm outboard
+  // likewise (the up bracket is the loaded one: ~155 deg of wrap,
+  // ~2T on its axle)
+  for (i = [0, 1]) txz(el_pul_p(i)) ty(el_shv_y[i]) {
+    color("silver") ty(-5) rx(-90) cylinder(d = 8, h = 14, $fn = 24);
     color("steelblue") {
       ty(-4.2) rx(-90) cylinder(d = 31, h = 1.6);
       ty(-2.6) rx(-90) cylinder(d = 26.1, h = 5.2);
@@ -715,38 +667,49 @@ module forearm() {
     }
   }
   color("khaki") {
-    // bracket A: fin pad + outboard riser + arm over the sheave
-    txz([-65, 80]) ty(40) cub([16, 24.5, 14], [1, 0, 1]);
-    hull() txz([[-65, 82], el_pul_p(0)]) ty(64.5) rx(-90)
-      cylinder(d = 13, h = 4);
-    // bracket B: pad on the plate's top margin + inboard-side arm
-    txz([62, 63]) ty(40) cub([20, 21.5, 10], [1, 0, 0]);
-    hull() txz([[62, 70], el_pul_p(1)]) ty(57.5) rx(-90)
-      cylinder(d = 13, h = 4);
+    // bracket dn: fin pad + riser + arm over the spool's outboard face
+    txz([-2, 110]) ty(40) cub([14, 17, 8], [1, 0, 1]);
+    hull() txz([[-2, 110], el_pul_p(0)]) ty(52.5) rx(-90)
+      cylinder(d = 12, h = 4.5);
+    // bracket up: pad on the plate's top margin + riser + arm
+    txz([58, 52]) ty(40) cub([18, 18, 12], [0, 0, 0]);
+    hull() txz([[67, 60], el_pul_p(1)]) ty(54) rx(-90)
+      cylinder(d = 12, h = 4);
   }
   // cable spans, straight portions as rods (wrapped arcs live in the
-  // grooves): drum -> sheave (the march's fleet lives here), then
-  // sheave -> nose tangency. The two runs CROSS between sheaves and
-  // nose — planes track_sep apart, so they pass ~6 clear laterally
+  // grooves). Drum -> sheave: EXTERNAL tangents, the two runs
+  // leaving OPPOSITE drum sides (dn its left, s = -1; up its right,
+  // s = +1 — opposite winding hands, so the drum reels one in as it
+  // pays the other out); the march's fleet + the 2 mm plane bridge
+  // live in these spans. Sheave -> channel: CROSSED tangents (the
+  // sheave wrap reverses hand relative to the nose seat), sheave
+  // point on the FAR side of n. The two runs CROSS between the
+  // sheaves and the liner, passing ~0.9 clear on the +-1 split
   color("orangered") {
-    ty(el_cab_y) {   // run A, inboard track
-      hull() { let (n = cab_tan_n(el_axle, drum_eff_r, el_pul_p(0),
-                                  el_pul_r, -1))
-        txz([el_axle + drum_eff_r * n, el_pul_p(0) + el_pul_r * n])
-          sphere(d = cable_d, $fn = 16); }
-      hull() { let (n = [cos(el_touch[0]), sin(el_touch[0])])
-        txz([el_pul_p(0) + el_pul_r * n, el_nose_r * n])
-          sphere(d = cable_d, $fn = 16); }
-    }
-    ty(el_cab_y + track_sep) {   // run B, outboard track
-      hull() { let (n = cab_tan_n(el_axle, drum_eff_r, el_pul_p(1),
-                                  el_pul_r, 1))
-        txz([el_axle + drum_eff_r * n, el_pul_p(1) + el_pul_r * n])
-          sphere(d = cable_d, $fn = 16); }
-      hull() { let (n = [cos(el_touch[1]), sin(el_touch[1])])
-        txz([el_pul_p(1) + el_pul_r * n, el_nose_r * n])
-          sphere(d = cable_d, $fn = 16); }
-    }
+    // dn run: inboard take-off (46) -> sheave dn (48) -> channel (49)
+    hull() { let (n = cab_tan_n(el_axle, drum_eff_r, el_pul_p(0),
+                                el_pul_r, -1)) {
+      txz(el_axle + drum_eff_r * n) ty(el_cab_y - track_sep / 2)
+        sphere(d = cable_d, $fn = 16);
+      txz(el_pul_p(0) + el_pul_r * n) ty(el_shv_y[0])
+        sphere(d = cable_d, $fn = 16); } }
+    hull() { let (n = [cos(el_touch[0]), sin(el_touch[0])]) {
+      txz(el_pul_p(0) - el_pul_r * n) ty(el_shv_y[0])
+        sphere(d = cable_d, $fn = 16);
+      txz(el_nose_r * n) ty(el_cab_y)
+        sphere(d = cable_d, $fn = 16); } }
+    // up run: outboard take-off (52) -> sheave up (50) -> channel
+    hull() { let (n = cab_tan_n(el_axle, drum_eff_r, el_pul_p(1),
+                                el_pul_r, 1)) {
+      txz(el_axle + drum_eff_r * n) ty(el_cab_y + track_sep / 2)
+        sphere(d = cable_d, $fn = 16);
+      txz(el_pul_p(1) + el_pul_r * n) ty(el_shv_y[1])
+        sphere(d = cable_d, $fn = 16); } }
+    hull() { let (n = [cos(el_touch[1]), sin(el_touch[1])]) {
+      txz(el_pul_p(1) - el_pul_r * n) ty(el_shv_y[1])
+        sphere(d = cable_d, $fn = 16);
+      txz(el_nose_r * n) ty(el_cab_y)
+        sphere(d = cable_d, $fn = 16); } }
   }
   // the wrist scale camera, forearm-fixed DEAD-AFT of the wrist axis:
   // the symmetric +-90 travel forces azimuth 180 (the only heading
@@ -824,7 +787,7 @@ module end_effector() {
 // per-board foot extension down-back that widens the stance against
 // fore-aft racking). Keeping material x >= -80 up high matters: the
 // outboard drive housing sweeps the board's own y-lane down to base
-// angle ~241 at shoulder r >= 252 (bend 55), and the rear edge's
+// angle ~241 at shoulder r >= 254 (bend 55), and the rear edge's
 // r-242 crossing sits at base angle ~251 — 10 deg in hand.
 module board_core_2d() {
   txy([-80, disc_z0 + 2 * ply_t])
@@ -893,11 +856,11 @@ module left_board_2d() {
                [rim_r * cos(a0), shoulder_h + rim_r * sin(a0)],
                [-80, shoulder_h + rim_r * sin(a0) - 40]]);
       // rear HEEL over the third disc tab. On THIS side the outboard
-      // housing's blades sweep base angles up to ~241 at shoulder
-      // r 252..304 (bend 55; the near corner passes (-127, 163) at
+      // housing's Y arms sweep base angles up to ~241 at shoulder
+      // r 254..282 (bend 55; a foot cap passes (-127, 163) at
       // full-up), so the heel's upper boundary is the 244 ray out to
-      // r 315, past the blades' reach: the shallow V it leaves
-      // against the sector gusset's chord IS the blade corridor,
+      // r 315, past the arms' reach: the shallow V it leaves
+      // against the sector gusset's chord IS the arm corridor,
       // not waste
       polygon([[-80, shoulder_h - 80 * tan(244 - 180)],
                [315 * cos(244), shoulder_h + 315 * sin(244)],
@@ -907,8 +870,8 @@ module left_board_2d() {
     txy([0, shoulder_h]) circle(d = 28.5);   // green snout pilot bore
     // segment leg screw pilots
     txy([0, shoulder_h])
-      rz([for (k = [0 : seg_n - 1], da = [-14, 0, 14])
-          sector_bis - sector_angle / 2 + (k + 0.5) * seg_ang + da])
+      rz([for (k = [0 : seg_n - 1], dk = [-14, 0, 14])
+          sector_bis - sector_angle / 2 + (k + 0.5) * seg_ang + dk])
         tx(leg_screw_r) circle(d = 2.5);
   }
 }
@@ -972,8 +935,8 @@ module fore_cw_fin_2d() {
         txy([elbow_cw_x0, elbow_d / 2 - elbow_cw_x0 * t + 50]) circle(2);
         txy([30, elbow_d / 2 - 30 * t + 48]) circle(2);
       }
-      // the elbow drive's blob: >= 25 of ply around its kidney; its
-      // rim also underwrites sheave A's bracket pad at (-65, 80)
+      // the elbow drive's blob: >= 25 of ply around its kidney (the
+      // dn sheave's bracket pad roots on the strip at (-2, 110))
       hull() {
         txy(el_axle) circle(94);
         txy(el_pin) circle(35);
@@ -997,7 +960,7 @@ module boom_plate_2d() rz(dd) difference() {
   union() {
     sq([da + cd + 55, 110], [0, 1], 16);
     // the kidney would sever the 110 strip: widen it into a ring
-    // (>= 25 of ply all around the cutout; 88 also gives the blade
+    // (>= 25 of ply all around the cutout; 88 also gives the arm
     // feet and every screw hole 7+ of edge distance)
     hull() { tx(da) circle(88); tx(da + cd) circle(35); }
     // SOLID fan below the boom, as far down as travel allows: the

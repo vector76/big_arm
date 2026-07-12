@@ -10,6 +10,8 @@
 // tips reach r 66.9 vs the 8T interference limit 67.0 — the same
 // 0.1 margin the 51T wheel runs at C = 59 (transverse contact stays
 // ~1.07-thin; the herringbone face overlap covers, as ever).
+// The two take-offs feed the crossed idler sheaves and land in the
+// liner's ONE shared channel (see the elbow section in params.scad).
 // Groove hand drawn LH like the shoulder's — VERIFY against the nose
 // anchor phasing at detail time (the march must run WITH the
 // take-offs' walk, not against it; the sheaves eat it as fleet).
@@ -25,7 +27,8 @@ bore_d = shaft_d + 2.5;         // free clearance around the dead axle
 relief_d = 15.5;                // pocket-floor relief (see gear_drum)
 
 el_groove_turns = el_core_len / groove_p;
-z_core = el_core_y0 - el_whl_y0;   // 37.7: locked to the track planes
+z_core = el_core_y0 - el_whl_y0;   // 30.7: locked to the take-off
+                                   // stations astride the channel
 
 // the groove cutter — gear_drum's twisted annular crescent verbatim
 // (see the long note there), at the elbow core length

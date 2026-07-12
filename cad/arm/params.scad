@@ -18,29 +18,40 @@
 //
 // Y-LANE ZONING (why nothing collides), y in mm at the shoulder:
 // truss chords 0..43, counterweight block 1..43 (bolted inboard of
-// the boom plate's downward tail), link
-// side plates 43..55 (the +y one grows the drive boom plate), drum
-// 56..82 (cable plane 69), wheel + pinion 82..109, motor 34..82
-// (plunged through the boom plate), bridge 109..117 — all riding the
-// arm. Static: base boards 63..75, fixed sector core 63..75 (= the
-// left board's plane; rim ring 59..79), green joint bushings + bolt
-// heads |y| 58.5..83 at the axis; the joint-angle sensor is a camera
-// on the arm (-55..-75 lane, r 92 about the axis) reading a printed
+// the boom plate's downward tail), link side plates 43..55 (the +y
+// one grows the drive boom plate), then a 3 mm running gap — SAME as
+// the elbow's, so ONE bearing-station design serves every joint.
+// Static: base boards 58..70; the fixed sector band 58..106.5
+// (wedge-backed printed segments on the left board's circular rim,
+// r 213..240, FLUSH on the board's inner face and growing outboard —
+// numbers from prototype1's wrap math: two ramped tracks, band +
+// march + walls); green joint bushings + bolt heads |y| ~53..78 at
+// the axis. Riding the arm: drum 60..105 (grooved band matching the
+// sector tracks, r 249..277), wheel + pinion 108.5..135.5 (outboard
+// of the band's end), motor 56.5..104.5 sleeved off the boom plate
+// with its face 4 under the gear plane (the old plunge idiom died
+// when the stack moved outboard), bridge 137.5..145.5. The
+// joint-angle sensor is a camera
+// on the arm (-56..-70 lane, r 92 about the axis) reading a printed
 // scale strip on the sensor-board lobe rim (r 80).
 // The radial rule that makes the lane crossings safe: every moving
-// part that enters y > 55 lives at r > 250 from the shoulder axis —
-// outside the fixed sector rim (r 244) — and the base boards have no
-// material beyond x = -80 up high, which is the only region the swept
-// drive fan (base angles 115..235) reaches.
+// part that enters y > 55 lives at r > 249 from the shoulder axis —
+// outside the fixed band's crest (r 240) and wedge (r >= 213) — and
+// the base boards have no material beyond x = -80 up high, which is
+// the only region the swept drive fan (base angles 115..235) reaches.
 
 ply_t = 12;
 
 // ---- reduction architecture ----
+// the m2 12T/51T herringbone primary is drawn REAL — prototype1's
+// pinion() / arm_gear_drum() modules, whose numbers live in
+// prototype1/params.scad (the source of record) — so mesh and lane
+// collisions in the concept are true
 primary_ratio = 51 / 12;      // 4.25 (capstan joints)
 drum_eff_r = 6.75;
-gear_od = 107;                // 51T m2 wheel envelope
+gear_od = 107;                // 51T wheel envelope (lane math)
 gear_w = 27;
-drum_od = 26;
+drum_od = 26;                 // legacy envelope (joints.scad drive_unit)
 motor_w = 42.3;               // NEMA 17
 motor_len = 48;
 cd = 63;                      // primary center distance
@@ -154,13 +165,16 @@ elbow_cw_slot_x = 205;         // ...centered at upper_len - 245
 //     only the ARM truss sweeps the front: at shoulder_min its bottom
 //     edge passes z~263 at the board plane (the taper is anchored at
 //     the shoulder), top rises to 247.
-//     The arm swings between the side boards (110 wide in a 126 gap).
+//     The arm swings between the side boards (110 wide in a 116 gap).
 // ALL THREE boards tab straight into the disc — mortises through both
 // ply layers, panel shoulders landing on the disc top (no angle
 // blocks); the front board runs disc-top-to-front_z1, closing the U
 // into a torsion box with the disc as its floor.
 base_plate = 520;
-col_w = 150;          // side board spacing (inner faces at +-63)
+col_w = 140;          // side board spacing (inner faces at +-58: a
+                      // 3 mm running gap to the arm plates, matching
+                      // the elbow — one bearing-station design serves
+                      // every joint)
 shoulder_h = 392;     // the whole machine rode down 28 with the disc
 front_x = 130;        // side boards' front edge; the front board spans it
 front_z1 = 247;       // 16 mm under the truss bottom at shoulder_min
@@ -182,7 +196,19 @@ roller_r = 185;       // support/hold-down roller stations
 // lives. With the sector out of every arm plane, the bend is
 // otherwise free.
 shoulder_bend = 45;
-sector_plane_y = col_w / 2 - ply_t / 2;   // 69: the left board mid-plane
+
+// ---- capstan lane (numbers from prototype1/params.scad wrap math) ----
+// The sector band is ONE-SIDED: flush on the left board's inner face,
+// growing outboard. The wedge-backed printed segments cap the board's
+// circular rim (rim = sr - 3, crest = sr + 1.4, backing down to
+// rim - 22 outboard of the board face); the drum's grooved band spans
+// the same y so the two-track helix lines up, and the wheel + pinion
+// + bridge stack outboard of the band's end.
+cab_y0 = col_w / 2 - ply_t;   // 58: band start = board inner face
+cab_w = 48.5;                 // band + march + walls — keep in sync
+                              // with prototype1's band_wt
+drum_l = 45;                  // grooved core + flanges — keep in sync
+                              // with prototype1's drum_len + 4
 
 // ---- testbench (the assembly modules recomposed; testbench.scad) ----
 // The REAL base + upper arm double as the shoulder test rig: the slew

@@ -17,11 +17,14 @@
 //   at base angle 180 - shoulder_bend + mid-travel.
 // - The DRIVE RIDES THE ARM: the +y truss plate grows a boom at arm
 //   angle 180 - shoulder_bend carrying, outboard of itself, the drum
-//   (on the sector cable plane y 56..82), the wheel + pinion (82..109)
-//   and the motor plunged through the plate (34..82, prototype1
-//   idiom); a printed bridge (109..117) picks up both axle ends so
-//   they're simply supported. The drive mass behind the joint is free
-//   counterweight, and the gear mesh is entirely arm-internal.
+//   (its grooved band spanning the sector band's lane, y 58..103),
+//   the wheel + pinion outboard of the band's end (108.5..135.5) and
+//   the motor sleeved off the plate, face 4 under the gear plane
+//   (56.5..104.5 — the prototype1 plunge idiom died when the stack
+//   moved outboard); a printed bridge (137.5..145.5) picks up both
+//   axle ends so they're simply supported. The drive mass behind the
+//   joint is free counterweight, and the gear mesh is entirely
+//   arm-internal.
 // - COUNTERWEIGHT: the drive boom plate is a SOLID FAN reaching from
 //   the boom down past straight-back (left side only), and the ~4 kg
 //   block bolts to its inboard face just BELOW the arm centerline —
@@ -71,6 +74,10 @@ include <params.scad>
 use <../lib/helpers.scad>
 use <truss.scad>
 use <joints.scad>
+// the REAL drivetrain parts, verbatim from the detail files (their
+// numbers come from prototype1/params.scad, the source of record)
+use <../prototype1/pinion.scad>
+use <../prototype1/gear_drum.scad>
 
 sr = sector_r(shoulder_ratio);   // 238.2
 sh_mid = (shoulder_min + shoulder_max) / 2;   // 40
@@ -79,6 +86,8 @@ dd = 180 - shoulder_bend;        // drive boom direction, ARM frame (135)
 sector_bis = dd + sh_mid;        // fixed sector bisector, BASE frame (175)
 drum_a = (sr + 25) * [cos(dd), sin(dd)];       // drum axle, arm frame
 pin_a = (sr + 25 + cd) * [cos(dd), sin(dd)];   // pinion/motor, arm frame
+whl_y0 = cab_y0 + cab_w + 2;     // 108.5: wheel/pinion plane, outboard
+                                 // of the fixed band's end
 
 // ---- the machine, final configuration ----
 bench_env();
@@ -120,11 +129,11 @@ module bench_env() {
       cylinder(d = 22, h = 7, center = true);
   }
   // yaw drive: the m2 12T herringbone pinion (the shoulder primary
-  // pinion, reused) hangs INVERTED over the rim so the gear band can
-  // sit low: the motor face bolts down onto a printed pylon's top
-  // plate 2 over the band, the shaft drops through its clearance
-  // hole and the pinion spans the full band with margin. Azimuth
-  // 315: out of the arm's swept corridors.
+  // pinion, reused — drawn real) hangs INVERTED over the rim so the
+  // gear band can sit low: the motor face bolts down onto a printed
+  // pylon's top plate 2 over the band, the shaft drops through its
+  // clearance hole and the pinion spans the full band with margin.
+  // Azimuth 315: out of the arm's swept corridors.
   rz(135) tx(-(yaw_pitch_r + 12)) {
     color("khaki") {
       tx(-38) cub([12, 50, 50], [1, 1, 0]);
@@ -135,7 +144,7 @@ module bench_env() {
     }
     color("dimgray") tz(54) cub([motor_w, motor_w, motor_len], [1, 1, 0]);
     color("silver") tz(23) cylinder(d = 5, h = 31, $fn = 24);
-    color("tomato") tz(22) cylinder(d = 28, h = gear_w);
+    color("tomato") tz(22) pinion();
   }
 }
 
@@ -186,15 +195,17 @@ module slew_base(segs = true) {
   }
 
   // the FIXED shoulder sector web is drawn as part of left_board_2d
-  // (one CNC piece); only its rim cable channel is a separate part
+  // (one CNC piece); only its rim cable channel — the wedge-backed
+  // segment band, flush on the board's inner face — is separate
   tz(shoulder_h)
     sector_channel(sr, shoulder_max - shoulder_min + 10, sector_bis,
-                   sector_plane_y);
+                   cab_y0, cab_w);
   // paired preloaded bearing stations (joints.scad bearing_station;
   // annotated diagram in bearing_station.scad): pink bushing + roll
   // pin turn with the arm plates, green bushing + M3 bolt fixed to
-  // each board. The preload loop is internal, so board drift can't
-  // unload the bearings, and the bolts see zero shear
+  // each board, gap 3 — the SAME station as the elbow's. The preload
+  // loop is internal, so board drift can't unload the bearings, and
+  // the bolts see zero shear
   tz(shoulder_h) {
     my([0, 1]) ty(upper_w / 2 - ply_t)
       bearing_station(yoke_y - upper_w / 2);
@@ -237,34 +248,47 @@ module upper_arm() {
   // over the truss plate at concept level)
   color("burlywood") ty(upper_w / 2) rx(90) linear_extrude(ply_t)
     boom_plate_2d();
-  // drive hardware, all outboard of the boom plate: drum on the fixed
-  // sector's cable plane (y 56..82), wheel above it (82..109), pinion
-  // alongside, motor plunged through the plate (34..82) — its mass is
-  // free counterweight. The mesh is entirely arm-internal.
+  // drive hardware, all outboard of the boom plate — REAL parts
+  // (prototype1's modules, so the concept can't drift from the
+  // prints): arm_gear_drum lays its grooved core across the fixed
+  // band's lane (62..103) and its herringbone wheel outboard of the
+  // band's end (108.5..135.5, a short neck spanning the band's
+  // outboard wall); the 12T pinion meshes at cd, its motor sleeved
+  // off the plate with its face 4 under the gear plane (56.5..104.5)
+  // — its mass is free counterweight. The mesh is entirely
+  // arm-internal.
   txz(drum_a) {
     color("silver") ty(upper_w / 2 - ply_t) rx(-90)
-      cylinder(d = 8, h = 78, $fn = 24);
-    color("steelblue") ty(sector_plane_y - 13) rx(-90)
-      cylinder(d = drum_od, h = 26);
-    color("steelblue") ty(sector_plane_y + 13) rx(-90)
-      cylinder(d = gear_od, h = gear_w);
+      cylinder(d = 8, h = 108, $fn = 24);
+    color("steelblue") ty(cab_y0 + 2) rx(-90)
+      arm_gear_drum(whl_y0 - cab_y0 - 2 - drum_l);
   }
   txz(pin_a) {
-    color("tomato") ty(sector_plane_y + 13) rx(-90)
-      cylinder(d = 28, h = gear_w);
-    color("dimgray") ty(sector_plane_y - 35) rx(-90)
+    color("tomato") ty(whl_y0) rx(-90) pinion();
+    // the motor rides in a printed SLEEVE box off the plate; its face
+    // stops 4 under the gear plane (the rig idiom: the gear sweeps
+    // over the mounting plane), the pinion floating on the shaft
+    // above it. Mesh set by press-and-clamp of the sleeve's slotted
+    // feet — detail deferred
+    color("khaki") ty(upper_w / 2) rx(-90) difference() {
+      cub([motor_w + 12, motor_w + 12, whl_y0 - 4 - upper_w / 2],
+          [1, 1, 0]);
+      tz(-0.5) cub([motor_w + 1, motor_w + 1, whl_y0], [1, 1, 0]);
+    }
+    color("dimgray") ty(whl_y0 - 4 - motor_len) rx(-90)
       cub([motor_w, motor_w, motor_len], [1, 1, 0]);
   }
   // printed bridge over both axle ends (prototype1 idiom: the axles
   // end up simply supported); legs flank the wheels, clear of the
   // cable runs
   color("khaki") {
-    ty(sector_plane_y + 48) rx(90) linear_extrude(8) rz(dd)
+    ty(whl_y0 + gear_w + 10) rx(90) linear_extrude(8) rz(dd)
       tx(sr - 15) sq([cd + 80, 172], [0, 1], 16);
     txz([for (s = [-72, 72])
          [(sr + 25 + cd / 2) * cos(dd) - s * sin(dd),
           (sr + 25 + cd / 2) * sin(dd) + s * cos(dd)]])
-      ty(upper_w / 2) rx(-90) cylinder(d = 14, h = 54);
+      ty(upper_w / 2) rx(-90) cylinder(d = 14, h = whl_y0 + gear_w + 6
+                                       - upper_w / 2);
   }
   // upper-arm counterweight: the block bolts to the INBOARD face of
   // the boom plate's fan (no separate boom), centered just BELOW the
@@ -277,15 +301,15 @@ module upper_arm() {
     tx(cw_r - cw_mass[0] / 2) ty(43) cub(cw_mass, [0, -1, 1]);
 
   // the scale-reading camera, arm-fixed at arm azimuth 50 deg, r 92:
-  // bracket off the (solid) -y plate reaches over the 8 mm gap; the
+  // bracket off the (solid) -y plate reaches over the 3 mm gap; the
   // lens sits 6 mm off the strip on the lobe rim. Azimuth 50 is
   // forced: world azimuth = 50 + pose, so the sweep is 30 (full
   // down) .. 150 (full up) — the only mount that stays on the
   // lobe's top arc at both ends of the travel
   ry(-50) tx(92) {
-    color("seagreen") ty(-75) cub([10, 14, 14], [0, 0, 1]);
-    color("dimgray") ty(-68) ry(-90) cylinder(d = 6, h = 5);
-    color("khaki") ty(-61) cub([10, 6, 14], [0, 0, 1]);
+    color("seagreen") ty(-(yoke_y + 12)) cub([10, 14, 14], [0, 0, 1]);
+    color("dimgray") ty(-(yoke_y + 5)) ry(-90) cylinder(d = 6, h = 5);
+    color("khaki") ty(-(yoke_y - 2)) cub([10, 6, 14], [0, 0, 1]);
   }
 
   // elbow fork lobes: full ply rings around the 28.5 pilot bores —
@@ -371,22 +395,25 @@ module board_slots_2d() {
 }
 
 // LEFT board: grows the FIXED shoulder sector as a SOLID web —
-// literally one CNC piece, so it's drawn here in the board color. A
-// gusset triangle blends the sector's lower tip back into the board's
-// rear edge (fills the notch where the lower edge crossed x -80,
-// stiffening the cantilevered tip); it lives at base angles 240..253,
-// outside the drive fan's 115..235 sweep, so the radial rule holds.
-// Only the rim cable channel (sector_channel) is a separate part
+// literally one CNC piece, so it's drawn here in the board color. Its
+// circular rim stops at sr - 3: the printed segment bands seat on it
+// and carry the cable out to the crest at sr + 1.4. A gusset triangle
+// blends the sector's lower tip back into the board's rear edge
+// (fills the notch where the lower edge crossed x -80, stiffening the
+// cantilevered tip); it lives at base angles 240..253, outside the
+// drive fan's 115..235 sweep, so the radial rule holds. (The lower
+// end's cable knot pokes past the arc end within the board plane —
+// nick this gusset's corner to clear it.)
 module left_board_2d() {
   ang = shoulder_max - shoulder_min + 10;
   a0 = sector_bis + ang / 2;               // lower sector edge (240)
   difference() {
     union() {
       board_core_2d();
-      txy([0, shoulder_h]) rz(sector_bis) pie(sr, ang);
+      txy([0, shoulder_h]) rz(sector_bis) pie(sr - 3, ang);
       polygon([[-80, shoulder_h - 80 * tan(a0 - 180)],
-               [sr * cos(a0), shoulder_h + sr * sin(a0)],
-               [-80, shoulder_h + sr * sin(a0) - 40]]);
+               [(sr - 3) * cos(a0), shoulder_h + (sr - 3) * sin(a0)],
+               [-80, shoulder_h + (sr - 3) * sin(a0) - 40]]);
     }
     txy([0, shoulder_h]) circle(d = 28.5);   // green snout pilot bore
   }
@@ -401,8 +428,8 @@ module sensor_board_2d() difference() {
 
 // the arm's drive boom plate, drawn in the +y truss plate's plane:
 // a strip at arm angle dd carrying the drum dead axle bore and the
-// motor plunge cutout (prototype1 idiom: the motor hangs from a
-// slotted plate at its face; mesh set by press-and-clamp)
+// motor standoff's mounting circle (the motor rides outboard on a
+// printed standoff; mesh set by press-and-clamp of its slotted feet)
 // the forearm's LEFT plate fin, drawn in the forearm frame (elbow at
 // the origin): bottom edge 2 mm above the shared taper line behind
 // the axis — clears the upper arm's top chord at full extension, and
@@ -441,7 +468,7 @@ module boom_plate_2d() rz(dd) difference() {
       [[104.8, 224.8]]));
   }
   tx(sr + 25) circle(d = 8.4);
-  tx(sr + 25 + cd) circle(d = 46);
+  tx(sr + 25 + cd) circle(d = 30);   // wiring pass / standoff locator
 }
 
 module tube(od, id, h) difference() {

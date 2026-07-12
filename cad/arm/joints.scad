@@ -23,17 +23,22 @@ module pie(r, ang) {
                         r * sin(-ang / 2 + ang * i / n)]]));
 }
 
-// the sector's rim cable channel (printed clip-on segments in the
-// detail design — see prototype1), stood into the XZ plane (joint
-// axis = Y), bisector rotated to `bis` degrees from +X (measured in
-// the XZ plane, toward +Z); `plane` sets the mid-plane's y. The
-// sector WEB itself is no separate part: the fixed sector is a solid
-// web CNC'd as one piece with the left base board (see the assembly's
-// left_board_2d)
-module sector_channel(r, ang, bis = 180, plane = 0) {
-  ty(plane) rx(90) rz(bis)
-    color("khaki") linear_extrude(20, center = true)
-      difference() { pie(r + 5.5, ang); pie(r - 8, ang + 8); }
+// the sector's rim cable channel: WEDGE-BACKED printed segments
+// (detail design: prototype1/sector_segment.scad) capping the board
+// web's circular rim — the two-track band hugs rim (r-3) to crest
+// (r+1.4), and outboard of the board face the section fills solid
+// down past the rim to the screw leg (radial backing; the concept
+// profile here mirrors seg_profile). ONE-SIDED: y0 is the flush
+// (arm-side) face, w the full band width. Joint axis = Y, bisector at
+// `bis` degrees from +X toward +Z. The sector WEB itself is no
+// separate part: the fixed sector is a solid web CNC'd as one piece
+// with the left base board (see the assembly's left_board_2d)
+module sector_channel(r, ang, bis = 180, y0 = 0, w = 48.5) {
+  color("khaki") rx(-90) rz(-bis - ang / 2)
+    rotate_extrude(angle = ang, $fn = 180)
+      polygon([[r - 3, y0], [r + 1.4, y0], [r + 1.4, y0 + w],
+               [r - 17, y0 + w], [r - 25, y0 + ply_t + 5],
+               [r - 25, y0 + ply_t], [r - 3, y0 + ply_t]]);
 }
 
 // drive unit envelope: 51T wheel + drum on a dead axle, pinion + NEMA
@@ -61,9 +66,11 @@ module drive_unit(out = 180) {
 // yellowgreen fixed bushing, red split pin, deepskyblue tee washer).
 // Local frame: axis = Y, y = 0 at the MOVING plate's inner face, +y
 // toward the FIXED board; `gap` = moving plate outer face to fixed
-// board inner face (8 at the shoulder, 3 at the elbow — the main
-// bearing sits proud of the board's inner face when the gap allows,
-// flush when it doesn't). Preload loop is internal, never through
+// board inner face (3 at BOTH the shoulder and the elbow — one
+// printed design serves every joint; at that gap the main bearing
+// sits flush with the board's inner face rather than proud, and the
+// hub flips the same idiom onto the baseplate). Preload loop is
+// internal, never through
 // wood: bolt head -> green web + shoulder -> main outer race -> balls
 // -> inner race -> pink -> 2nd outer race -> balls -> inner race ->
 // blue washer -> jam nuts. Pink, pin, main inner race and 2nd outer

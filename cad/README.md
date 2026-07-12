@@ -48,7 +48,7 @@ flags (0 = from origin, 1 = centered, -1 = negative-going), and
 | File | Part | Make |
 |------|------|------|
 | `pinion.scad` | 12T herringbone, press-on 5 mm D-bore (proven grub-free fit: Ø5.1 with flat at nominal 2.0 mm) | print |
-| `gear_drum.scad` | 51T stub-addendum herringbone with integrated cable drum: HELICALLY GROOVED core (the lay is positively located; length = wrap band + its march, from the wrap math), mid-groove anchor hole; two 608 bearings press in, spins on a fixed M8 dead axle | print |
+| `gear_drum.scad` | 51T stub-addendum herringbone with integrated cable drum: HELICALLY GROOVED core (the lay is positively located; length = wrap band + its march, from the wrap math), mid-groove anchor hole; two 608 bearings press in, spins on a fixed M8 dead axle. TWO variants share `drum_body()`: `gear_drum()` (gear at the base, bearing boss on top) and `arm_gear_drum()` (reversed for the arm — drum inboard across the sector band, neck, gear outboard, bearings pocketed into the ends), which `arm/assembly.scad` draws verbatim | print |
 | `motor_mount.scad` | rigid slotted plate; the motor plunges through the board and hangs from it; mesh set by press-and-clamp | print |
 | `bridge.scad` | spans the gear+drum tangent to the arc; picks up the axle top so the drum axle is simply supported | print |
 | `sector.scad` | sector core with the plain CIRCULAR rim the segment bands seat on — superseded as a part (the fixed sector is one CNC piece with the left base board); kept as the reference for that board's rim radius + screw pattern | reference |

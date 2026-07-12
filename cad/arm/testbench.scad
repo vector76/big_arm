@@ -36,7 +36,7 @@
 // drives (being redesigned), forearm truss, elbow-CW hanger sweep.
 //
 // CLAMP ZONING: yaw is frozen, so only the pitch sweep matters — the
-// boom fan / CW / drive stack own the strip y -75..117 behind the
+// boom fan / CW / drive stack own the strip y -70..146 behind the
 // shoulder (x < 0), dipping to z 54 just 6 mm over the rim. Keep
 // clamp hardware off the rim within ~35 deg of azimuth 180 (or under
 // 6 mm tall there); the four bars at 45/135/225/315 all sit outside

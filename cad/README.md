@@ -52,7 +52,7 @@ flags (0 = from origin, 1 = centered, -1 = negative-going), and
 | `motor_mount.scad` | rigid slotted plate; the motor plunges through the board and hangs from it; mesh set by press-and-clamp | print |
 | `bridge.scad` | spans the gear+drum tangent to the arc; picks up the axle top so the drum axle is simply supported | print |
 | `sector.scad` | sector core with the plain CIRCULAR rim the segment bands seat on — superseded as a part (the fixed sector is one CNC piece with the left base board); kept as the reference for that board's rim radius + screw pattern | reference |
-| `sector_segment.scad` | printed channel L-SEGMENTS, TWO-TRACK RAMPED: the band seats flush on the rim (cable tension presses print onto wood) spanning the full two-track envelope one-sided from the flush arm-side face; the leg screws to the outboard ply face. 45° V track slots climb at the drum groove's ~2° lead — zero fleet. Three ~180 mm prints (`-D idx=0..2`; the ends grow anchor walls at their track's station); print lying on the flush face | print |
+| `sector_segment.scad` | printed channel segments, TWO-TRACK RAMPED and WEDGE-BACKED: the band seats flush on the rim (cable tension presses print onto wood) and outboard of the board face the section fills solid down to the leg — ample radial backing; the leg screws to the outboard ply face through deep 7.5 mm counterbores. 45° V track slots climb at the drum groove's ~2° lead — zero fleet. Three ~180 mm prints (`-D idx=0..2`; on the end prints the anchored run's slot stops short of the arc end, and the cord knots in a recess on the end face) | print |
 
 Gear width follows the one-tooth phase rule (`gear_phase_width`): each
 herringbone half advances exactly one tooth of helix phase from center to
@@ -88,9 +88,10 @@ torque math; `-D pose_shoulder=<deg>` (−20…100) poses it.
 Cable (~2 m of 1.1 mm stiff aramid cord): anchor at the drum's
 mid-groove radial hole (knot behind), ~14 resident wraps riding the
 helical groove of the 41 mm drum, both ends terminating in the printed
-END segments of the channel — the cable passes through the 2.2 mm hole
-in the anchor wall and knots in the cavity behind it, in line with its
-track. The wrap band MARCHES one groove pitch per drum rev (see the
+END segments of the channel — each run's slot stops just short of the
+arc end, the cord continues through a 2.2 mm hole in line with its
+track, and the knot seats in a shallow recess on the segment's end
+face (tied in the open, drawn back by tension). The wrap band MARCHES one groove pitch per drum rev (see the
 wrap-math note in `prototype1/params.scad`): the groove and the two
 ramped sector tracks make the walk exact and fleet-free — check at
 assembly that the groove hand matches the track ramp direction. Aramid
@@ -142,6 +143,7 @@ openscad -o build/testbench_up.png -D pose_shoulder=100 --viewall --autocenter t
   ~41 mm at the current ratios) — if the ratios, cable, or groove pitch
   change, the drum groove and every sector track follow, so regenerate
   every output.
-- The sector segments print lying on the flush face: the arc sits in
-  the bed plane, the V walls print at 45°, and the only support needed
-  is the flat plane under the leg.
+- The sector segments print INVERTED, on the wide outboard end face:
+  the arc sits in the bed plane, the V walls and the wedge diagonal
+  print at ≥45°, the leg's board-side land faces up, and the
+  counterbores rise straight off the bed — no support anywhere.

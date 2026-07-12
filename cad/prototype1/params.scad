@@ -78,16 +78,18 @@ drum_core_d = 2 * (drum_eff_r - cable_d / 2 + groove_g);  // 13.6: the
 sector_eff_r = capstan_ratio * drum_eff_r;       // 238.2 mm
 sector_angle = 130;         // deg of arc (120 travel + margin)
 // Sector construction: the web is a plain CIRCULAR ply arc (in the arm
-// it IS the left base board); printed L-SEGMENTS hang on it. The L's
-// top arm — the track band — sits flush ON the rim, so cable tension
-// presses printed part onto wood (the screws only locate); the leg
-// drops down the OUTBOARD face and takes wood screws into the ply
-// (through-bolts would poke into the 3 mm arm-side gap). Segments
-// print lying on the flush face — the arc is then in the bed plane —
-// so the track slots are 45-deg V's (self-centering, and every
-// overhang is 45 deg except the one flat support plane under the leg,
-// which can also be sliced away by swapping the leg for ribs + screw
-// bosses at print time).
+// it IS the left base board); printed WEDGE-BACKED segments hang on
+// it. The track band sits flush ON the rim, so cable tension presses
+// printed part onto wood; outboard of the board face — where there is
+// no wood — the section fills SOLID from the band down past the rim to
+// the leg (the diagonal in the sketch): ample radial backing for the
+// track loads. The leg lands on the OUTBOARD ply face and takes wood
+// screws (through-bolts would poke into the 3 mm arm-side gap), each
+// at the bottom of a DEEP COUNTERBORE reaching in from the wide
+// outboard end face. Segments print INVERTED — that wide outboard
+// face is the bed — with the arc in the bed plane: the 45-deg V
+// tracks, the >= 45-deg wedge diagonal, and the up-facing leg land
+// all print support-free.
 sector_core_t = 12;
 seg_n = 3;                  // ~177 mm chord per print at 43.3 deg
 seg_ang = sector_angle / seg_n;
@@ -100,8 +102,12 @@ rim_r = apex_r - 2.2;                    // ply rim: 2.2 under the apex
 crest_r = sector_eff_r + 1.4;            // cord captive by ~0.85
 leg_t = 5;                  // leg plate on the outboard core face
 leg_d = 22;                 // leg reach down that face
+seg_back = 14;              // wedge depth below the rim at the
+                            // outboard face — the inverted print bed
 leg_screw_d = 3.6;          // wood screws, 3 per segment
-leg_screw_r = rim_r - 13;   // screw circle radius
+leg_screw_r = rim_r - 10;   // screw circle: keeps the counterbore
+                            // fully inside the wedge (seg_back 14)
+cb_d = 7.5;                 // screw-head counterbore (heads ~7)
 // WRAP MATH — the band MARCHES. The resident wraps between the two
 // take-offs are frozen to the drum (no slip; the mid-anchor pins them),
 // so every wrap the joint motion adds lands one pitch beyond the band

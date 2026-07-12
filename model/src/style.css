@@ -53,6 +53,31 @@ body {
   text-align: left;
 }
 
+#status {
+  position: fixed;
+  left: 12px;
+  top: 12px;
+  color: #8b95a3;
+  font-size: 13px;
+}
+
+.page-link {
+  position: fixed;
+  left: 12px;
+  bottom: 12px;
+  color: #8b95a3;
+  font-size: 12.5px;
+  text-decoration: none;
+  background: rgba(20, 22, 26, 0.88);
+  border: 1px solid #333a44;
+  border-radius: 6px;
+  padding: 5px 10px;
+}
+
+.page-link:hover {
+  color: #d7dce2;
+}
+
 .margin-good { color: #6fd08c; }
 .margin-thin { color: #e8b34b; }
 .margin-bad  { color: #e5604d; font-weight: 600; }

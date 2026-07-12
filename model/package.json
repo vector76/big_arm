@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
+    "export:cad": "node scripts/export-cad.mjs",
     "preview": "vite preview",
     "test": "vitest run"
   },

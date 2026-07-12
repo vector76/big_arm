@@ -25,11 +25,15 @@ compliance of a lightweight structure.
 [`model/`](model/) holds the interactive concept model (TypeScript +
 three.js, fully client-side — see [docs/tooling.md](docs/tooling.md)):
 counterweight sizing, joint torques and margins, and traverse times,
-computed live over a crude 3D view with sliders.
+computed live over a crude 3D view with sliders. A second page, the
+**CAD twin** (`twin.html`), renders the actual OpenSCAD assembly —
+rigid-body meshes exported from [`cad/arm/`](cad/) — posed live by the
+four joint angles.
 
 ```sh
 cd model
 npm install
+npm run export:cad  # render cad/arm/ into the twin's meshes (needs OpenSCAD)
 npm run dev    # interactive, http://localhost:5173
 npm test       # model-core unit tests
 npm run build  # static site in model/dist/

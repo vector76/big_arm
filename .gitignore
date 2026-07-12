@@ -1,3 +1,4 @@
 node_modules/
 dist/
 cad/**/build/
+model/public/cad/

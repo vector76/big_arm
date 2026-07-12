@@ -61,14 +61,18 @@
 //   into the disc through mortises in both ply layers — the U plus
 //   disc make one torsion box, no angle blocks.
 //
-// STRUCTURE: the machine is a module kit — bench_env() (final bench
-// hardware only), slew_base() (disc + boards + fixed sector + shoulder
-// stations), upper_arm() (truss + boom drive + CW + camera) and
-// forearm_install() (elbow stations + everything distal) —
-// so testbench.scad can compose the SAME parts into the shoulder test
-// rig: real base + upper arm, disc clamped flat to the desk, forearm
-// replaced by a hung weight. This file's top level is the final
-// configuration.
+// STRUCTURE: the machine is a module kit of RIGID BODIES — bench_env()
+// (final bench hardware only), slew_base() (disc + boards + fixed
+// sector + shoulder stations), upper_arm() (truss + boom drive + CW +
+// camera), elbow_stations() (upper-arm-fixed), forearm() (everything
+// that bends at the elbow) and end_effector() (wrist-mounted) — each
+// drawn in its own joint frame, with ALL pose transforms in the
+// top-level composition below and nowhere else. So testbench.scad can
+// compose the SAME parts into the shoulder test rig (real base + upper
+// arm, disc clamped flat to the desk, forearm replaced by a hung
+// weight), and export.scad can emit each body as a mesh the three.js
+// twin viewer poses with the four joint angles alone. This file's top
+// level is the final configuration.
 
 include <params.scad>
 use <../lib/helpers.scad>
@@ -86,12 +90,20 @@ drum_a = (sr + 25) * [cos(dd), sin(dd)];       // drum axle, arm frame
 pin_a = (sr + 25 + cd) * [cos(dd), sin(dd)];   // pinion/motor, arm frame
 
 // ---- the machine, final configuration ----
+// The kinematic tree, whole and in one place: every pose transform
+// lives HERE, between rigid bodies drawn in their own joint frames.
 bench_env();
 rz(pose_yaw) {                   // everything from here yaws together
   slew_base();
   tz(shoulder_h) ry(-pose_shoulder) {
     upper_arm();
-    tx(upper_len) forearm_install();
+    tx(upper_len) {
+      elbow_stations();
+      ry(pose_elbow) {           // downward bend only
+        forearm();
+        tx(fore_len) ry(-pose_wrist) end_effector();
+      }
+    }
   }
 }
 
@@ -316,53 +328,56 @@ module upper_arm() {
     }
 }
 
-// ---- elbow stations + forearm + wrist + end effector ----
+// ---- elbow stations: the upper-arm-fixed side of the joint ----
 // Drawn at the elbow origin in the upper-arm frame. The testbench
-// leaves ALL of this out and hangs its test weight in the empty
-// pilot bores instead.
-module forearm_install() {
+// leaves the stations AND everything distal out and hangs its test
+// weight in the empty pilot bores instead.
+module elbow_stations() {
   // paired stations again: forearm plates are the moving side,
   // upper-arm plates the fixed boards (gap 3, so the main bearing
   // sits flush with the fixed plate's inner face instead of proud)
   my([0, 1]) ty(fore_w / 2 - ply_t)
     bearing_station(upper_w / 2 - ply_t - fore_w / 2);
+}
 
-  ry(pose_elbow) {   // downward bend only
-    box_truss(0, fore_len, fore_w, elbow_d, link_d(-fore_len),
-              0, 45, 45);
-    color("burlywood") my([0, 1]) ty(fore_w / 2) rx(90)
-      linear_extrude(ply_t) difference() {
-        circle(r = 36);
-        circle(d = 15.5);
-      }
-    // the LEFT forearm plate grows a FIN back over the elbow (one
-    // CNC piece, replacing the bolted-on boom + riser)
-    color("burlywood") ty(fore_w / 2) rx(90) linear_extrude(ply_t)
-      fore_cw_fin_2d();
-    // elbow counterweight, CENTERED for lateral symmetry: a
-    // dog-leg hanger crosses from the fin's inboard face (y 28)
-    // to the center plane, then drops through the upper arm's
-    // CENTERED top-board slot to the block, whose CG sits on the
-    // forearm axis extended back through the elbow — so gravity
-    // torque vanishes at every pose. At full extension the hanger
-    // parks in the slot (near-vertical entry: arc r ~245)
-    color("slategray") {
-      tx(elbow_cw_x0) ty(-20) tz(88)
-        cub([25, 48, 24], [0, 0, 0]);                  // dog-leg
-      tx(elbow_cw_x0) tz(-45)
-        cub([25, 40, link_d(-elbow_cw_x0) / 2 + 82], [0, 1, 0]);
-      tx(elbow_cw_x0 - 28) tz(-45) cub(elbow_cw_blk, [0, 1, 0]);
+// ---- forearm: truss + fin + elbow CW + wrist axle ----
+// Drawn at the elbow origin in its OWN (elbow-bent) frame.
+module forearm() {
+  box_truss(0, fore_len, fore_w, elbow_d, link_d(-fore_len),
+            0, 45, 45);
+  color("burlywood") my([0, 1]) ty(fore_w / 2) rx(90)
+    linear_extrude(ply_t) difference() {
+      circle(r = 36);
+      circle(d = 15.5);
     }
-    // ---- wrist ----
-    tx(fore_len) {
-      joint_axle(fore_w + 40);
-      ry(-pose_wrist) {
-        color("burlywood") cub([ee_len, 44, 64], [0, 1, 1]);
-        color("navajowhite") tx(ee_len) ry(90) cylinder(d = 85, h = 12);
-        %tx(ee_len + 75) ry(90) cylinder(d = 70, h = 125, center = true);
-      }
-    }
+  // the LEFT forearm plate grows a FIN back over the elbow (one
+  // CNC piece, replacing the bolted-on boom + riser)
+  color("burlywood") ty(fore_w / 2) rx(90) linear_extrude(ply_t)
+    fore_cw_fin_2d();
+  // elbow counterweight, CENTERED for lateral symmetry: a
+  // dog-leg hanger crosses from the fin's inboard face (y 28)
+  // to the center plane, then drops through the upper arm's
+  // CENTERED top-board slot to the block, whose CG sits on the
+  // forearm axis extended back through the elbow — so gravity
+  // torque vanishes at every pose. At full extension the hanger
+  // parks in the slot (near-vertical entry: arc r ~245)
+  color("slategray") {
+    tx(elbow_cw_x0) ty(-20) tz(88)
+      cub([25, 48, 24], [0, 0, 0]);                  // dog-leg
+    tx(elbow_cw_x0) tz(-45)
+      cub([25, 40, link_d(-elbow_cw_x0) / 2 + 82], [0, 1, 0]);
+    tx(elbow_cw_x0 - 28) tz(-45) cub(elbow_cw_blk, [0, 1, 0]);
   }
+  // the wrist's dead axle rides the forearm plates
+  tx(fore_len) joint_axle(fore_w + 40);
+}
+
+// ---- end effector: everything that pitches at the wrist ----
+// Drawn at the wrist origin in its own frame.
+module end_effector() {
+  color("burlywood") cub([ee_len, 44, 64], [0, 1, 1]);
+  color("navajowhite") tx(ee_len) ry(90) cylinder(d = 85, h = 12);
+  %tx(ee_len + 75) ry(90) cylinder(d = 70, h = 125, center = true);
 }
 
 // shared side board core: full-height body from the disc top to the

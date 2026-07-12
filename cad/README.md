@@ -117,6 +117,20 @@ openscad -o build/testbench_up.png -D pose_shoulder=100 --viewall --autocenter t
 
 `build/` is git-ignored; regenerate outputs from source.
 
+## CAD twin viewer
+
+`arm/export.scad` emits the assembly one RIGID BODY at a time (static /
+yaw / upper / fore / ee — the bodies between the pose transforms in
+`assembly.scad`'s top level), each in its own joint frame at zero pose,
+as colored 3MF; a sixth `frames` group echoes the joint offsets, travel
+limits and default pose as JSON straight out of `params.scad`. The
+three.js twin viewer (`model/twin.html`) loads those meshes onto the
+same kinematic tree and poses them with the four joint angles alone —
+`npm run export:cad` in `model/` regenerates everything into
+`model/public/cad/` (git-ignored). Keep `assembly.scad`'s pose
+transforms at the top level only: a pose rotation buried inside a body
+module would silently freeze that joint in the viewer.
+
 ## Print notes
 
 - Gears print teeth-up as modeled; the herringbone V needs no supports.

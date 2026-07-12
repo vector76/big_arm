@@ -1,9 +1,11 @@
-// Capstan sector core: a SINGLE CNC plywood plate. The rim is a polygon
-// of seg_n flat facets; printed channel segments (sector_segment.scad)
-// clip over each facet and carry the true cable arc. The pivot bore and
-// six-bolt hub circle belong to the superseded pendulum stand — in the
-// arm the sector is FIXED, one piece with the left base board, and this
-// file survives as the reference for that board's rim construction.
+// Capstan sector core reference: a SINGLE CNC plywood plate with a
+// plain CIRCULAR rim at rim_r; the printed L-segments
+// (sector_segment.scad) seat their track band flush on that rim and
+// screw to the outboard face. In the arm the web is no separate part —
+// the fixed sector is one CNC piece with the left base board — so this
+// file survives as the reference for that board's rim radius and screw
+// pattern. The pivot bore and six-bolt hub circle belong to the
+// superseded pendulum stand.
 //
 // Export: openscad -o build/sector_core.dxf -D layer=1 sector.scad
 // layer=0 renders the core with the printed segments for inspection.
@@ -18,37 +20,36 @@ pivot_d = hub_tube_od + 0.15; // snug slip over the printed bearing tube
 hub_r = sector_hub_r;
 arc_band = 45;                // depth of the rim band
 
-// pie with a controllable facet count: n = seg_n gives the rim polygon
-module pie(r, ang, n = 0) {
-  nn = n > 0 ? n : max(12, ceil(ang / 4));
-  polygon(concat([[0, 0]], [for (i = [0 : nn]) [r * cos(-ang / 2 + ang * i / nn),
-                                                r * sin(-ang / 2 + ang * i / nn)]]));
+module pie(r, ang) {
+  n = max(12, ceil(ang / 4));
+  polygon(concat([[0, 0]],
+    [for (i = [0 : n]) [r * cos(-ang / 2 + ang * i / n),
+                        r * sin(-ang / 2 + ang * i / n)]]));
 }
 
 module sector_core_2d() {
   difference() {
     union() {
-      // rim band: polygonal outer edge (the facets), round inner edge
+      // rim band: circular outer edge the segment bands seat on
       difference() {
-        pie(facet_d / cos(seg_ang / 2), sector_angle, seg_n);
-        pie(facet_d - arc_band, sector_angle + 10);
+        pie(rim_r, sector_angle);
+        pie(rim_r - arc_band, sector_angle + 10);
       }
       circle(r = hub_r);
       // spoke: hub to rim mid-arc
       intersection() {
-        pie(facet_d, sector_angle);
-        sq([facet_d, spoke_w], [0, 1]);
+        pie(rim_r, sector_angle);
+        sq([rim_r, spoke_w], [0, 1]);
       }
     }
     circle(d = pivot_d);
     // hub circle: stacks the arm across the core
     rz([for (i = [0 : hub_bolt_n - 1]) i * 360 / hub_bolt_n])
       tx(hub_bolt_r) circle(d = hub_bolt_d);
-    // segment cheek bolts: two per facet (cartesian in each facet frame,
-    // matching the printed segments)
-    rz([for (k = [0 : seg_n - 1]) -sector_angle / 2 + (k + 0.5) * seg_ang])
-      ty([-facet_d * tan(seg_ang / 2) / 2, facet_d * tan(seg_ang / 2) / 2])
-        tx(facet_d - 7) circle(d = 4.5);
+    // leg screw pilots: three per segment, matching the printed legs
+    rz([for (k = [0 : seg_n - 1], da = [-14, 0, 14])
+        -sector_angle / 2 + (k + 0.5) * seg_ang + da])
+      tx(leg_screw_r) circle(d = 2.5);
   }
 }
 
@@ -59,5 +60,5 @@ else {
   for (k = [0 : seg_n - 1])
     color(k == 0 || k == seg_n - 1 ? "tomato" : "khaki")
       rz(-sector_angle / 2 + (k + 0.5) * seg_ang)
-        sector_segment(end = k == 0 ? -1 : k == seg_n - 1 ? 1 : 0);
+        sector_segment(k, k == 0 ? -1 : k == seg_n - 1 ? 1 : 0);
 }

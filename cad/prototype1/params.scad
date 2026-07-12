@@ -51,29 +51,92 @@ travel_mid = (travel_min + travel_max) / 2;   // 35: rig tilt on the board
 total_ratio = 150;
 primary_ratio = gear_teeth / pinion_teeth;       // 4.25
 capstan_ratio = total_ratio / primary_ratio;     // 35.3
-cable_d = 1.5;              // Dyneema
-drum_core_d = 12;           // cable bend D/d = 8, fine for synthetic line
-drum_eff_r = drum_core_d / 2 + cable_d / 2;      // 6.75 mm
+cable_d = 1.1;              // stiff aramid cord (nominal — measure the
+                            // real spool and set groove_p from it)
+// GROOVE PITCH MUST EXCEED THE GROOVE OPENING BY A PRINTABLE LAND —
+// adjacent turns otherwise overlap and machine the lands away. Here
+// p - w = 0.25: the land tip is ~a nozzle width and the rib widens
+// toward its base, so it prints. (See drum_groove in gear_drum.scad
+// for the OTHER groove pitfall: the twist-extrude cutter must be an
+// arc-width crescent, not an offset circle.)
+groove_p = 1.5;             // helical lay pitch: drum groove AND the
+                            // sector track ramp share it (one helix)
+// The DRUM groove is ROUND-BOTTOM: the cord seats on the floor, so
+// the centerline radius — which sets the RATIO, and through it the
+// registration between drum revs and the sector track stations — sees
+// cord-diameter error only 1:1 (a V would amplify it ~1.4-2x). The
+// SECTOR tracks are V's instead: their radius barely moves the ratio
+// (238 vs 6.75 lever), and the segments print lying down, where a V
+// is what keeps every overhang at 45 deg.
+groove_w = cable_d + 0.15;  // drum groove width: snug, guides the lay
+groove_g = 0.6;             // drum groove depth; land = p - w = 0.25
+drum_eff_r = 6.75;          // cable CENTERLINE radius — this sets the
+                            // ratio, invariant to cable/groove changes
+drum_core_d = 2 * (drum_eff_r - cable_d / 2 + groove_g);  // 13.6: the
+                            // groove floor puts the centerline at eff_r
+                            // (bend D at the centerline 13.5, D/d ~12)
 sector_eff_r = capstan_ratio * drum_eff_r;       // 238.2 mm
-sector_core_r = sector_eff_r - cable_d / 2;      // cable-groove floor radius
 sector_angle = 130;         // deg of arc (120 travel + margin)
-// Sector construction: a SINGLE 12 mm ply core whose rim is a polygon of
-// flat facets; printed channel segments clip over each facet (flat on
-// the ply side, true arc with groove walls on the cable side). The two
-// end segments integrate the cable anchors.
+// Sector construction: the web is a plain CIRCULAR ply arc (in the arm
+// it IS the left base board); printed L-SEGMENTS hang on it. The L's
+// top arm — the track band — sits flush ON the rim, so cable tension
+// presses printed part onto wood (the screws only locate); the leg
+// drops down the OUTBOARD face and takes wood screws into the ply
+// (through-bolts would poke into the 3 mm arm-side gap). Segments
+// print lying on the flush face — the arc is then in the bed plane —
+// so the track slots are 45-deg V's (self-centering, and every
+// overhang is 45 deg except the one flat support plane under the leg,
+// which can also be sliced away by swapping the leg for ribs + screw
+// bosses at print time).
 sector_core_t = 12;
-seg_n = 9;                  // facets across the arc (~14.4 deg each)
-seg_wall = 4;               // printed wall at the facet ends (thinnest)
-seg_cheek = 10;             // cheek half-height gripping the ply (z +-)
-seg_grip = 14;              // cheek depth inward of the facet
+seg_n = 3;                  // ~177 mm chord per print at 43.3 deg
 seg_ang = sector_angle / seg_n;
-facet_d = (sector_core_r - seg_wall) * cos(seg_ang / 2);  // facet distance
-seg_flange_r = sector_core_r + cable_d + 4;   // groove wall crest
-// Resident cable on the drum is nearly constant (one side pays off as the
-// other winds on): full-travel turns = travel/360 * capstan_ratio (~11.8),
-// plus dead wraps at the anchor and end margin.
-drum_len = ceil(((travel_max - travel_min) / 360 * capstan_ratio + 2.5)
-                * cable_d + 2);                  // 24 mm
+seg_wall = 4;               // band wall beyond the outermost track's
+                            // V MOUTH (~2.7 half-width at the crest)
+v_half = 45;                // track V half-angle (>= 45: lying print)
+track_seat = cable_d / 2 / sin(v_half);  // cord center above the apex
+apex_r = sector_eff_r - track_seat;      // V apex radius (~237.4)
+rim_r = apex_r - 2.2;                    // ply rim: 2.2 under the apex
+crest_r = sector_eff_r + 1.4;            // cord captive by ~0.85
+leg_t = 5;                  // leg plate on the outboard core face
+leg_d = 22;                 // leg reach down that face
+leg_screw_d = 3.6;          // wood screws, 3 per segment
+leg_screw_r = rim_r - 13;   // screw circle radius
+// WRAP MATH — the band MARCHES. The resident wraps between the two
+// take-offs are frozen to the drum (no slip; the mid-anchor pins them),
+// so every wrap the joint motion adds lands one pitch beyond the band
+// edge: BOTH take-offs walk axially, one groove pitch per drum rev,
+// while the anchor stays put mid-band. Deterministic and repeatable —
+// the groove makes it exact — but the drum must be as long as the band
+// PLUS its march, and the sector needs TWO tracks (one per run) at
+// constant separation band_w, each ramping by `ramp` across the arc.
+// Drum groove and sector tracks are one continuous helix at the shared
+// lead angle atan(groove_p / (2*PI*drum_eff_r)) ~ 1.8 deg, so the free
+// spans leave both surfaces square: zero fleet angle at every pose.
+// (Assembly check: the drum groove HAND must match the track ramp
+// direction — a left-hand groove with a right-hand ramp puts the two
+// helices in opposition and doubles the fleet instead of killing it.)
+travel_turns = (travel_max - travel_min) / 360 * capstan_ratio; // 11.8
+dead_turns = 2.5;           // strain-relief margin, ~1.25 per run
+band_w = (travel_turns + dead_turns) * groove_p; // 21.4: frozen band =
+                                                 // track separation
+ramp = travel_turns * groove_p;                  // 17.7: the march
+drum_len = ceil(band_w + ramp + 2);              // 41 (the old formula,
+                            // resident band only, missed the march)
+// sector track stations: z in the core frame (web mid-plane = 0), a in
+// deg from the arc bisector. The band is ONE-SIDED: it starts FLUSH at
+// the core's arm-side face (band_z0) and grows outboard — in the arm,
+// the left board's inner face stays clean and everything wide lives
+// outboard. The tangent point sweeps 1 deg of arc per deg of joint, so
+// the ramp completes over the TRAVEL span and the 5-deg end margins
+// extend at the same slope to the anchors. Run A (run = -1) anchors at
+// the -half end, run B (+1) at +half — the diagonal extremes; between
+// them the tracks run parallel, band_w apart.
+band_z0 = -sector_core_t / 2;             // the FLUSH (arm-side) face
+band_wt = band_w + ramp * sector_angle / (travel_max - travel_min)
+          + 2 * seg_wall;                 // ~43: full band width
+function track_z(a, run) = band_z0 + band_wt / 2
+  + run * band_w / 2 + ramp * a / (travel_max - travel_min);
 drum_flange_d = drum_core_d + 14;
 
 // ---- axle & bearings ----
@@ -138,10 +201,10 @@ hub_tube_bore = 13;         // between pockets; clears the inner-race spacer
 sector_stack_t = sector_core_t;   // single-ply core (12)
 
 // z stack, sector core mid-plane = 0: the gear sweeps under the sector
-// rim (2 mm below the printed segment cheeks) and over the motor plate
-// (4 mm), pinion z-aligned with the gear; the motor body hangs through
-// the board cutout (~35 mm proud of the back face).
-gear_top = -seg_cheek - 2;
+// band (2 mm below its flush face) and over the motor plate (4 mm),
+// pinion z-aligned with the gear; the motor body hangs through the
+// board cutout (~35 mm proud of the back face).
+gear_top = band_z0 - 2;
 gear_z = gear_top - gear_width;
 board_face_z = gear_z - 4 - motor_plate_t;
 face_z = board_face_z;      // motor face = board face plane

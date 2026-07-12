@@ -37,8 +37,8 @@ flags (0 = from origin, 1 = centered, -1 = negative-going), and
 - `prototype1/` — Phase 1a shoulder drivetrain: herringbone primary
   (12T/51T, module 2, 4.25:1; wheel tips stubbed to 0.65 addendum so
   they clear the small pinion's base circle at 20° PA) + capstan cable
-  sector (Ø12 mm drum core, 238 mm effective sector radius, ~35:1) =
-  150:1 total. The pendulum test stand that originally carried these
+  sector (helically grooved drum, 6.75 mm cable-centerline radius,
+  238 mm effective sector radius, ~35:1) = 150:1 total. The pendulum test stand that originally carried these
   parts is superseded by `arm/testbench.scad` (stand files removed; git
   history has them); the drivetrain part files remain as the seed of
   the real shoulder's detail design.
@@ -48,11 +48,11 @@ flags (0 = from origin, 1 = centered, -1 = negative-going), and
 | File | Part | Make |
 |------|------|------|
 | `pinion.scad` | 12T herringbone, press-on 5 mm D-bore (proven grub-free fit: Ø5.1 with flat at nominal 2.0 mm) | print |
-| `gear_drum.scad` | 51T stub-addendum herringbone with integrated cable drum (length from the wrap math); two 608 bearings press in, spins on a fixed M8 dead axle | print |
+| `gear_drum.scad` | 51T stub-addendum herringbone with integrated cable drum: HELICALLY GROOVED core (the lay is positively located; length = wrap band + its march, from the wrap math), mid-groove anchor hole; two 608 bearings press in, spins on a fixed M8 dead axle | print |
 | `motor_mount.scad` | rigid slotted plate; the motor plunges through the board and hangs from it; mesh set by press-and-clamp | print |
 | `bridge.scad` | spans the gear+drum tangent to the arc; picks up the axle top so the drum axle is simply supported | print |
-| `sector.scad` | sector core with the polygonal facet rim the segments clip over — superseded as a part (the fixed sector is one CNC piece with the left base board); kept as the rim-construction reference | reference |
-| `sector_segment.scad` | printed channel segments: flat inside (clip over one rim facet, two M4s), true cable arc with groove walls outside; print 7 plain + 2 end variants with integral cable anchors | print |
+| `sector.scad` | sector core with the plain CIRCULAR rim the segment bands seat on — superseded as a part (the fixed sector is one CNC piece with the left base board); kept as the reference for that board's rim radius + screw pattern | reference |
+| `sector_segment.scad` | printed channel L-SEGMENTS, TWO-TRACK RAMPED: the band seats flush on the rim (cable tension presses print onto wood) spanning the full two-track envelope one-sided from the flush arm-side face; the leg screws to the outboard ply face. 45° V track slots climb at the drum groove's ~2° lead — zero fleet. Three ~180 mm prints (`-D idx=0..2`; the ends grow anchor walls at their track's station); print lying on the flush face | print |
 
 Gear width follows the one-tooth phase rule (`gear_phase_width`): each
 herringbone half advances exactly one tooth of helix phase from center to
@@ -85,14 +85,24 @@ See the header of `arm/testbench.scad` for what the rig exercises
 as-final, the clamp zoning around the counterweight sweep, and the
 torque math; `-D pose_shoulder=<deg>` (−20…100) poses it.
 
-Cable (~2 m of 1.5 mm Dyneema): anchor at the drum's radial hole (knot
-behind), ~14 resident wraps on the 24 mm drum, both ends terminating in
-the printed END segments of the channel — the cable passes through the
-2.2 mm hole in the anchor wall and knots in the cavity behind it, in line
-with the groove. Tension by rotating the drum before dropping the pinion
-into mesh; engagement locks it, and one tooth of re-meshing ≈ 0.8 mm of
-cable. If that proves too coarse, a screw tensioner can be built into an
-end segment (it's a 20-minute reprint).
+Cable (~2 m of 1.1 mm stiff aramid cord): anchor at the drum's
+mid-groove radial hole (knot behind), ~14 resident wraps riding the
+helical groove of the 41 mm drum, both ends terminating in the printed
+END segments of the channel — the cable passes through the 2.2 mm hole
+in the anchor wall and knots in the cavity behind it, in line with its
+track. The wrap band MARCHES one groove pitch per drum rev (see the
+wrap-math note in `prototype1/params.scad`): the groove and the two
+ramped sector tracks make the walk exact and fleet-free — check at
+assembly that the groove hand matches the track ramp direction. Aramid
+is slippery and weak in knots: figure-8 with a backup, or seize the
+tail. Tension by rotating the drum before dropping the pinion into
+mesh — the free drum equalizes both runs through torque balance, so a
+single tensioned end pretensions the whole loop; engagement locks it,
+and one tooth of re-meshing ≈ 0.8 mm of cable. Set pretension above
+half the max working tension swing (~56 N + margin) so both runs stay
+taut at full load; a screw tensioner in one end segment replaces the
+tooth-quantized adjustment when it proves too coarse (a 20-minute
+reprint).
 
 ## Rendering
 
@@ -105,7 +115,8 @@ openscad -o build/pinion.stl pinion.scad
 openscad -o build/gear_drum.stl gear_drum.scad
 openscad -o build/motor_mount.stl motor_mount.scad
 openscad -o build/bridge.stl bridge.scad
-openscad -o build/sector_segment.stl  sector_segment.scad   # 7 + 2 ends
+openscad -o build/sector_segment_1.stl -D idx=1 sector_segment.scad
+   # 3 distinct segments: idx = 0..2 (0 and 2 grow the anchor walls)
 ```
 
 In `arm/`:
@@ -127,6 +138,10 @@ openscad -o build/testbench_up.png -D pose_shoulder=100 --viewall --autocenter t
 - `gear_backlash = 0` deliberately: no backlash is cut into the teeth —
   set the mesh snug by pressing the gears together before tightening the
   motor plate.
-- `drum_len` is computed from the wrap math (full-travel turns + dead
-  wraps; ~24 mm at the current ratios) — if the ratios change, the drum,
-  sector, and board geometry all follow, so regenerate every output.
+- `drum_len` is computed from the wrap math (resident band + its march;
+  ~41 mm at the current ratios) — if the ratios, cable, or groove pitch
+  change, the drum groove and every sector track follow, so regenerate
+  every output.
+- The sector segments print lying on the flush face: the arc sits in
+  the bed plane, the V walls print at 45°, and the only support needed
+  is the flat plane under the leg.

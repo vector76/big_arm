@@ -148,11 +148,16 @@ export class TwinScene {
 
   private bodyParents: Record<string, THREE.Object3D>;
 
-  async load(baseUrl: string, onProgress: (msg: string) => void): Promise<void> {
+  // version cache-busts the fixed-URL meshes (see vite.config.ts)
+  async load(
+    baseUrl: string,
+    version: string,
+    onProgress: (msg: string) => void,
+  ): Promise<void> {
     const loader = new ThreeMFLoader();
     await Promise.all(
       Object.entries(this.bodyParents).map(async ([body, parent]) => {
-        const group = await loader.loadAsync(`${baseUrl}${body}.3mf`);
+        const group = await loader.loadAsync(`${baseUrl}${body}.3mf?v=${version}`);
         fixMaterials(group);
         parent.add(group);
         if (body === 'ee') this.eeBody = group;

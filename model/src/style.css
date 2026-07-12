@@ -61,6 +61,22 @@ body {
   font-size: 13px;
 }
 
+/* twin.html: IK drag hint, parked under the lil-gui pose panel */
+#ik-hint {
+  position: fixed;
+  right: 15px;
+  top: 172px;
+  width: 245px;
+  box-sizing: border-box;
+  color: #8b95a3;
+  font-size: 12.5px;
+  background: rgba(20, 22, 26, 0.88);
+  border: 1px solid #333a44;
+  border-radius: 6px;
+  padding: 5px 10px;
+  pointer-events: none;
+}
+
 .page-link {
   position: fixed;
   left: 12px;

@@ -12,7 +12,7 @@ const status = document.getElementById('status')!;
 
 async function main(): Promise<void> {
   const base = `${import.meta.env.BASE_URL}cad/`;
-  const res = await fetch(`${base}frames.json`);
+  const res = await fetch(`${base}frames.json?v=${__BUILD_ID__}`);
   if (!res.ok) {
     status.textContent =
       'cad/frames.json not found — run `npm run export:cad` first.';
@@ -23,7 +23,7 @@ async function main(): Promise<void> {
 
   const scene = new TwinScene(document.getElementById('app')!, frames);
   let loaded = 0;
-  await scene.load(base, () => {
+  await scene.load(base, __BUILD_ID__, () => {
     loaded++;
     status.textContent = `loading meshes ${loaded}/5`;
   });

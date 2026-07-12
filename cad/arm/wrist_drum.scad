@@ -28,8 +28,7 @@ use <../lib/helpers.scad>
 wr_apex_r = wr_drum_r - (cable_d / 2) / sin(v_half);   // 49.2
 wr_crest_r = wr_drum_r + 1.4;    // cord captive by ~0.85 (sector idiom)
 wd_y0 = ee_w / 2;                // 55: the EE plate's outer face
-wd_web0 = wr_cab_y - 3;          // 65: web/rim inboard face
-wd_y1 = wr_cab_y + wr_band + 3;  // 77.1: outboard face
+wd_y1 = wr_cab_y + wr_band + 3;  // 68.1: outboard face
 anchor_az = [264, 90];           // NOMINAL, per groove (see header)
 
 module wd_tube(od, id, y0, y1) difference() {
@@ -38,10 +37,10 @@ module wd_tube(od, id, y0, y1) difference() {
 }
 
 module wrist_drum() difference() {
-  union() {
-    wd_tube(wr_hub_od, wr_hub_id, wd_y0, wd_web0);        // foot + shell
-    wd_tube(2 * wr_crest_r, wr_hub_id, wd_web0, wd_y1);   // web + rim
-  }
+  // ONE solid annulus, plate face to outboard face: with the cable
+  // plane hugging the wood there's no separate foot/web — the first
+  // groove mouth leaves a ~1.8 lip to the seating face
+  wd_tube(2 * wr_crest_r, wr_hub_id, wd_y0, wd_y1);
   // the two V-grooves, cut as revolved triangles about the axis
   for (i = [0, 1]) ty(wr_cab_y + i * wr_band) rx(-90)
     rotate_extrude($fn = 120)
@@ -52,11 +51,13 @@ module wrist_drum() difference() {
   for (i = [0, 1]) ry(-anchor_az[i]) ty(wr_cab_y + i * wr_band)
     ry(90) tz(wr_hub_id / 2 - 2)
       cylinder(d = 2.2, h = wr_crest_r - wr_hub_id / 2 + 4, $fn = 24);
-  // six wood screws into the EE plate: shank through the foot, head
-  // bore reaching in from the outboard face
+  // six wood screws into the EE plate: shank through a 3.5 floor,
+  // head bore reaching in from the outboard face (heads at r 44.8
+  // max — inside the groove apex ring at 49.2)
   ry([for (k = [0 : 5]) k * 60 + 30]) tx(wr_screw_r) {
     ty(wd_y0 - 1) rx(-90) cylinder(d = 3.6, h = 6, $fn = 24);
-    ty(wd_y0 + 4) rx(-90) cylinder(d = 7.5, h = wd_y1 - wd_y0, $fn = 24);
+    ty(wd_y0 + 3.5) rx(-90)
+      cylinder(d = 7.5, h = wd_y1 - wd_y0 - 2.5, $fn = 24);
   }
 }
 

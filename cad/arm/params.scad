@@ -469,7 +469,17 @@ wr_axle = [-190, 150];       // capstan dead axle (forearm frame x,z):
                              // high on the fin — the wheel's low point
                              // (z 97.6) passes 22 over the upper arm's
                              // top chord at full extension (75.5)
-wr_pin = [wr_axle[0] - cd, wr_axle[1]];   // pinion/motor straight back
+wr_mesh_a = 215;     // pinion direction from the capstan axle, deg
+                     // (180 = straight back). ROTATED DOWN past 180 to
+                     // drop the motor — the heaviest piece — toward
+                     // the forearm axis line: every mm of drive CG
+                     // height is a mm the closing CW block must hang
+                     // lower. Bound: the motor body's bottom must
+                     // clear the fin's bottom-edge rule (taper line
+                     // + 2) at full extension — at 215 the bottom
+                     // passes z ~95 vs the line's ~77 at that x
+                     // (~18 in hand; ~230 would spend it all)
+wr_pin = wr_axle + cd * [cos(wr_mesh_a), sin(wr_mesh_a)];
 // wrap bookkeeping — the shoulder's wrap math at wrist scale. The
 // march is so short here (~2.3 mm over a ~650 mm span, ~0.2 deg of
 // fleet) that the DRUM grooves stay PLAIN CIRCLES; only the capstan
@@ -482,15 +492,22 @@ wr_cap_len = ceil(wr_band + wr_ramp + 2); // 11: grooved core
 // LANES (+y side): the fin (28..40) hosts the stack exactly as the
 // boom plate hosts the shoulder's — wheel + pinion straddle it
 // through a kidney (27..54), grooved core out at the cable plane,
-// bearing boss + bridge outboard. The cable plane must clear the
-// elbow station's hardware off the upper-arm plate's 55 face (green
-// flange + bolt head reach y ~63): grooves at 68 / 68 + band. The
-// runs also pass z ~78 OVER the elbow axis at x = 0, so they clear
-// the Ø48 flange radially too — doubly safe
-wr_cab_y = 68;               // first groove centerline
+// bearing boss + bridge outboard. The cable plane hugs the WOOD:
+// the only material in its way is the 55 outer face shared by the
+// upper-arm fork plates (at the elbow) and the EE fork plates (at
+// the wrist) — every piece of joint HARDWARE off those faces (green
+// flanges r 24, screw heads r 23, bolt heads) is cleared RADIALLY,
+// the runs' closest pass to either joint axis being ~75. So the
+// first groove sits at 59: cord edge ~3.5 off the wood, and the
+// groove mouth (+-2.2 at the crest) leaves a printable ~1.8 lip to
+// the drum ring's inboard face. (The capstan's y is otherwise FREE:
+// the axle is carried on both sides, so the band goes wherever the
+// cable plane asks and the neck length absorbs the difference —
+// wr_cab_y below ~59 would drive the neck negative into the wheel.)
+wr_cab_y = 59;               // first groove centerline
 wr_whl_y0 = 27;              // wheel inboard face (fin kidney idiom)
-wr_core_y0 = wr_cab_y + wr_band / 2 - wr_cap_len / 2;   // 65.5
-wr_y1 = wr_core_y0 + wr_cap_len + 2 + bearing_w;        // 85.5: part end
+wr_core_y0 = wr_cab_y + wr_band / 2 - wr_cap_len / 2;   // 56.5
+wr_y1 = wr_core_y0 + wr_cap_len + 2 + bearing_w;        // 76.5: part end
 // the two runs are EXTERNAL COMMON TANGENTS of the drum and capstan
 // circles (converging ~3 deg — belt-like); the common normal n makes
 // angle acos((r2-r1)/d) with the center line, two signs = two runs
@@ -501,11 +518,11 @@ function wr_tan_n(s) = let (a = wr_span_phi + s * wr_span_gam)
   [cos(a), sin(a)];         // s = -1 upper run, +1 lower run
 function wr_tan_p1(s) = [fore_len, 0] + wr_drum_r * wr_tan_n(s);
 function wr_tan_p2(s) = wr_axle + wr_cap_r * wr_tan_n(s);
-// the EE drum ring (wrist_drum.scad): foot flange on the EE plate's
-// outer face (55), open center around the station's green flange
-// (Ø48) and its screw heads (r 20 circle), rim carrying the grooves
+// the EE drum ring (wrist_drum.scad): one solid annulus seated on
+// the EE plate's outer face (55), open center around the station's
+// green flange (Ø48, r 24) and its screw heads (r 23) — the ring
+// goes on after the joint is assembled
 wr_hub_id = 58;
-wr_hub_od = 96;              // lands inside the EE disc (rcap 49.4)
 wr_screw_r = 41;             // 6 wood screws into the EE plate
 
 // ---- the capstan lane on the arm ----

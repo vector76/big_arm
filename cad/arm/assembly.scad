@@ -592,11 +592,13 @@ module forearm() {
   // The shoulder's flipped-stack idiom on the enlarged fin: wheel +
   // pinion straddle the fin plate (28..40) through its kidney cutout
   // (lane 27..54), the grooved capstan core sits out at the cable
-  // plane (grooves 68 / 68+band, clearing the elbow station's y ~63
-  // hardware), and the part ends in a bearing boss picked up by a
+  // plane (grooves 59 / 59+band, hugging the 55 wood faces — all
+  // joint hardware is cleared RADIALLY, see params), and the part
+  // ends in a bearing boss picked up by a
   // CONCEPT-LEVEL bridge — plate over the boss, rear wall down to the
-  // fin's outer face at x <= axle - 62 (wheel tips reach 52.4, and
-  // both cable runs leave toward +x, so the back is free air). To be
+  // fin's outer face at x <= axle - 68 (wheel tips reach 52.4, the
+  // down-rotated pinion's reach 58.3 + margin, and both cable runs
+  // leave toward +x, so the back is free air). To be
   // detailed as walled housings with staggered screws, the shoulder
   // treatment.
   txz(wr_axle) {
@@ -624,8 +626,8 @@ module forearm() {
     }
     // outboard bridge: plate over the boss + rear wall to the fin
     txz(wr_axle) {
-      ty(wr_y1 + 1) tx(-62) cub([112, 8, 70], [0, 0, 1]);
-      ty(40) tx(-62) cub([8, wr_y1 + 1 - 40, 70], [0, 0, 1]);
+      ty(wr_y1 + 1) tx(-68) cub([118, 8, 70], [0, 0, 1]);
+      ty(40) tx(-68) cub([8, wr_y1 + 1 - 40, 70], [0, 0, 1]);
     }
   }
   // the cable runs' STRAIGHT portions, drawn as rods for clearance

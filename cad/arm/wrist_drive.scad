@@ -71,7 +71,11 @@ module wrist_gear_capstan() {
       herringbone_gear(gear_module, gear_teeth, gear_width,
                        helix = helix_angle, pa = pressure_angle,
                        backlash = gear_backlash, ha = wheel_addendum);
-      tz(gear_width) cylinder(d = 24, h = z_core - 2 - gear_width);
+      // the neck all but vanishes with the cable plane hugging the
+      // wood (wr_cab_y 59 leaves ~0.2); clamp it non-negative so a
+      // further inboard push degenerates gracefully to flange-on-wheel
+      tz(gear_width)
+        cylinder(d = 24, h = max(0.1, z_core - 2 - gear_width));
       tz(z_core - 2) wr_capstan_body();
       tz(z_core + wr_cap_len + 2) cylinder(d = 28, h = bearing_w);
     }

@@ -96,6 +96,8 @@ use <joints.scad>
 use <pinion.scad>      // the REAL drivetrain parts, verbatim from
 use <gear_drum.scad>   // the detail files — same params.scad
 use <sector_segment.scad>
+use <wrist_drive.scad> // wrist gear+capstan (rides the forearm fin)
+use <wrist_drum.scad>  // wrist drum ring (rides the EE fork)
 
 sr = sector_r(shoulder_ratio);   // 238.2
 da = sr + 18;    // drum axis radius, 256.2: CLOSE IN, so the take-off
@@ -580,20 +582,61 @@ module forearm() {
     color("dimgray") ty(-(fore_w / 2 + 9)) ry(-90) cylinder(d = 6, h = 5);
     color("khaki") ty(-(fore_w / 2 + 4)) cub([10, 6, 14], [0, 0, 1]);
   }
-  // elbow counterweight, CENTERED for lateral symmetry: a
-  // dog-leg hanger crosses from the fin's inboard face (y 28)
-  // to the center plane, then drops through the upper arm's
-  // CENTERED top-board slot to the block, whose CG sits on the
-  // forearm axis extended back through the elbow — so gravity
-  // torque vanishes at every pose. At full extension the hanger
-  // parks in the slot (near-vertical entry: arc r ~245)
-  color("slategray") {
-    tx(elbow_cw_x0) ty(-20) tz(88)
-      cub([25, 48, 24], [0, 0, 0]);                  // dog-leg
-    tx(elbow_cw_x0) tz(-45)
-      cub([25, 40, link_d(-elbow_cw_x0) / 2 + 82], [0, 1, 0]);
-    tx(elbow_cw_x0 - 28) tz(-45) cub(elbow_cw_blk, [0, 1, 0]);
+  // elbow counterweight: TEMPORARILY NOT DRAWN (block + dog-leg
+  // hanger). The wrist drive stack (~0.6 kg) now rides the enlarged
+  // fin behind the elbow, above the axis line — block, hanger and
+  // fin outline all get resized together at the next mass audit
+  // (re-add + trim; the parking slot in the upper arm stays)
+
+  // ---- wrist capstan drive (see the params section; ratio ~19.9) ----
+  // The shoulder's flipped-stack idiom on the enlarged fin: wheel +
+  // pinion straddle the fin plate (28..40) through its kidney cutout
+  // (lane 27..54), the grooved capstan core sits out at the cable
+  // plane (grooves 68 / 68+band, clearing the elbow station's y ~63
+  // hardware), and the part ends in a bearing boss picked up by a
+  // CONCEPT-LEVEL bridge — plate over the boss, rear wall down to the
+  // fin's outer face at x <= axle - 62 (wheel tips reach 52.4, and
+  // both cable runs leave toward +x, so the back is free air). To be
+  // detailed as walled housings with staggered screws, the shoulder
+  // treatment.
+  txz(wr_axle) {
+    color("silver") ty(18) rx(-90)
+      cylinder(d = 8, h = wr_y1 + 6 - 18, $fn = 24);
+    color("steelblue") ty(wr_whl_y0) rx(-90) wrist_gear_capstan();
   }
+  txz(wr_pin) {
+    color("tomato") ty(wr_whl_y0) rx(-90) pinion();
+    color("silver") ty(18) rx(-90) cylinder(d = 5, h = 24, $fn = 24);
+    color("dimgray") ty(18 - motor_len) rx(-90)
+      cub([motor_w, motor_w, motor_len], [1, 1, 0]);
+  }
+  color("khaki") {
+    // inboard support slab (y 18..26): motor face + axle wheel end,
+    // mesh center distance printed-exact — the shoulder idiom
+    ty(26) rx(90) linear_extrude(8) difference() {
+      hull() { txy(wr_axle) circle(64); txy(wr_pin) circle(30); }
+      txy(wr_pin) circle(12);
+    }
+    // ring wall closing the slab to the fin's inner face (26..28)
+    ty(28) rx(90) linear_extrude(2) difference() {
+      hull() { txy(wr_axle) circle(62); txy(wr_pin) circle(32); }
+      hull() { txy(wr_axle) circle(56); txy(wr_pin) circle(26); }
+    }
+    // outboard bridge: plate over the boss + rear wall to the fin
+    txz(wr_axle) {
+      ty(wr_y1 + 1) tx(-62) cub([112, 8, 70], [0, 0, 1]);
+      ty(40) tx(-62) cub([8, wr_y1 + 1 - 40, 70], [0, 0, 1]);
+    }
+  }
+  // the cable runs' STRAIGHT portions, drawn as rods for clearance
+  // eyeballing: external common tangents of the r 50 drum and r 16
+  // capstan (converging ~3 deg). Upper run in the first groove
+  // (wr_cab_y), lower in the second; the wrapped arcs live in the
+  // grooves and aren't drawn
+  color("orangered") for (i = [0, 1])
+    ty(wr_cab_y + i * wr_band) hull()
+      txz([wr_tan_p1(i == 0 ? -1 : 1), wr_tan_p2(i == 0 ? -1 : 1)])
+        sphere(d = cable_d, $fn = 16);
   // the wrist scale camera, forearm-fixed DEAD-AFT of the wrist axis:
   // the symmetric +-90 travel forces azimuth 180 (the only heading
   // that keeps the read head on the EE strip at both extremes — the
@@ -653,6 +696,10 @@ module end_effector() {
       rz(180) pie(rcap + 0.8, wrist_travel + 20);
       circle(r = rcap);
     }
+  // the wrist DRUM ring on the +y side plate (the strip owns the -y
+  // rim): the REAL print, wrist_drum.scad — cable grooves at r 50,
+  // foot around the green flange, screws into the ply disc
+  color("steelblue") wrist_drum();
   // tool flange on the end plate's front face; the ghosted volume is
   // a reference envelope, not a part
   color("navajowhite") tx(ee_len) ry(90) cylinder(d = 85, h = 12);
@@ -789,14 +836,39 @@ module sensor_board_2d() difference() {
 // upper arm ends at the elbow). The closest approach to the elbow
 // axis is r ~40 — clearance held for whatever drive wheel the elbow
 // redesign puts at the joint (the old worm ring reached r 37.5)
+// ENLARGED (deliberately generous — to be trimmed when the elbow CW
+// comes back): the old strip fin plus a DRIVE BLOB hosting the wrist
+// capstan stack — a ring holding >= 29 of ply around the kidney the
+// wheel + pinion straddle through (the boom-plate treatment), hulled
+// down to the old fin's top edge. Clipped hard against the taper
+// line + 2 behind the arm, so the full-extension clearance rule
+// survives whatever the hull does.
 module fore_cw_fin_2d() {
   t = tan(arm_taper);
-  polygon([[70, elbow_d / 2 - 70 * t - 26],
-           [2, elbow_d / 2 - 2 * t - 26],
-           [0, elbow_d / 2 + 2],
-           [elbow_cw_x0, elbow_d / 2 - elbow_cw_x0 * t + 2],
-           [elbow_cw_x0, elbow_d / 2 - elbow_cw_x0 * t + 52],
-           [30, elbow_d / 2 - 30 * t + 50]]);
+  difference() {
+    union() {
+      polygon([[70, elbow_d / 2 - 70 * t - 26],
+               [2, elbow_d / 2 - 2 * t - 26],
+               [0, elbow_d / 2 + 2],
+               [elbow_cw_x0, elbow_d / 2 - elbow_cw_x0 * t + 2],
+               [elbow_cw_x0, elbow_d / 2 - elbow_cw_x0 * t + 52],
+               [30, elbow_d / 2 - 30 * t + 50]]);
+      hull() {
+        txy(wr_axle) circle(84);
+        txy(wr_pin) circle(35);
+        txy([elbow_cw_x0, elbow_d / 2 - elbow_cw_x0 * t + 50]) circle(2);
+        txy([30, elbow_d / 2 - 30 * t + 48]) circle(2);
+      }
+    }
+    // nothing below the shared taper line + 2 behind the arm (the
+    // old polygon respects it by construction; the blob is clipped)
+    polygon([[-80, elbow_d / 2 + 80 * t + 2],
+             [-330, elbow_d / 2 + 330 * t + 2],
+             [-330, elbow_d / 2 + 330 * t - 200],
+             [-80, elbow_d / 2 + 80 * t - 200]]);
+    // the kidney: wheel + pinion clearance, Ø110 blended into Ø26
+    hull() { txy(wr_axle) circle(55); txy(wr_pin) circle(13); }
+  }
 }
 
 module boom_plate_2d() rz(dd) difference() {

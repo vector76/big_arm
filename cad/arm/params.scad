@@ -13,10 +13,11 @@
 //     straight-back. The YAW is a single-stage herringbone ring:
 //     printed gear segments on a doubled two-ply slew disc, driven
 //     directly by the m2 8T pinion (the shoulder primary pinion).
-//     Elbow + wrist drives are BEING OVERHAULED with something
-//     different (the worm lean is dropped — its motors outgrew the
-//     truss hollows); the model carries bare stations/axles at those
-//     joints until the redesign lands
+//     Elbow + wrist drives are BEING OVERHAULED (the worm lean is
+//     dropped — its motors outgrew the truss hollows). The WRIST
+//     redesign has landed: a second herringbone primary + cable loop,
+//     remote-mounted on the elbow-CW fin (see the wrist capstan drive
+//     section below). The elbow still carries a bare station
 //
 // Y-LANE ZONING (why nothing collides), y in mm at the shoulder:
 // truss chords 0..43, counterweight block 1..43 (bolted inboard of
@@ -133,7 +134,7 @@ yaw_lobe_r = yaw_pitch_r + 7 - 0.8;  // 213.2: the disc is NOT a plain
                                 // segments
 shoulder_ratio = 150; shoulder_min = -20; shoulder_max = 100;  // capstan
 elbow_travel = 135;   // downward bend only; drive TBD (redesign underway)
-wrist_travel = 180;   // +-90; drive TBD (redesign underway)
+wrist_travel = 180;   // +-90; capstan drive, remote motor (below)
 
 // ---- links ----
 upper_len = 450;
@@ -244,7 +245,13 @@ cw_bend = -2;                  // deg above straight-back: NEGATIVE =
 cw_r = 265;                    // block center; worst corner sweeps 325
 cw_mass = [110, 42, 110];      // ~4.0 kg steel, 42 across y
 elbow_cw_x0 = -252;            // boom tail; hook and block hang there
-elbow_cw_blk = [70, 40, 80];   // placeholder block, center near the axis line
+elbow_cw_blk = [70, 40, 80];   // placeholder block, center near the axis
+                               // line. TEMPORARILY NOT DRAWN: the wrist
+                               // drive stack (~0.6 kg) now rides the
+                               // enlarged fin above the axis line, so
+                               // block, dog-leg and fin outline all get
+                               // resized together at the next mass
+                               // audit (re-add + trim)
 elbow_cw_slot = [88, 48];      // in the upper arm's top board only...
 elbow_cw_slot_x = 205;         // ...centered at upper_len - 245
 
@@ -439,6 +446,67 @@ function track_z(a, run) = band_z0 + band_wt / 2
 shaft_d = 8;                // M8 rod / bolt
 bearing_w = 7;              // 608
 bearing_pocket_d = 22.1;    // press fit; tune to printer
+
+// ---- wrist capstan drive (~20:1; herringbone primary + cable loop) ----
+// (Lives BELOW the capstan-stage and bearing sections: it reuses
+// groove_p and bearing_w, and top-level variables don't forward-
+// reference.) The shoulder's architecture relocated: a second 8T/51T
+// herringbone primary (the shared pinion again) drives a FAT grooved
+// capstan riding the enlarged elbow-CW fin behind the elbow, and two
+// straight cable runs go forward along the +y side to a full-circle
+// printed DRUM on the EE fork's left plate. Remote motor: its mass
+// lands where counterweight was going anyway, the forearm nose stays
+// bare, and nothing along the span moves relative to anything (drum,
+// runs, capstan and motor all live on the forearm/EE pair — no
+// idlers, no joint crossing). Margin: 0.41 x 19.9 x ~0.85 / 2.9 = ~2.4.
+wr_drum_r = 50;       // cable CENTERLINE radius at the EE drum — the
+                      // nose-cap radius (49.4), so the drum's crest
+                      // pokes only ~2 proud of the link outline
+wr_cap_r = 16;        // capstan centerline radius: core wall over the
+                      // bore ~10 mm — nothing thin anywhere
+wrist_ratio = primary_ratio * wr_drum_r / wr_cap_r;   // ~19.9
+wr_axle = [-190, 150];       // capstan dead axle (forearm frame x,z):
+                             // high on the fin — the wheel's low point
+                             // (z 97.6) passes 22 over the upper arm's
+                             // top chord at full extension (75.5)
+wr_pin = [wr_axle[0] - cd, wr_axle[1]];   // pinion/motor straight back
+// wrap bookkeeping — the shoulder's wrap math at wrist scale. The
+// march is so short here (~2.3 mm over a ~650 mm span, ~0.2 deg of
+// fleet) that the DRUM grooves stay PLAIN CIRCLES; only the capstan
+// keeps the helical groove
+wr_turns = wrist_travel / 360 * wr_drum_r / wr_cap_r;   // 1.56
+wr_band = (wr_turns + 2.5) * groove_p;    // 6.1: frozen band = the
+                                          // drum's groove separation
+wr_ramp = wr_turns * groove_p;            // 2.3: the march
+wr_cap_len = ceil(wr_band + wr_ramp + 2); // 11: grooved core
+// LANES (+y side): the fin (28..40) hosts the stack exactly as the
+// boom plate hosts the shoulder's — wheel + pinion straddle it
+// through a kidney (27..54), grooved core out at the cable plane,
+// bearing boss + bridge outboard. The cable plane must clear the
+// elbow station's hardware off the upper-arm plate's 55 face (green
+// flange + bolt head reach y ~63): grooves at 68 / 68 + band. The
+// runs also pass z ~78 OVER the elbow axis at x = 0, so they clear
+// the Ø48 flange radially too — doubly safe
+wr_cab_y = 68;               // first groove centerline
+wr_whl_y0 = 27;              // wheel inboard face (fin kidney idiom)
+wr_core_y0 = wr_cab_y + wr_band / 2 - wr_cap_len / 2;   // 65.5
+wr_y1 = wr_core_y0 + wr_cap_len + 2 + bearing_w;        // 85.5: part end
+// the two runs are EXTERNAL COMMON TANGENTS of the drum and capstan
+// circles (converging ~3 deg — belt-like); the common normal n makes
+// angle acos((r2-r1)/d) with the center line, two signs = two runs
+wr_span_phi = atan2(wr_axle[1], wr_axle[0] - fore_len);
+wr_span_d = norm([wr_axle[0] - fore_len, wr_axle[1]]);
+wr_span_gam = acos((wr_cap_r - wr_drum_r) / wr_span_d);
+function wr_tan_n(s) = let (a = wr_span_phi + s * wr_span_gam)
+  [cos(a), sin(a)];         // s = -1 upper run, +1 lower run
+function wr_tan_p1(s) = [fore_len, 0] + wr_drum_r * wr_tan_n(s);
+function wr_tan_p2(s) = wr_axle + wr_cap_r * wr_tan_n(s);
+// the EE drum ring (wrist_drum.scad): foot flange on the EE plate's
+// outer face (55), open center around the station's green flange
+// (Ø48) and its screw heads (r 20 circle), rim carrying the grooves
+wr_hub_id = 58;
+wr_hub_od = 96;              // lands inside the EE disc (rcap 49.4)
+wr_screw_r = 41;             // 6 wood screws into the EE plate
 
 // ---- the capstan lane on the arm ----
 // FLIPPED STACK: the sector band is flush on the left board's inner

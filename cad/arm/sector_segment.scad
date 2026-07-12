@@ -10,7 +10,7 @@
 // outboard, per the flush stack-up (params).
 //
 // The two track slots are 45-deg V's that climb across the arc at the
-// shared ~1.9 deg lead (track_z in params.scad): the sector-side lay
+// shared ~1.4 deg lead (track_z in params.scad): the sector-side lay
 // is positively located, the free spans leave square (zero fleet),
 // and the V self-centers the cord. The ramp direction must match the
 // drum groove's hand (params wrap-math note).

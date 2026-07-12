@@ -21,25 +21,11 @@ module pie(r, ang) {
                         r * sin(-ang / 2 + ang * i / n)]]));
 }
 
-// the sector's rim cable channel: WEDGE-BACKED printed segments
-// (detail part: sector_segment.scad) capping the board web's circular
-// rim — the two-track band hugs rim_r to crest_r, and outboard of the
-// board face the section fills solid down past the rim to the screw
-// leg (radial backing; this concept envelope mirrors seg_profile,
-// same params). ONE-SIDED: cab_y0 is the flush (arm-side) face. Joint
-// axis = Y, bisector at `bis` degrees from +X toward +Z. The sector
-// WEB itself is no separate part: the fixed sector is a solid web
-// CNC'd as one piece with the left base board (see the assembly's
-// left_board_2d)
-module sector_channel(ang, bis = 180) {
-  color("khaki") rx(-90) rz(-bis - ang / 2)
-    rotate_extrude(angle = ang, $fn = 180)
-      polygon([[rim_r, cab_y0], [crest_r, cab_y0],
-               [crest_r, cab_y0 + cab_w],
-               [rim_r - seg_back, cab_y0 + cab_w],
-               [rim_r - leg_d, cab_y0 + ply_t + leg_t],
-               [rim_r - leg_d, cab_y0 + ply_t], [rim_r, cab_y0 + ply_t]]);
-}
+// (The sector's rim cable channel is no longer sketched here: the
+// assembly places the REAL prints — sector_segment.scad — directly,
+// the same no-drift rule as the drivetrain parts. The sector WEB is
+// no separate part either: it's CNC'd as one piece with the left
+// base board, see the assembly's left_board_2d.)
 
 // ---- preloaded joint bearing station ----
 // Shared by the shoulder and elbow; see bearing_station.scad for the

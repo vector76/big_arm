@@ -25,9 +25,9 @@ flags (0 = from origin, 1 = centered, -1 = negative-going), and
   internal preload loop, wood never in a precision fit, one design
   serves every joint; `arm/bearing_station.scad` is the annotated
   standalone detail — while the wrist keeps a dead-axle proxy.
-  Reductions: shoulder = an m2 12T/51T herringbone primary (4.25:1)
+  Reductions: shoulder = an m2 8T/51T herringbone primary (6.375:1)
   into an INVERTED capstan (sector fixed to the left base board,
-  ~35:1, drive rides the arm; 150:1 total), yaw = a two-ply slew disc
+  ~23.5:1, drive rides the arm; 150:1 total), yaw = a two-ply slew disc
   with printed herringbone gear segments driven directly by the same
   pinion on an inverted motor, riding rim rollers and hubbed on the
   bearing-station idiom flipped onto the flat baseplate
@@ -45,9 +45,9 @@ flags (0 = from origin, 1 = centered, -1 = negative-going), and
 
 | File | Part | Make |
 |------|------|------|
-| `pinion.scad` | 12T herringbone, press-on 5 mm D-bore (proven grub-free fit: Ø5.1 with flat at nominal 2.0 mm); drives the shoulder primary AND the yaw ring | print |
-| `gear_drum.scad` | the shoulder's gear+drum: helically grooved capstan core INBOARD (the lay is positively located; length = wrap band + its march), mid-groove anchor hole, a short neck spanning the sector band's outboard wall, and the 51T stub-addendum herringbone wheel OUTBOARD; two 608s pocket into the part's ends, spins on a fixed M8 dead axle | print |
-| `sector_segment.scad` | printed channel segments, TWO-TRACK RAMPED and WEDGE-BACKED: the band seats flush on the left board's circular rim (cable tension presses print onto wood) and outboard of the board face the section fills solid down to the leg — ample radial backing; the leg screws to the outboard ply face through deep 7.5 mm counterbores (pilot circle CNC'd into the board). 45° V track slots climb at the drum groove's ~2° lead — zero fleet. Three ~180 mm prints (`-D idx=0..2`; on the end prints the anchored run's slot stops short of the arc end, and the cord knots in a recess on the end face) | print |
+| `pinion.scad` | 8T herringbone, cut opposite-hand to mesh the +helix wheels, press-on 5 mm D-bore (proven grub-free fit: Ø5.1 with flat at nominal 2.0 mm); drives the shoulder primary AND the yaw ring | print |
+| `gear_drum.scad` | the shoulder's gear+drum, FLIPPED stack: the 51T stub-addendum herringbone wheel INBOARD (straddling the boom plate through its kidney cutout), a short neck, the helically grooved capstan core across the sector band's lane (the lay is positively located; length = wrap band + its march), mid-groove anchor hole, and a bearing BOSS outboard; two 608s pocket into the ends (wheel face + boss, full-shoulder floors with inner-race reliefs), spins on a fixed M8 dead axle between two printed supports | print |
+| `sector_segment.scad` | printed channel segments, TWO-TRACK RAMPED and WEDGE-BACKED: the band seats flush on the left board's circular rim (cable tension presses print onto wood) and outboard of the board face the section fills solid down to the leg — ample radial backing; the leg screws to the outboard ply face through deep 7.5 mm counterbores (pilot circle CNC'd into the board). 45° V track slots climb at the drum groove's ~1.4° lead — zero fleet. Three ~180 mm prints (`-D idx=0..2`; on the end prints the anchored run's slot stops short of the arc end, and the cord knots in a recess on the end face) | print |
 
 Gear width follows the one-tooth phase rule: each herringbone half
 advances exactly one tooth of helix phase from center to edge (~27 mm

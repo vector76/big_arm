@@ -16,15 +16,18 @@
 //   grounds straight into the base, no bracket, no pylon. Fan bisector
 //   at base angle 180 - shoulder_bend + mid-travel.
 // - The DRIVE RIDES THE ARM: the +y truss plate grows a boom at arm
-//   angle 180 - shoulder_bend carrying, outboard of itself, the drum
-//   (its grooved band spanning the sector band's lane, y 58..103),
-//   the wheel + pinion outboard of the band's end (108.5..135.5) and
-//   the motor sleeved off the plate, face 4 under the gear plane
-//   (56.5..104.5 — the old rig's plunge idiom died when the stack
-//   moved outboard); a printed bridge (137.5..145.5) picks up both
-//   axle ends so they're simply supported. The drive mass behind the
-//   joint is free counterweight, and the gear mesh is entirely
-//   arm-internal.
+//   angle 180 - shoulder_bend. The stack is FLIPPED (wheel INBOARD):
+//   the 51T wheel + 8T pinion straddle the boom plate through its
+//   kidney cutout (y 27..54), the drum's grooved band spans the
+//   sector band's lane (62..92) ending in a bearing boss (..101),
+//   and the motor points back into the arm side (-30..18), its face
+//   on the printed inboard support slab that also seats the drum
+//   axle's wheel end — so the mesh center distance is printed-exact
+//   and the separating force loops close inside the print; a short
+//   printed bridge (101..109) picks up the boss end: the dead axle is
+//   simply supported. The drive mass behind the joint is free
+//   counterweight, and the gear mesh is entirely arm-internal,
+//   guarded inside the cutout.
 // - COUNTERWEIGHT: the drive boom plate is a SOLID FAN reaching from
 //   the boom down past straight-back (left side only), and the ~4 kg
 //   block bolts to its inboard face just BELOW the arm centerline —
@@ -48,11 +51,11 @@
 //   with no baseplate through-hole, so the plate bottom stays flat
 //   for clamping. Printed herringbone gear segments wrap 200 deg of
 //   the rim and the motor hangs INVERTED from a printed pylon,
-//   driving them directly with the m2 12T pinion (the same pinion as
-//   the shoulder primary) — single stage, ~17:1, yaw +-90. The pinion
+//   driving them directly with the m2 8T pinion (the same pinion as
+//   the shoulder primary) — single stage, ~26:1, yaw +-90. The pinion
 //   sits at bench azimuth 315, out of every swept corridor (the arm's
 //   drive boom owns azimuths 90..270 at full-up; the front board
-//   corners sweep r 161 vs the pinion's 219). On the disc, the stiff
+//   corners sweep r 161 vs the pinion's 215). On the disc, the stiff
 //   U of three boards: left = sector host; right = near-twin carrying
 //   the unloaded joint-angle sensor (sleeve turning with the arm hub,
 //   ring reader on the outer face — no drivetrain compliance in the
@@ -80,14 +83,24 @@ use <truss.scad>
 use <joints.scad>
 use <pinion.scad>      // the REAL drivetrain parts, verbatim from
 use <gear_drum.scad>   // the detail files — same params.scad
+use <sector_segment.scad>
 
 sr = sector_r(shoulder_ratio);   // 238.2
+da = sr + 18;    // drum axis radius, 256.2: CLOSE IN, so the take-off
+                 // pull on the drum is mostly tangential (spans leave
+                 // 14 deg off tangential — radial ~25% of tension —
+                 // vs 19 deg at the old +25), bounded by the flanges
+                 // (r 13.8) passing 2.8 over the band's crest (239.6)
 sh_mid = (shoulder_min + shoulder_max) / 2;   // 40
 yoke_y = col_w / 2 - ply_t;      // 63: side board inner faces
 dd = 180 - shoulder_bend;        // drive boom direction, ARM frame (135)
 sector_bis = dd + sh_mid;        // fixed sector bisector, BASE frame (175)
-drum_a = (sr + 25) * [cos(dd), sin(dd)];       // drum axle, arm frame
-pin_a = (sr + 25 + cd) * [cos(dd), sin(dd)];   // pinion/motor, arm frame
+drum_a = da * [cos(dd), sin(dd)];         // drum axle, arm frame
+pin_a = (da + cd) * [cos(dd), sin(dd)];   // pinion/motor, arm frame
+leg_a = [for (s = [-72, 72]) drum_a + s * [-sin(dd), cos(dd)]];
+                 // support columns / bridge legs flank the drum,
+                 // clear of the wheel and the cable runs, footed on
+                 // the boom plate's kidney ring
 
 // ---- the machine, final configuration ----
 // The kinematic tree, whole and in one place: every pose transform
@@ -136,13 +149,13 @@ module bench_env() {
     color("silver") tx(roller_r) tz(60) ry(90)
       cylinder(d = 22, h = 7, center = true);
   }
-  // yaw drive: the m2 12T herringbone pinion (the shoulder primary
+  // yaw drive: the m2 8T herringbone pinion (the shoulder primary
   // pinion, reused — drawn real) hangs INVERTED over the rim so the
   // gear band can sit low: the motor face bolts down onto a printed
   // pylon's top plate 2 over the band, the shaft drops through its
   // clearance hole and the pinion spans the full band with margin.
   // Azimuth 315: out of the arm's swept corridors.
-  rz(135) tx(-(yaw_pitch_r + 12)) {
+  rz(135) tx(-(yaw_pitch_r + gear_module * pinion_teeth / 2)) {
     color("khaki") {
       tx(-38) cub([12, 50, 50], [1, 1, 0]);
       tz(50) difference() {
@@ -203,10 +216,16 @@ module slew_base(segs = true) {
   }
 
   // the FIXED shoulder sector web is drawn as part of left_board_2d
-  // (one CNC piece); only its rim cable channel — the wedge-backed
-  // segment band, flush on the board's inner face — is separate
-  tz(shoulder_h)
-    sector_channel(sector_angle, sector_bis);
+  // (one CNC piece); the wedge-backed segment band on its rim is the
+  // REAL print (sector_segment.scad — the same no-drift rule as the
+  // drivetrain parts), three segments, the end ones carrying the
+  // anchors. rx(-90) maps local station a to base angle
+  // sector_bis - a, landing run A's end-face knot at the lower
+  // (gusset) end, 240 — where the nick note applies
+  color("khaki") tz(shoulder_h) ty(cab_y0 + sector_core_t / 2) rx(-90)
+    for (i = [0 : seg_n - 1])
+      rz(seg_bis(i) - sector_bis)
+        sector_segment(i, i == 0 ? -1 : i == seg_n - 1 ? 1 : 0);
   // paired preloaded bearing stations (joints.scad bearing_station;
   // annotated diagram in bearing_station.scad): pink bushing + roll
   // pin turn with the arm plates, green bushing + M3 bolt fixed to
@@ -255,45 +274,51 @@ module upper_arm() {
   // over the truss plate at concept level)
   color("burlywood") ty(upper_w / 2) rx(90) linear_extrude(ply_t)
     boom_plate_2d();
-  // drive hardware, all outboard of the boom plate — REAL parts (the
-  // detail-file modules, so the concept can't drift from the prints):
-  // gear_drum lays its grooved core across the fixed band's lane
-  // (62..103) and its herringbone wheel outboard of the band's end
-  // (108.5..135.5, a short neck spanning the band's outboard wall);
-  // the 12T pinion meshes at cd, its motor sleeved off the plate with
-  // its face 4 under the gear plane (56.5..104.5) — its mass is free
-  // counterweight. The mesh is entirely arm-internal.
+  // drive hardware — REAL parts (the detail-file modules, so the
+  // concept can't drift from the prints). FLIPPED stack: gear_drum's
+  // herringbone wheel sits INBOARD (27..54), straddling the boom
+  // plate through its kidney cutout, its grooved core lays across the
+  // fixed band's lane (62..92) and the part ends outboard in a
+  // bearing boss (..101); the 8T pinion meshes at cd in the wheel's
+  // plane, its motor hung under the inboard support slab, body
+  // pointing back into the arm side (-30..18) — its mass is free
+  // counterweight. The mesh is entirely arm-internal, guarded inside
+  // the cutout.
   txz(drum_a) {
-    color("silver") ty(upper_w / 2 - ply_t) rx(-90)
-      cylinder(d = 8, h = 108, $fn = 24);
-    color("steelblue") ty(cab_y0 + 2) rx(-90) gear_drum();
+    color("silver") ty(18) rx(-90) cylinder(d = 8, h = drum_y1 + 6 - 18, $fn = 24);
+    color("steelblue") ty(whl_y0) rx(-90) gear_drum();
   }
   txz(pin_a) {
     color("tomato") ty(whl_y0) rx(-90) pinion();
-    // the motor rides in a printed SLEEVE box off the plate; its face
-    // stops 4 under the gear plane (the rig idiom: the gear sweeps
-    // over the mounting plane), the pinion floating on the shaft
-    // above it. Mesh set by press-and-clamp of the sleeve's slotted
-    // feet — detail deferred
-    color("khaki") ty(upper_w / 2) rx(-90) difference() {
-      cub([motor_w + 12, motor_w + 12, whl_y0 - 4 - upper_w / 2],
-          [1, 1, 0]);
-      tz(-0.5) cub([motor_w + 1, motor_w + 1, whl_y0], [1, 1, 0]);
-    }
-    color("dimgray") ty(whl_y0 - 4 - motor_len) rx(-90)
+    color("silver") ty(18) rx(-90) cylinder(d = 5, h = 24, $fn = 24);
+    color("dimgray") ty(18 - motor_len) rx(-90)
       cub([motor_w, motor_w, motor_len], [1, 1, 0]);
   }
-  // printed bridge over both axle ends (the rig idiom: the axles end
-  // up simply supported); legs flank the wheels, clear of the cable
-  // runs
+  // printed INBOARD support: an 8-thick slab spanning both axes 1
+  // under the gear plane, standoff columns rising to the plate's
+  // inner face around the kidney (two flanking the drum at leg_a, one
+  // past the pinion). It seats the drum axle's wheel end AND the
+  // motor face (NEMA boss through the d 24 clearance hole; mesh
+  // center distance printed-exact, the separating force loops closing
+  // inside the print). Bolts to the plate — detail deferred
   color("khaki") {
-    ty(whl_y0 + gear_width + 10) rx(90) linear_extrude(8) rz(dd)
-      tx(sr - 15) sq([cd + 80, 172], [0, 1], 16);
-    txz([for (s = [-72, 72])
-         [(sr + 25 + cd / 2) * cos(dd) - s * sin(dd),
-          (sr + 25 + cd / 2) * sin(dd) + s * cos(dd)]])
-      ty(upper_w / 2) rx(-90) cylinder(d = 14, h = whl_y0 + gear_width + 6
-                                       - upper_w / 2);
+    ty(26) rx(90) linear_extrude(8) rz(dd) difference() {
+      hull() tx([da, da + cd]) circle(30);
+      tx(da + cd) circle(12);
+    }
+    txz(leg_a) ty(26) rx(-90)
+      cylinder(d = 14, h = upper_w / 2 - ply_t - 26);
+    txz((da + cd + 42) * [cos(dd), sin(dd)]) ty(26) rx(-90)
+      cylinder(d = 14, h = upper_w / 2 - ply_t - 26);
+  }
+  // ... and the short printed OUTBOARD bridge over the drum's bearing
+  // boss (the rig idiom: the dead axle ends up simply supported);
+  // legs flank the drum at leg_a, clear of the cable runs
+  color("khaki") {
+    ty(drum_y1 + 8) rx(90) linear_extrude(8) rz(dd)
+      tx(da) sq([70, 172], [1, 1], 16);
+    txz(leg_a) ty(upper_w / 2) rx(-90)
+      cylinder(d = 14, h = drum_y1 + 6 - upper_w / 2);
   }
   // upper-arm counterweight: the block bolts to the INBOARD face of
   // the boom plate's fan (no separate boom), centered just BELOW the
@@ -440,9 +465,12 @@ module sensor_board_2d() difference() {
 }
 
 // the arm's drive boom plate, drawn in the +y truss plate's plane:
-// a strip at arm angle dd carrying the drum dead axle bore and the
-// motor standoff's mounting circle (the motor rides outboard on a
-// printed standoff; mesh set by press-and-clamp of its slotted feet)
+// a strip at arm angle dd, widened into a RING around the kidney
+// cutout the wheel + pinion straddle the plate through (mesh inside
+// it); the ring is also the footing for the inboard support columns
+// and the bridge legs (leg_a, lateral +-72). The dead axle no longer
+// pierces the plate — it crosses inside the kidney, carried by the
+// printed supports on either face
 // the forearm's LEFT plate fin, drawn in the forearm frame (elbow at
 // the origin): bottom edge 2 mm above the shared taper line behind
 // the axis — clears the upper arm's top chord at full extension, and
@@ -465,7 +493,10 @@ module fore_cw_fin_2d() {
 
 module boom_plate_2d() rz(dd) difference() {
   union() {
-    sq([sr + 25 + cd + 55, 110], [0, 1], 16);
+    sq([da + cd + 55, 110], [0, 1], 16);
+    // the kidney would sever the 110 strip: widen it into a ring
+    // (>= 25 of ply all around the cutout)
+    hull() { tx(da) circle(82); tx(da + cd) circle(35); }
     // SOLID fan below the boom, as far down as travel allows: the
     // upper-arm counterweight bolts to its inboard face BELOW the arm
     // centerline (the drive stack rides above it). Boundary = the two
@@ -480,8 +511,8 @@ module boom_plate_2d() rz(dd) difference() {
       [for (a = [8 : 4 : 56]) 338 * [cos(a), sin(a)]],
       [[104.8, 224.8]]));
   }
-  tx(sr + 25) circle(d = 8.4);
-  tx(sr + 25 + cd) circle(d = 30);   // wiring pass / standoff locator
+  // the kidney: wheel + pinion clearance, Ø110 blended into Ø26
+  hull() { tx(da) circle(55); tx(da + cd) circle(13); }
 }
 
 module tube(od, id, h) difference() {

@@ -1,20 +1,23 @@
-// The shoulder's gear+drum: helically grooved capstan core INBOARD —
-// its groove lays across the fixed sector band's tracks — a short
-// printed NECK spanning the band's outboard wall (length from the
-// lane math), and the 51T stub-addendum herringbone wheel OUTBOARD,
-// past the band's end. A gear at the base would sweep through the
-// fixed band, so this reverses the retired pendulum-rig stacking, and
-// both 608s pocket INTO the part's ends (a bearing boss at the base
-// would collide with the boom plate). Spins on a fixed M8 dead axle
-// off the boom plate, simply supported by the bridge.
+// The shoulder's gear+drum, FLIPPED stack: the 51T stub-addendum
+// herringbone wheel INBOARD — it straddles the boom plate through the
+// plate's kidney cutout — then a short neck, the helically grooved
+// capstan core laying across the fixed sector band's tracks (the lay
+// is positively located; length = wrap band + its march), and past
+// the core's outboard flange a bearing BOSS. A gear-outboard stack
+// jammed the free end against the boom plate, where no 608 could
+// seat without severing the core (pocket 22.1 vs core 20.4);
+// flipped, both ends have meat: one 608 pockets into the wheel's
+// inboard face, the other into the boss, each with a full-shoulder
+// floor and an inner-race relief, and the part spins on a fixed M8
+// dead axle (printed inboard support slab + outboard bridge).
 // The drum core carries a HELICAL GROOVE at groove_p pitch: the lay
 // is positively located, so the wrap band's deterministic march (see
 // the wrap-math note in params.scad) can never bunch or climb —
 // drum_len covers band + march. Cable anchors in a radial hole
 // MID-GROOVE (knot or crimp in the bore annulus behind it), splitting
 // the wraps into the two runs.
-// Local frame: +z outboard, z 0 = the inboard flange face (the
-// assembly places it at cab_y0 + 2).
+// Local frame: +z outboard, z 0 = the wheel's inboard face (the
+// assembly places it at whl_y0).
 
 include <params.scad>
 use <../lib/helpers.scad>
@@ -22,8 +25,13 @@ use <../lib/gears.scad>
 
 anchor_d = 2.2;                 // cable feed-through, knot or crimp behind it
 bore_d = shaft_d + 2.5;         // free clearance around the dead axle
+relief_d = 15.5;                // pocket-floor relief: the floor ring
+                                // catches the OUTER race only, so the
+                                // static inner race never rubs
 
 groove_turns = drum_len / groove_p;
+z_core = core_y0 - whl_y0;      // 35: grooved core start, from the
+                                // lane math — locked to the tracks
 
 // flange + grooved core + flange + mid-groove anchor hole, z 0 = the
 // lower flange's bottom face
@@ -35,8 +43,9 @@ module drum_body() difference() {
   }
   drum_groove();
   // cable anchor: radial hole mid-groove, rotated to the groove's
-  // phase at that height so it lands in the groove floor
-  tz(2 + drum_len / 2) rz(-360 * (drum_len / 2 + groove_p / 2) / groove_p)
+  // phase at that height so it lands in the groove floor (the phase
+  // sign mirrors the twist's)
+  tz(2 + drum_len / 2) rz(360 * (drum_len / 2 + groove_p / 2) / groove_p)
     ry(90) cylinder(d = anchor_d, h = drum_flange_d, $fn = 24);
 }
 
@@ -49,13 +58,17 @@ module drum_body() difference() {
 // with its center exactly at drum_eff_r. (A small offset CIRCLE does
 // NOT work: it subtends ~10 deg, which sweeps a hairline ribbon coil
 // ~0.05 tall — the "groove" the first two attempts actually cut.)
-// RIGHT-HAND helix (negative twist) — the sector track ramp direction
-// must match (params wrap-math note).
+// LEFT-HAND helix (positive twist) — DERIVED, not chosen: with the
+// real segments in the assembly (run A's knot at the lower/gusset
+// end), the winding sense demands a LH lay to march WITH the track
+// ramp. The old right-hand note predated drawing the segments real:
+// a RH groove crosses the tracks at 2.7 deg — the in-opposition
+// failure the params wrap-math note warns about.
 module drum_groove() {
   n = 40;
   cw = 360 * groove_w / groove_p;   // crescent arc width, deg
   tz(2 - groove_p / 2)
-    linear_extrude(drum_len + groove_p, twist = -360 * (groove_turns + 1),
+    linear_extrude(drum_len + groove_p, twist = 360 * (groove_turns + 1),
                    slices = ceil(groove_turns + 1) * 72, convexity = 10)
       polygon(concat(
         [for (i = [0 : n])
@@ -74,17 +87,22 @@ module drive_wheel()
                    helix = helix_angle, pa = pressure_angle,
                    backlash = gear_backlash, ha = wheel_addendum);
 
-module gear_drum(neck = whl_y0 - cab_y0 - 2 - drum_l) {
-  lt = drum_l + neck + gear_width;   // total length
+module gear_drum() {
+  lt = drum_y1 - whl_y0;   // 74: wheel + neck + flanged core + boss
   difference() {
     union() {
-      drum_body();
-      tz(drum_l) cylinder(d = 24, h = neck);
-      tz(drum_l + neck) drive_wheel();
+      drive_wheel();
+      tz(gear_width) cylinder(d = 24, h = z_core - 2 - gear_width);
+      tz(z_core - 2) drum_body();
+      tz(z_core + drum_len + 2) cylinder(d = 28, h = drum_boss_l);
     }
     tz(-0.5) cylinder(d = bore_d, h = lt + 1, $fn = 48);
+    // 608 pockets into both ends; the relief past each floor keeps
+    // the rotating floor ring off the static inner race
     tz(-0.5) cylinder(d = bearing_pocket_d, h = bearing_w + 0.5, $fn = 96);
+    tz(-0.5) cylinder(d = relief_d, h = bearing_w + 1.5, $fn = 48);
     tz(lt - bearing_w) cylinder(d = bearing_pocket_d, h = bearing_w + 0.5, $fn = 96);
+    tz(lt - bearing_w - 1) cylinder(d = relief_d, h = bearing_w + 1.5, $fn = 48);
   }
 }
 

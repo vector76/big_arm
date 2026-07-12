@@ -3,6 +3,10 @@
 // the torque as an interference fit (dimensions copied verbatim from the
 // proven david_gears.scad pinion), and the herringbone self-centers
 // axially even if it ever slips slightly.
+// Cut OPPOSITE-HAND (helix = -helix_angle): external parallel-axis
+// helicals only mesh RH-on-LH, and herringbone_gear applies the same
+// hand for any tooth count — so the pinion mirrors, while the drive
+// wheel and the yaw ring segments keep +helix_angle.
 
 include <params.scad>
 use <../lib/helpers.scad>
@@ -24,7 +28,7 @@ module motor_shaft_bore() {
 module pinion() {
   difference() {
     herringbone_gear(gear_module, pinion_teeth, gear_width,
-                     helix = helix_angle, pa = pressure_angle,
+                     helix = -helix_angle, pa = pressure_angle,
                      backlash = gear_backlash);
     tz(-0.1) motor_shaft_bore();
   }

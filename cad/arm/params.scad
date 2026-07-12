@@ -10,7 +10,7 @@
 //     motor ride the arm on a boom bent shoulder_bend up from
 //     straight-back. The YAW is a single-stage herringbone ring:
 //     printed gear segments on a doubled two-ply slew disc, driven
-//     directly by the m2 12T pinion (the shoulder primary pinion).
+//     directly by the m2 8T pinion (the shoulder primary pinion).
 //     Elbow + wrist drives are BEING OVERHAULED with something
 //     different (the worm lean is dropped — its motors outgrew the
 //     truss hollows); the model carries bare stations/axles at those
@@ -21,51 +21,69 @@
 // the boom plate's downward tail), link side plates 43..55 (the +y
 // one grows the drive boom plate), then a 3 mm running gap — SAME as
 // the elbow's, so ONE bearing-station design serves every joint.
-// Static: base boards 58..70; the fixed sector band 58..106.5
+// Static: base boards 58..70; the fixed sector band 58..94.3
 // (wedge-backed printed segments on the left board's circular rim,
 // r 213..240, FLUSH on the board's inner face and growing outboard —
 // from the wrap math below: two ramped tracks, band + march + walls);
 // green joint bushings + bolt heads |y| ~53..78 at
-// the axis. Riding the arm: drum 60..105 (grooved band matching the
-// sector tracks, r 249..277), wheel + pinion 108.5..135.5 (outboard
-// of the band's end), motor 56.5..104.5 sleeved off the boom plate
-// with its face 4 under the gear plane (the old plunge idiom died
-// when the stack moved outboard), bridge 137.5..145.5. The
-// joint-angle sensor is a camera
+// the axis. Riding the arm — the drive stack is FLIPPED (wheel
+// INBOARD): wheel + pinion 27..54, straddling the boom plate through
+// its kidney cutout and stopping 4 short of the band/board face at
+// 58; motor -30..18, its face on the printed inboard support slab,
+// body pointing back into the arm side; drum 60..101 (grooved band
+// 62..92 matching the sector tracks, r 242..270, then the outboard
+// bearing boss); inboard support slab + standoffs 18..43, outboard
+// bridge 101..109. The joint-angle sensor is a camera
 // on the arm (-56..-70 lane, r 92 about the axis) reading a printed
 // scale strip on the sensor-board lobe rim (r 80).
 // The radial rule that makes the lane crossings safe: every moving
-// part that enters y > 55 lives at r > 249 from the shoulder axis —
-// outside the fixed band's crest (r 240) and wedge (r >= 213) — and
-// the base boards have no material beyond x = -80 up high, which is
-// the only region the swept drive fan (base angles 115..235) reaches.
+// part that enters y > 55 clears the fixed band's crest (r 240) —
+// the drum flanges, the lowest of them, pass 2.8 over it (r 242.4:
+// the axis sits CLOSE IN so the take-off pull is mostly tangential)
+// — and the base boards have no material beyond x = -80 up high,
+// which is the only region the swept drive fan (base angles 115..235)
+// reaches. The wheel/pinion/motor never enter y > 55: they dip to
+// r 204, but only in |y| < 55, and the swept back fan holds no
+// static material there (the boards own |y| >= 58) — at full-up the
+// wheel's low point passes z 139 and the motor's z ~109, far over
+// the z 48 disc top.
 
 ply_t = 12;
 
-// ---- herringbone primary (4.25:1) ----
+// ---- herringbone primary (6.375:1) ----
 // drawn REAL everywhere (pinion.scad / gear_drum.scad on
 // lib/gears.scad), so mesh and lane collisions in the concept are true
 gear_module = 2;
-pinion_teeth = 12;        // was 17: bigger primary so the sector shrinks
+pinion_teeth = 8;         // was 17, then 12: smaller pinion = bigger
+                          // primary. Changed 12->8 in step with
+                          // drum_eff_r x1.5 (sector_r ~ drum_eff_r *
+                          // pinion_teeth, so the sector/board are
+                          // EXACTLY unchanged) to fatten the core
 gear_teeth = 51;
-primary_ratio = gear_teeth / pinion_teeth;    // 4.25 (capstan joints)
+primary_ratio = gear_teeth / pinion_teeth;    // 6.375 (capstan joints)
 pressure_angle = 20;
-// Stub the 51T wheel's tips: full-addendum tips would gouge a 12T
+// Stub the 51T wheel's tips: full-addendum tips would gouge an 8T
 // pinion's base-circle root at pa 20 (interference limit: wheel tip
-// radius <= 52.5 mm at C = 63). At 0.65 the transverse contact ratio is
-// still ~1.3, and the herringbone face overlap adds a full tooth pitch
-// on top, so coverage never gaps. The pinion keeps full addendum —
+// radius <= 52.0 mm at C = 59). At 0.45 the tips stop at 51.9 and the
+// transverse contact ratio is ~1.07 — thin, but each herringbone half
+// adds a full tooth pitch of face overlap, so coverage never gaps.
+// The pinion keeps full addendum (its tip lands ~1.1 wide — printable);
 // interference is one-sided.
-wheel_addendum = 0.65;
+wheel_addendum = 0.45;
 helix_angle = 25;
 // One whole tooth of helix phase per herringbone half (center to edge):
 // systematic tooth errors average out at every rotation angle, and the
 // extra width adds strength. ~27 mm at m2 / 25 deg.
 gear_width = 2 * PI * gear_module / tan(helix_angle);
 gear_backlash = 0;        // cut none in; set the mesh snug by press-and-clamp
-cd = gear_module * (pinion_teeth + gear_teeth) / 2;   // center distance, 63
-drum_eff_r = 6.75;        // cable CENTERLINE radius — sets the joint
-                          // ratio, invariant to cable/groove changes
+cd = gear_module * (pinion_teeth + gear_teeth) / 2;   // center distance, 59
+drum_eff_r = 10.125;      // cable CENTERLINE radius — sets the joint
+                          // ratio, invariant to cable/groove changes.
+                          // x1.5 with the 12T->8T pinion: the sector
+                          // stays put while the core's groove-floor
+                          // wall grows 0.95 -> 4.3 over the bore
+                          // (~10x the torsional section for 1.5x the
+                          // drum torque)
 motor_w = 42.3;           // NEMA 17
 motor_len = 48;
 function sector_r(ratio) = ratio / primary_ratio * drum_eff_r;
@@ -73,8 +91,8 @@ function sector_r(ratio) = ratio / primary_ratio * drum_eff_r;
 yaw_travel = 180;     // +-90, single-stage herringbone ring drive
 yaw_disc_r = 200;     // slew disc: DOUBLED, two ply layers (24 thick)
 yaw_pitch_r = yaw_disc_r + 7;   // gear-segment pitch radius; with the
-                                // m2 12T pinion (pitch r 12) the yaw
-                                // ratio is ~17:1 — plenty for a
+                                // m2 8T pinion (pitch r 8) the yaw
+                                // ratio is ~26:1 — plenty for a
                                 // gravity-neutral vertical axis
 yaw_seg_arc = yaw_travel + 20;  // segment arc: travel + mesh margin
 shoulder_ratio = 150; shoulder_min = -20; shoulder_max = 100;  // capstan
@@ -85,7 +103,10 @@ wrist_travel = 180;   // +-90; drive TBD (redesign underway)
 upper_len = 450;
 upper_stub = 120;     // SHORT: just closes the box; the drive boom and
                       // counterweight take over behind the joint
-upper_w = 110;        // side plates clear the drive wheel (y 14..41) by 2
+upper_w = 110;        // arm box width: plates at 43..55 with the
+                      // elbow-matching 3 mm gap to the boards; the
+                      // flipped drive wheel (27..54) crosses the +y
+                      // plate only inside the boom kidney cutout
 fore_len = 450;
 fore_w = 80;          // roots inside the upper arm's elbow fork
 ee_len = 90;
@@ -111,8 +132,9 @@ function link_d(back) = elbow_d + 2 * back * tan(arm_taper);
 // Shoulder: NO separate boom — the drive-boom plate (left side) is a
 // SOLID FAN from the boom down past straight-back (arm angles
 // 135..200, outer arc r 338), and the CW block bolts to its inboard
-// face (y 1..43: inside the base boards, under the drum/motor/bridge
-// lanes). The block sits just BELOW the arm centerline (cw_bend is
+// face (y 1..43: inside the base boards; the flipped motor shares
+// this lane at pin_a, ~240 in-plane mm away — no cohabitation).
+// The block sits just BELOW the arm centerline (cw_bend is
 // NEGATIVE): the drive stack's mass rides above the centerline, so
 // the closing weight must hang under it for the combined CG to land
 // on the shoulder axis. Fan + block are travel-capped: over the full
@@ -122,7 +144,7 @@ function link_d(back) = elbow_d + 2 * back * tan(arm_taper);
 // (a stand-in shape) bottoms at z 67, 8 over the hub pillar's bolt
 // tip. Sized
 // ~1.06 kg.m: the ~1.2 needed less what the motor + wheel + drum
-// already contribute at r 263..326.
+// already contribute at r 256..315.
 // Elbow: the LEFT forearm plate grows a FIN back over the elbow (one
 // CNC piece with the plate; bottom edge 2 above the shared taper
 // line, so it clears the upper arm's top chord at full extension and
@@ -166,7 +188,7 @@ elbow_cw_slot_x = 205;         // ...centered at upper_len - 245
 //     printed pylon at azimuth 315, pinion down over the full gear
 //     band — out of every swept corridor (the arm's drive boom owns
 //     azimuths 90..270 at full-up; the front board corners sweep
-//     r 161 vs the pinion's 219)
+//     r 161 vs the pinion's 215)
 // (1) LEFT (+y) board: grows the FIXED shoulder sector — one CNC ply
 //     piece (or face-bolted stack), so joint torque grounds straight
 //     into the base with no bracket or pylon
@@ -200,18 +222,20 @@ roller_r = 185;       // support/hold-down roller stations
 // ---- inverted shoulder capstan ----
 // The sector is FIXED and coplanar/integral with the LEFT base board.
 // The drive rides the ARM: a boom plate grown from the +y truss plate
-// at arm angle 180 - shoulder_bend carries the drum dead axle and the
-// sleeved motor; a printed bridge picks up
-// both axle ends outboard so they are simply supported. The bend is
+// at arm angle 180 - shoulder_bend carries the whole stack — the
+// wheel + pinion straddle it through its kidney cutout, the motor
+// and the drum axle's wheel end hang on the printed inboard support,
+// and a short printed bridge picks up the axle's boss end outboard,
+// so the dead axle is simply supported. The bend is
 // the packaging knob: at full-up the drive bottoms out at base angle
-// 280 - shoulder_bend (235: clear of the well between the boards), at
-// full-down it parks up-back at 160 - shoulder_bend where nothing
-// lives. With the sector out of every arm plane, the bend is
-// otherwise free.
+// 280 - shoulder_bend (235: the wheel's low point passes z 139 over
+// the z 48 disc top, the motor's z ~109), at full-down it parks
+// up-back at 160 - shoulder_bend where nothing lives. With the
+// sector out of every arm plane, the bend is otherwise free.
 shoulder_bend = 45;
 
-// ---- capstan stage (~35:1; total joint ratio 150) ----
-capstan_ratio = shoulder_ratio / primary_ratio;  // 35.3
+// ---- capstan stage (~23.5:1; total joint ratio 150) ----
+capstan_ratio = shoulder_ratio / primary_ratio;  // 23.5
 cable_d = 1.1;              // stiff aramid cord (nominal — measure the
                             // real spool and set groove_p from it)
 // GROOVE PITCH MUST EXCEED THE GROOVE OPENING BY A PRINTABLE LAND —
@@ -231,10 +255,11 @@ groove_p = 1.5;             // helical lay pitch: drum groove AND the
 // is what keeps every overhang at 45 deg.
 groove_w = cable_d + 0.15;  // drum groove width: snug, guides the lay
 groove_g = 0.6;             // drum groove depth; land = p - w = 0.25
-drum_core_d = 2 * (drum_eff_r - cable_d / 2 + groove_g);  // 13.6: the
+drum_core_d = 2 * (drum_eff_r - cable_d / 2 + groove_g);  // 20.35: the
                             // groove floor puts the centerline at eff_r
-                            // (bend D at the centerline 13.5, D/d ~12)
-drum_flange_d = drum_core_d + 14;
+                            // (bend D at the centerline 20.25, D/d ~18)
+drum_flange_d = 27.6;       // = the 22.1 bearing pocket + 2.75 walls;
+                            // stands ~3 proud of the cable crest (21.4)
 sector_eff_r = capstan_ratio * drum_eff_r;      // 238.2 = sector_r(150)
 sector_angle = shoulder_max - shoulder_min + 10;  // 130: travel + margin
 
@@ -278,17 +303,19 @@ cb_d = 7.5;                 // screw-head counterbore (heads ~7)
 // PLUS its march, and the sector needs TWO tracks (one per run) at
 // constant separation band_w, each ramping by `ramp` across the arc.
 // Drum groove and sector tracks are one continuous helix at the shared
-// lead angle atan(groove_p / (2*PI*drum_eff_r)) ~ 1.8 deg, so the free
+// lead angle atan(groove_p / (2*PI*drum_eff_r)) ~ 1.35 deg, so the free
 // spans leave both surfaces square: zero fleet angle at every pose.
-// (Assembly check: the drum groove HAND must match the track ramp
-// direction — a left-hand groove with a right-hand ramp puts the two
-// helices in opposition and doubles the fleet instead of killing it.)
-travel_turns = (shoulder_max - shoulder_min) / 360 * capstan_ratio; // 11.8
+// (Assembly check — now DRAWN REAL and verified at the tangency: the
+// groove is LEFT-hand. With the segments placed so run A's knot lands
+// at the lower/gusset end, the winding sense forces the LH lay; the
+// wrong hand puts the two helices in opposition, crossing the tracks
+// at 2x the lead angle and doubling the fleet instead of killing it.)
+travel_turns = (shoulder_max - shoulder_min) / 360 * capstan_ratio; // 7.8
 dead_turns = 2.5;           // strain-relief margin, ~1.25 per run
-band_w = (travel_turns + dead_turns) * groove_p; // 21.4: frozen band =
+band_w = (travel_turns + dead_turns) * groove_p; // 15.5: frozen band =
                                                  // track separation
-ramp = travel_turns * groove_p;                  // 17.7: the march
-drum_len = ceil(band_w + ramp + 2);              // 41: grooved core
+ramp = travel_turns * groove_p;                  // 11.8: the march
+drum_len = ceil(band_w + ramp + 2);              // 30: grooved core
 // sector track stations: z in the web frame (board mid-plane = 0), a
 // in deg from the arc bisector. The band is ONE-SIDED: it starts FLUSH
 // at the board's arm-side face (band_z0) and grows outboard. The
@@ -299,27 +326,39 @@ drum_len = ceil(band_w + ramp + 2);              // 41: grooved core
 // tracks run parallel, band_w apart.
 band_z0 = -sector_core_t / 2;             // the FLUSH (arm-side) face
 band_wt = band_w + ramp * sector_angle / (shoulder_max - shoulder_min)
-          + 2 * seg_wall;                 // 48.5: full band width
+          + 2 * seg_wall;                 // 36.3: full band width
 function track_z(a, run) = band_z0 + band_wt / 2
   + run * band_w / 2 + ramp * a / (shoulder_max - shoulder_min);
 
 // ---- axle & bearings ----
-// the gear+drum spins on 608s pocketed into its ends, riding a fixed
-// M8 dead axle off the boom plate, simply supported by the bridge
+// the gear+drum spins on 608s pocketed into its ends (one into the
+// wheel's inboard face, one into the outboard boss — both with a
+// full-shoulder floor and an inner-race relief), riding a fixed M8
+// dead axle simply supported between the printed inboard support
+// slab and the printed outboard bridge, both hung off the boom plate
 shaft_d = 8;                // M8 rod / bolt
 bearing_w = 7;              // 608
 bearing_pocket_d = 22.1;    // press fit; tune to printer
 
 // ---- the capstan lane on the arm ----
-// The sector band is flush on the left board's inner face, growing
-// outboard; the drum's grooved band spans the same y so the shared
-// two-track helix lines up, and the wheel + pinion + bridge stack
-// outboard of the band's end.
+// FLIPPED STACK: the sector band is flush on the left board's inner
+// face, growing outboard (58..94.3), and the drum's grooved core
+// spans the same y so the shared two-track helix lines up (62..92).
+// The WHEEL sits INBOARD of the band, straddling the boom plate
+// through its kidney cutout; outboard, past the core's flange, the
+// part ends in a bearing BOSS — free air where the wheel used to be,
+// so BOTH ends take full 608 pockets (a gear-outboard stack jammed
+// the free end against the boom plate, where a 608 pocket severed
+// the core: pocket 22.1 vs core 20.4).
 cab_y0 = col_w / 2 - ply_t;   // 58: band start = board inner face
-cab_w = band_wt;              // 48.5
-drum_l = drum_len + 4;        // 45: grooved core + flanges
-whl_y0 = cab_y0 + cab_w + 2;  // 108.5: wheel/pinion plane, outboard
-                              // of the fixed band's end
+cab_w = band_wt;              // 36.3
+core_y0 = cab_y0 + 4;         // 62: grooved core start = the first
+                              // track's V mouth (seg_wall inboard)
+whl_y0 = core_y0 - 8 - gear_width;  // 27: wheel's inboard face; the 8
+                              // = neck (6) + inboard flange (2)
+drum_boss_l = bearing_w;      // 7: outboard bearing boss past the flange
+drum_y1 = core_y0 + drum_len + 2 + drum_boss_l;  // 101: part's
+                              // outboard end; bridge just past it
 
 // ---- testbench (the assembly modules recomposed; testbench.scad) ----
 // The REAL base + upper arm double as the shoulder test rig: the slew

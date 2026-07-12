@@ -42,13 +42,14 @@ move).
   printed cycloidal (η floor 0.45 is comfortable for a decent cycloidal).
   Both are single-stage and compact at this ratio.
 - **Shoulder (150:1): leading hypothesis (2026-07-09) — herringbone
-  primary + capstan cable sector.** A 4.25:1 printed herringbone pair
-  (12T/51T m2; the wheel's addendum stubbed to 0.65 so its tips clear the
+  primary + capstan cable sector.** A 6.375:1 printed herringbone pair
+  (8T/51T m2; the wheel's addendum stubbed to 0.45 so its tips clear the
   small pinion's base circle at 20° PA — the herringbone's full-tooth face
   overlap keeps contact continuous) drives a small cable drum; the cable
-  wraps a plywood sector fixed to the upper arm (~35:1 — 238 mm sector
-  radius over 6.75 mm effective drum radius; the higher primary ratio
-  keeps the sector compact, 2026-07-10). Expected η ≈ 0.9 × 0.95 ≈
+  wraps a plywood sector fixed to the upper arm (~23.5:1 — 238 mm sector
+  radius over 10.125 mm effective drum radius; drum × 1.5 with pinion
+  12T → 8T left the sector radius exactly unchanged while fattening the
+  drum's torsion section, 2026-07-11). Expected η ≈ 0.9 × 0.95 ≈
   **0.85 → margin ~1.96**. Worst-case cable tension ≈ 26.7 N·m / 0.238 m ≈
   **112 N** — mild for wire rope or Dyneema in a wooden groove. Capstan drift (an accumulating *relative*
   error) is made irrelevant by the *absolute* optical joint sensing; cable

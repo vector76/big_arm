@@ -60,8 +60,9 @@
 //   elbow stands outboard of the 55 face but three thin liner tabs
 //   (<= 58), so the wrist cable plane hugs back in (wr_cab_y 61.5).
 // - BASE: a DOUBLED two-ply slew disc (r 200, 24 thick) rides bare-608
-//   support rollers under its rim (stub axles at z 13 off small
-//   blocks: crowns at the z 24 disc bottom) and hold-downs over it.
+//   support rollers under its rim (each on a 5/16" bolt at z 13
+//   spanning a pair of printed lugs: crowns at the z 24 disc bottom)
+//   and hold-downs over it.
 //   The HUB is the joint bearing-station idiom FLIPPED onto the
 //   baseplate (hub_station in joints.scad, diagram hub_station.scad):
 //   a preloaded 608 pair locates the axis — and the yaw gear mesh —
@@ -163,18 +164,11 @@ module bench_env() {
   // joints.scad; annotated diagram hub_station.scad). Drawn unposed:
   // pink, the pin and the disc-side races actually turn with the disc
   hub_station();
-  // support rollers under the disc rim: bare 608s on stub axles held
-  // at z 13 by small inboard blocks — crowns at 24 = the disc bottom,
-  // 2 mm of ground clearance under each bearing. Stations dodge the
-  // 315 deg lane where the pinion lives; more are cheap if rim loads
-  // ask for them
-  rz([30, 90, 150, 210, 270, 330]) tx(roller_r) {
-    color("khaki") tx(-15) cub([20, 24, 22], [1, 1, 0]);
-    color("silver") tz(13) ry(90) {
-      cylinder(d = 8, h = 28, center = true);
-      cylinder(d = 22, h = 7, center = true);
-    }
-  }
+  // support rollers under the disc rim: bare 608s at z 13 — crowns at
+  // 24 = the disc bottom, 2 mm of ground clearance under each bearing.
+  // Stations dodge the 315 deg lane where the pinion lives; more are
+  // cheap if rim loads ask for them
+  rz([30, 90, 150, 210, 270, 330]) tx(roller_r) roller_stand();
   // hold-down stations: riser outside the gear band, arm in over the rim
   rz([30, 150, 270]) {
     color("khaki") tx(yaw_disc_r + 20) cub([14, 30, 76], [0, 1, 0]);
@@ -213,6 +207,43 @@ module bench_env() {
     color("khaki") tx(229) cub([10, 14, 29], [0, 1, 0]);
     color("seagreen") tx(225) tz(29) cub([14, 14, 14], [0, 1, 0]);
     color("dimgray") tx(220) tz(36) ry(90) cylinder(d = 6, h = 5);
+  }
+}
+
+// one under-rim support-roller stand, drawn at the origin with the
+// roller axis along +x (radial once tx(roller_r) places it): a bare
+// 608 rides a 5/16" bolt (8 mm bores) spanning a PAIR of printed lugs
+// — head against the inboard lug, nut outboard under the rim edge —
+// so the axle is simply supported, not a stub. The lug gap is 8
+// (0.5 slop each side of the 7-wide bearing) and the base floor is
+// cut away beneath it, keeping the 2 mm ground clearance; lug tops at
+// 21 keep 3 under the disc. The base spreads into two tangential ears
+// clear of the bearing well, one wood screw each into the plate
+// (driven from above, before the disc goes on) — vertical loads go
+// straight down the lugs, the screws just keep the stand put
+module roller_stand() {
+  color("khaki") difference() {
+    union() {
+      tx([-12, 4]) cub([8, 22, 21], [0, 1, 0]);    // the lug pair
+      cub([24, 48, 6], [1, 1, 0]);                 // base + screw ears
+    }
+    tz(13) ry(90) cylinder(d = 8, h = 26, center = true);  // axle bore
+    tz(-0.1) cub([8, 24, 6.3], [1, 1, 0]);   // bearing well in the base
+    ty([-18, 18]) tz(-0.1) cylinder(d = 4, h = 6.3);       // screw holes
+  }
+  // the axle: 5/16 x 1.25" hex bolt through both lugs, nut outboard
+  color("silver") tz(13) ry(90) {
+    tz(-12) cylinder(d = 7.9, h = 31.75);
+    rz(30) {   // hex flats down: the corners would graze the base edge
+      tz(-17.5) cylinder(d = 14.7, h = 5.5, $fn = 6);
+      tz(12) cylinder(d = 14.7, h = 6.7, $fn = 6);
+    }
+  }
+  color("silver") tz(13) ry(90)                    // the bare 608
+    cylinder(d = 22, h = 7, center = true);
+  color("silver") ty([-18, 18]) {                  // anchor wood screws
+    tz(-6) cylinder(d = 3, h = 12);
+    tz(6) cylinder(d = 5.5, h = 2);
   }
 }
 

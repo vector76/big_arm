@@ -265,10 +265,10 @@ elbow_cw_slot_x = 205;         // ...centered at upper_len - 245
 
 // ---- base: slew disc + THREE boards ----
 // (0) the slew disc: a plain TWO-LAYER ply disc (24 thick) riding
-//     bare-608 support rollers under its rim (stub axles at z 13 off
-//     small blocks: crowns at 24 = the disc bottom, 2 mm of ground
-//     clearance) and hold-downs over it — the roller ring reacts the
-//     overturning moment. The hub is the joint bearing-station idiom
+//     bare-608 support rollers under its rim (each on a 5/16" bolt at
+//     z 13 spanning a pair of printed lugs: crowns at 24 = the disc
+//     bottom, 2 mm of ground clearance) and hold-downs over it — the
+//     roller ring reacts the overturning moment. The hub is the joint bearing-station idiom
 //     FLIPPED onto the baseplate (hub_station in joints.scad; the
 //     annotated diagram is hub_station.scad): a preloaded 608 pair
 //     locates the axis — and with it the yaw gear mesh — from a
@@ -322,10 +322,10 @@ col_w = 140;          // side board spacing (inner faces at +-58: a
 shoulder_h = 392;     // the whole machine rode down 28 with the disc
 front_x = 130;        // side boards' front edge; the front board spans it
 front_z1 = 247;       // 16 mm under the truss bottom at shoulder_min
-disc_z0 = 24;         // disc bottom = the support-608 crowns (stub
-                      // axles at z 13, 2 mm ground clearance under
-                      // each bearing); inverting the yaw motor freed
-                      // the under-rim space that set the old height
+disc_z0 = 24;         // disc bottom = the support-608 crowns (5/16"
+                      // bolt axles at z 13, 2 mm ground clearance
+                      // under each bearing); inverting the yaw motor
+                      // freed the under-rim space that set the height
 roller_r = 185;       // support/hold-down roller stations
 
 // ---- inverted shoulder capstan ----

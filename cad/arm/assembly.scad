@@ -169,13 +169,10 @@ module bench_env() {
   // Stations dodge the 315 deg lane where the pinion lives; more are
   // cheap if rim loads ask for them
   rz([30, 90, 150, 210, 270, 330]) tx(roller_r) roller_stand();
-  // hold-down stations: riser outside the gear band, arm in over the rim
-  rz([30, 150, 270]) {
-    color("khaki") tx(yaw_disc_r + 20) cub([14, 30, 76], [0, 1, 0]);
-    color("khaki") tx(roller_r + 6) tz(64) cub([36, 30, 12], [0, 1, 0]);
-    color("silver") tx(roller_r) tz(60) ry(90)
-      cylinder(d = 22, h = 7, center = true);
-  }
+  // hold-down stations: a 608 crown-DOWN kissing the disc top at
+  // roller_r, hung from a post whose riser stands 6 outside the r 214
+  // rim envelope (band + lobe — the clearance params.scad promises)
+  rz([30, 150, 270]) tx(roller_r) holddown_post();
   // yaw drive: the m2 8T herringbone pinion (the shoulder primary
   // pinion, reused — drawn real) hangs INVERTED over the rim so the
   // gear band can sit low: the motor face bolts down onto a printed
@@ -242,6 +239,48 @@ module roller_stand() {
   color("silver") tz(13) ry(90)                    // the bare 608
     cylinder(d = 22, h = 7, center = true);
   color("silver") ty([-18, 18]) {                  // anchor wood screws
+    tz(-6) cylinder(d = 3, h = 12);
+    tz(6) cylinder(d = 5.5, h = 2);
+  }
+}
+
+// one hold-down post, the roller stand's lug-pair idiom hung over the
+// rim (same local frame: origin at the bearing, +x radial). Everything
+// is forced by the disc: bolt at z 59 puts the crown ON the z 48 disc
+// top, lug bottoms at 50 keep 2 over the top surface and the flush
+// band, the arm bottom at 67 clears the nut's corners (65.4) so a
+// wrench works in the open bay between nut and riser, and the riser
+// stands at r 220..232 — 6 outside the r 214 band/lobe envelope. The
+// bolt slides in from inboard over the disc; its head face sits at
+// r 167.5, and the board heels' bottom corners (x -150, y 70) sweep
+// r 165.5 past it — 2 mm is the TIGHTEST swept clearance in the base,
+// so any heel growth must nibble that corner. NOTE the load path:
+// uplift goes bolt -> lugs -> arm in bending -> riser -> the two ear
+// screws in WITHDRAWAL — fine against roller-preload and gust loads,
+// but if a mass audit finds real overturning moment, the ears want
+// more/longer screws, not a thicker arm
+module holddown_post() {
+  color("khaki") difference() {
+    union() {
+      tz(50) tx([-12, 4]) cub([8, 22, 17], [0, 1, 0]);   // the lug pair
+      tz(67) tx(-12) cub([59, 22, 12], [0, 1, 0]);       // arm, in over the rim
+      tx(35) cub([12, 22, 67], [0, 1, 0]);               // riser
+      tx(29) cub([24, 48, 6], [0, 1, 0]);                // foot + screw ears
+    }
+    tz(59) ry(90) cylinder(d = 8, h = 26, center = true);    // axle bore
+    tx(41) ty([-18, 18]) tz(-0.1) cylinder(d = 4, h = 6.3);  // screw holes
+  }
+  // the axle: the rollers' 5/16 x 1.25" hex bolt again, nut in the bay
+  color("silver") tz(59) ry(90) {
+    tz(-12) cylinder(d = 7.9, h = 31.75);
+    rz(30) {
+      tz(-17.5) cylinder(d = 14.7, h = 5.5, $fn = 6);
+      tz(12) cylinder(d = 14.7, h = 6.7, $fn = 6);
+    }
+  }
+  color("silver") tz(59) ry(90)                    // the bare 608
+    cylinder(d = 22, h = 7, center = true);
+  color("silver") tx(41) ty([-18, 18]) {           // anchor wood screws
     tz(-6) cylinder(d = 3, h = 12);
     tz(6) cylinder(d = 5.5, h = 2);
   }

@@ -2,9 +2,11 @@
 // dimensions and architecture (v0 design point: 0.45 m links, ratios
 // 60/150/90/40, counterweights), placeholder detail. Premises:
 //   - plywood box-truss links, wide sections preferred
-//   - shoulder + elbow are PAIRED PRELOADED BEARING STATIONS (see
-//     bearing_station.scad / joints.scad): internal preload loop, wood
-//     never in a precision fit; wrist still a 608 dead-axle proxy
+//   - ALL THREE pitch joints are PAIRED PRELOADED BEARING STATIONS
+//     (see bearing_station.scad / joints.scad): internal preload loop,
+//     wood never in a precision fit. At the wrist the fork nesting
+//     flips (the EE straddles OUTSIDE the forearm) and green rides
+//     the outer link, keeping the tail stack inside the forearm box
 //   - the shoulder is the phase-1a capstan INVERTED: the sector is
 //     fixed (integral with the left base board) and the drum/wheel/
 //     motor ride the arm on a boom bent shoulder_bend up from
@@ -111,7 +113,6 @@ upper_w = 110;        // arm box width: plates at 43..55 with the
                       // plate only inside the boom kidney cutout
 fore_len = 450;
 fore_w = 80;          // roots inside the upper arm's elbow fork
-ee_len = 90;
 
 // ---- link taper ----
 // Both links TAPER at the same angle and share the same depth at the
@@ -129,6 +130,34 @@ shoulder_d = 165;     // depth at the shoulder axis (the original)
 arm_taper = 2.1;      // deg per edge
 elbow_d = shoulder_d - 2 * upper_len * tan(arm_taper);   // ~132
 function link_d(back) = elbow_d + 2 * back * tan(arm_taper);
+
+// ---- wrist / end effector ----
+// The forearm's front end is a FULL CIRCULAR CAP about the wrist axis
+// (the upper arm's elbow-fork idiom one joint down), and the END
+// EFFECTOR is a U-fork OUTSIDE it: side plates in the upper arm's
+// 43..55 lane (ee_w = upper_w), so the elbow's 3 mm running gap — and
+// with it the one bearing-station design — repeats at the wrist.
+// Station roles mirror the joint's nesting: pink + the tail stack
+// (tee washer, jam nuts, bolt tail) ride the INNER forearm plates and
+// hide inside the forearm box; green + bolt head go on the outer EE
+// sides, where only the low flange stands proud. Bores follow: 15.5
+// (pink's sleeve) in the forearm, 28.5 (green's snout) in the EE.
+wrist_d = link_d(-fore_len);  // forearm depth at the wrist, ~99
+ee_w = upper_w;               // EE fork width = upper arm width
+ee_clear = 5;                 // forearm end to end-plate inner face: a
+                              // SWEPT running clearance, so more than
+                              // the 3 mm lateral gaps. The circular
+                              // forearm end makes it pose-invariant —
+                              // constant radius about the wrist axis
+ee_len = wrist_d / 2 + ee_clear + ply_t;  // end plate FRONT face (~67);
+                              // the tool flange centers here (the twin
+                              // viewer's IK drag tip reads this)
+ee_strap = 72;                // side strap depth forward of the cap
+                              // disc: the strap edges leave the circle
+                              // at azimuth +-46.7, keeping the rim
+                              // circular through the wrist scale
+                              // strip's 200-deg arc (+-90 travel + 10
+                              // overshoot each end, camera dead-aft)
 
 // ---- counterweights ----
 // Shoulder: NO separate boom — the drive-boom plate (left side) is a

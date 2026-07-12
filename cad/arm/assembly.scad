@@ -489,7 +489,7 @@ module elbow_stations() {
     bearing_station(upper_w / 2 - ply_t - fore_w / 2);
 }
 
-// ---- forearm: truss + fin + elbow CW + wrist axle ----
+// ---- forearm: truss + fin + elbow CW + wrist fork end ----
 // Drawn at the elbow origin in its OWN (elbow-bent) frame.
 module forearm() {
   difference() {
@@ -516,14 +516,26 @@ module forearm() {
       // chords, which share the tab's y lane)
       color("burlywood") my(1) ty(fore_w / 2) rx(90) linear_extrude(ply_t)
         rz(60) tx(50) sq([38, 24], [0, 1], 8);
+      // wrist end: the plates end in a FULL CIRCULAR CAP about the
+      // wrist axis, tangent to both taper edges — the upper arm's
+      // elbow-fork idiom one joint down. The payoff is the end
+      // effector's flat end plate clearing this end by ee_clear at
+      // EVERY wrist angle: constant radius about the axis makes the
+      // clearance pose-invariant
+      color("burlywood") tx(fore_len) my([0, 1]) ty(fore_w / 2) rx(90)
+        linear_extrude(ply_t) hull() {
+          circle(r = wrist_d / 2 * cos(arm_taper));
+          tx(-2) sq([2, wrist_d], [0, 1]);
+        }
     }
     // joint bores cut through plates AND lobes together — the plates
     // start at the elbow axis and end at the wrist axis, so a bore cut
-    // only in the lobe pieces stays half-blocked. Elbow: d 15.5 passes
-    // pink's sleeve (moving side); wrist: d 8.5 passes the dead axle
-    ty(-fore_w / 2 - 1) rx(-90) cylinder(d = 15.5, h = fore_w + 2);
-    tx(fore_len) ty(-fore_w / 2 - 1) rx(-90)
-      cylinder(d = 8.5, h = fore_w + 2);
+    // only in the lobe pieces stays half-blocked. BOTH ends take
+    // d 15.5 for pink's sleeve: the forearm carries the pink side at
+    // both its joints — moving at the elbow, fixed at the wrist (the
+    // station doesn't care; see joints.scad)
+    tx([0, fore_len]) ty(-fore_w / 2 - 1) rx(-90)
+      cylinder(d = 15.5, h = fore_w + 2);
   }
   // the elbow scale camera on the tab: bracket bridges the 3 mm gap,
   // body straddles the strip's y lane (the fork plate's 43..55), lens
@@ -548,14 +560,67 @@ module forearm() {
       cub([25, 40, link_d(-elbow_cw_x0) / 2 + 82], [0, 1, 0]);
     tx(elbow_cw_x0 - 28) tz(-45) cub(elbow_cw_blk, [0, 1, 0]);
   }
-  // the wrist's dead axle rides the forearm plates
-  tx(fore_len) joint_axle(fore_w + 40);
+  // the wrist scale camera, forearm-fixed DEAD-AFT of the wrist axis:
+  // the symmetric +-90 travel forces azimuth 180 (the only heading
+  // that keeps the read head on the EE strip at both extremes — the
+  // same forcing as the shoulder camera's 50). Bracket on the right
+  // plate's outer face, where the plate is solid (truss cutouts stop
+  // 73 behind the axis; the bracket sits 379..389); body straddles
+  // the strip lane, lens ~6 off the strip crest (r ~50.3) on the EE's
+  // right side plate rim. The EE's strap corners sweep azimuths
+  // +-118 at most, 60 deg short of the camera hardware
+  tx(fore_len) ry(180) tx(61) {
+    color("seagreen") ty(-(fore_w / 2 + 4)) cub([10, 14, 14], [0, -1, 1]);
+    color("dimgray") ty(-(fore_w / 2 + 9)) ry(-90) cylinder(d = 6, h = 5);
+    color("khaki") ty(-(fore_w / 2 + 4)) cub([10, 6, 14], [0, 0, 1]);
+  }
 }
 
 // ---- end effector: everything that pitches at the wrist ----
-// Drawn at the wrist origin in its own frame.
+// Drawn at the wrist origin in its own frame. A U-FORK straddling
+// OUTSIDE the forearm: side plates in the upper arm's 43..55 lane
+// (ee_w = upper_w — the elbow's lateral zoning repeats one joint
+// down, nesting flipped), each a DISC about the wrist axis matching
+// the forearm cap's diameter, extended forward as an ee_strap-deep
+// strap to the end plate ee_clear past the forearm end. The wrist is
+// the THIRD paired bearing station — the elbow's placement line
+// verbatim, roles mirrored: pink + tail stack ride the (inner, here
+// fixed) forearm plates, green + bolt head these (outer, moving)
+// sides. The straps leave the cap circle at azimuth +-46.7, so the
+// rim stays circular through the scale strip's 200-deg arc. Sweep
+// note: the strap corners reach r ~76 about the axis — past the
+// elbow fold plane's 74 — but only 430+ mm from the elbow, far
+// beyond any upper-arm material (the plane only guards fold_cut's
+// ~177 reach); everything else stays inside the cap radius + gap.
 module end_effector() {
-  color("burlywood") cub([ee_len, 44, 64], [0, 1, 1]);
+  rcap = wrist_d / 2 * cos(arm_taper);
+  // side plates: disc + forward strap, one CNC piece each; d 28.5
+  // pilots green's snout (this joint's fixed-BUSHING side, though
+  // the EE is the moving link — the station doesn't care)
+  color("burlywood") my([0, 1]) ty(ee_w / 2) rx(90) linear_extrude(ply_t)
+    difference() {
+      union() { circle(r = rcap); sq([ee_len, ee_strap], [0, 1]); }
+      circle(d = 28.5);
+    }
+  // end plate between the straps, full forearm depth: its inner face
+  // clears the forearm's circular end by ee_clear at every wrist angle
+  color("sienna") tx(ee_len - ply_t)
+    cub([ply_t, ee_w - 2 * ply_t, wrist_d], [0, 1, 1]);
+  // paired stations: same lanes, same 3 mm gap, same print as the
+  // shoulder's and elbow's
+  my([0, 1]) ty(fore_w / 2 - ply_t)
+    bearing_station(ee_w / 2 - ply_t - fore_w / 2);
+  // wrist joint-angle scale strip around the RIGHT side plate's rim
+  // (the right-side convention of the other two): travel + 2x10
+  // overshoot = 200 deg centered dead-aft, read by the camera on the
+  // forearm's right plate — strip on child, camera on parent
+  color("white") ty(-(ee_w / 2 - ply_t)) rx(90) linear_extrude(ply_t)
+    difference() {
+      rz(180) pie(rcap + 0.8, wrist_travel + 20);
+      circle(r = rcap);
+    }
+  // tool flange on the end plate's front face; the ghosted volume is
+  // a reference envelope, not a part
   color("navajowhite") tx(ee_len) ry(90) cylinder(d = 85, h = 12);
   %tx(ee_len + 75) ry(90) cylinder(d = 70, h = 125, center = true);
 }

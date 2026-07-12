@@ -1,11 +1,14 @@
-// Joint hardware, concept level. The shoulder and elbow pitch joints
-// use PAIRED PRELOADED BEARING STATIONS (bearing_station() below; the
-// annotated standalone diagram with rationale is bearing_station.scad).
-// The wrist still uses the older proxy idiom: a fixed dead axle with a
-// printed hub tube (joint_axle). The elbow and wrist DRIVES are being
-// overhauled with something different — their old worm proxies are
-// gone, and those joints carry bare stations/axles in the model until
-// the redesign lands.
+// Joint hardware, concept level. ALL THREE pitch joints use PAIRED
+// PRELOADED BEARING STATIONS (bearing_station() below; the annotated
+// standalone diagram with rationale is bearing_station.scad). At the
+// wrist the station is role-mirrored: the end effector straddles
+// OUTSIDE the forearm, and green + bolt head ride the outer EE sides
+// while pink + the tail stack (tee washer, jam nuts) sit on the
+// forearm plates, hidden inside the forearm box instead of hanging
+// off the EE's cheeks where they could catch. The elbow and wrist
+// DRIVES are being overhauled with something different — their old
+// worm proxies are gone, and those joints carry bare stations in the
+// model until the redesign lands.
 //
 // Conventions: pitch joints rotate about local Y. The shoulder sector
 // is drawn in the base frame with its arc bisector opposite the
@@ -28,16 +31,19 @@ module pie(r, ang) {
 // base board, see the assembly's left_board_2d.)
 
 // ---- preloaded joint bearing station ----
-// Shared by the shoulder and elbow; see bearing_station.scad for the
-// annotated standalone diagram (sketch palette: orchid arm bushing,
-// yellowgreen fixed bushing, red split pin, deepskyblue tee washer).
-// Local frame: axis = Y, y = 0 at the MOVING plate's inner face, +y
-// toward the FIXED board; `gap` = moving plate outer face to fixed
-// board inner face (3 at BOTH the shoulder and the elbow — one
+// Shared by the shoulder, elbow AND wrist; see bearing_station.scad
+// for the annotated standalone diagram (sketch palette: orchid arm
+// bushing, yellowgreen fixed bushing, red split pin, deepskyblue tee
+// washer). Local frame: axis = Y, y = 0 at the PINK-side plate's
+// inner face, +y toward the GREEN-side board; `gap` = pink plate
+// outer face to green board inner face (3 at ALL THREE joints — one
 // printed design serves every joint; at that gap the main bearing
 // sits flush with the board's inner face rather than proud, and the
-// hub flips the same idiom onto the baseplate). Preload loop is
-// internal, never through
+// hub flips the same idiom onto the baseplate). WHICH side moves is
+// the joint's business, not the station's — the loop only cares
+// about relative rotation: at the shoulder/elbow the pink side is
+// the moving link, at the wrist the green side (the outer EE fork)
+// is. Preload loop is internal, never through
 // wood: bolt head -> green web + shoulder -> main outer race -> balls
 // -> inner race -> pink -> 2nd outer race -> balls -> inner race ->
 // blue washer -> jam nuts. Pink, pin, main inner race and 2nd outer
@@ -222,16 +228,4 @@ module hub_station() rx(90) {
     ty(s1 + 16) rx(-90) cylinder(d = 6.9, h = 2.4, $fn = 6);
     ty(s1 + 19) rx(-90) cylinder(d = 6.9, h = 2.4, $fn = 6);
   }
-}
-
-// dead axle + printed hub tube, spanning `span` across the joint (Y)
-module joint_axle(span) {
-  color("silver") ty(-span / 2 - 10) rx(-90)
-    cylinder(d = 8, h = span + 20, $fn = 24);
-  color("khaki") ty(-19) rx(-90) tube(30, 22, 38);
-}
-
-module tube(od, id, h) difference() {
-  cylinder(d = od, h = h);
-  tz(-0.5) cylinder(d = id, h = h + 1);
 }

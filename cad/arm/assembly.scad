@@ -51,10 +51,15 @@
 //   baseplate (hub_station in joints.scad, diagram hub_station.scad):
 //   a preloaded 608 pair locates the axis — and the yaw gear mesh —
 //   with no baseplate through-hole, so the plate bottom stays flat
-//   for clamping. Printed herringbone gear segments wrap 200 deg of
+//   for clamping. Printed herringbone gear segments wrap 182 deg of
 //   the rim and the motor hangs INVERTED from a printed pylon,
 //   driving them directly with the m2 8T pinion (the same pinion as
-//   the shoulder primary) — single stage, ~26:1, yaw +-90. The pinion
+//   the shoulder primary) — single stage, ~26:1, yaw +-85. The bare
+//   178 deg of rim bulges into the READOUT LOBE (the rim is an exact
+//   360 budget, band + lobe): white angle strip on its face, crest
+//   flush with the gear band's outer radius, read by the base-fixed
+//   camera at azimuth 135 — one rim cylinder, so the camera can
+//   never be struck at any overtravel. The pinion
 //   sits at bench azimuth 315, out of every swept corridor (the arm's
 //   drive boom owns azimuths 90..270 at full-up; the front board
 //   corners sweep r 161 vs the pinion's 215). On the disc, the stiff
@@ -203,12 +208,27 @@ module bench_env() {
     color("silver") tz(23) cylinder(d = 5, h = 31, $fn = 24);
     color("tomato") tz(22) pinion();
   }
+  // the yaw joint-angle camera, base-fixed at azimuth 135 — the strip
+  // fills the whole readout lobe, so the read heading is forced
+  // diametrically opposite the pinion (the same forcing as the wrist
+  // camera's dead-aft 180). Lens ~6 off the strip crest (r 214) at
+  // band mid-height (z 36), body outboard, khaki pylon down to the
+  // plate; nearest fixed neighbor is the 150-deg hold-down riser,
+  // ~36 clear. The lobe puts the crest AT the gear band's outer
+  // radius, so nothing the disc carries can ever reach the camera —
+  // overtravel reads gear instead of strip, a data fault, not a crash
+  rz(135) {
+    color("khaki") tx(229) cub([10, 14, 29], [0, 1, 0]);
+    color("seagreen") tx(225) tz(29) cub([14, 14, 14], [0, 1, 0]);
+    color("dimgray") tx(220) tz(36) ry(90) cylinder(d = 6, h = 5);
+  }
 }
 
 // ---- slew disc + boards + fixed sector + shoulder stations ----
-// segs: the printed gear segments are install-at-graduation parts —
-// the testbench clamps the disc dead and omits them (the hub station
-// lives in bench_env, which the testbench never draws).
+// segs: the printed gear segments AND the rim angle strip are
+// install-at-graduation parts — the testbench clamps the disc dead
+// and omits them (the hub station lives in bench_env, which the
+// testbench never draws).
 module slew_base(segs = true) {
   // the base: two-layer ply slew disc; printed herringbone gear
   // segments clip over the rim through yaw_seg_arc, centered on the
@@ -219,22 +239,36 @@ module slew_base(segs = true) {
   // only the washer/jam-nut/bolt-tip pillar stands proud of the disc
   color("rosybrown") {
     tz(disc_z0) linear_extrude(ply_t) difference() {
-      circle(r = yaw_disc_r);
+      disc_blank_2d();
       circle(d = 15.5);
       board_slots_2d();
     }
     tz(disc_z0 + ply_t) linear_extrude(ply_t) difference() {
-      circle(r = yaw_disc_r);
+      disc_blank_2d();
       circle(d = 48);
       board_slots_2d();
     }
   }
-  if (segs)
+  if (segs) {
     color("khaki") tz(disc_z0) linear_extrude(2 * ply_t) rz(-45)
       difference() {
         pie(yaw_pitch_r + 7, yaw_seg_arc);
         circle(r = yaw_pitch_r - 12);
       }
+    // the YAW angle strip on the readout lobe's face (the arc budget
+    // is exact: seg + strip = 360, ends butting the band against the
+    // lobe's steps): a printed adhesive band 0.8 proud over the full
+    // 24 band height — crest flush with the gear band's outer radius,
+    // see params — centered opposite the gear, read by the base-fixed
+    // camera at azimuth 135 (bench_env). The pitch-axis idiom brought
+    // down to the base: strip on the moving link, camera on the fixed
+    // one; install-at-graduation like the segments
+    color("white") tz(disc_z0) linear_extrude(2 * ply_t) rz(135)
+      difference() {
+        pie(yaw_lobe_r + 0.8, yaw_strip_arc);
+        circle(r = yaw_lobe_r);
+      }
+  }
 
   // ... and the three boards: near-twins left/right plus the FRONT
   // board, ALL tabbed straight into the disc (mortises through both
@@ -639,6 +673,14 @@ module board_core_2d() {
     sq([front_x + 80, shoulder_h - disc_z0 - 2 * ply_t], [0, 0], 10);
   txy([0, shoulder_h]) circle(r = 80);
   tx([-140, -60, 20]) ty(disc_z0) sq([40, 2 * ply_t + 2], [0, 0]);
+}
+
+// the slew-disc blank, shared by both ply layers: the base circle
+// plus the READOUT LOBE — the bare arc bulged out so the angle
+// strip's crest rides at the gear band's outer radius (see params)
+module disc_blank_2d() {
+  circle(r = yaw_disc_r);
+  rz(135) pie(yaw_lobe_r, yaw_strip_arc);
 }
 
 // the mortise pattern cut through both slew-disc layers: three slots

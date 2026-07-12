@@ -92,13 +92,45 @@ motor_w = 42.3;           // NEMA 17
 motor_len = 48;
 function sector_r(ratio) = ratio / primary_ratio * drum_eff_r;
 
-yaw_travel = 180;     // +-90, single-stage herringbone ring drive
+// The slew RIM is a full-circle budget shared exactly between the gear
+// band and the yaw angle strip (the pitch-axis sensing idiom brought
+// down to the base: white band on the bare arc, base-fixed camera).
+// The camera reads the strip over the WHOLE travel, so the bare arc
+// must span travel + overshoot while the gear spans travel + mesh
+// margin: travel = 180 - margin/end - overshoot/end. 180 -> 170 paid
+// for the strip; trimming the old 10-deg/end mesh margin to 6 kept the
+// cut that small (the herringbone contact patch spreads only ~1.7 deg
+// each way at the 207 pitch radius — transverse action + half-chevron
+// helix advance — so 6 still leaves ~2.5 backed teeth in reserve)
+yaw_travel = 170;     // +-85, single-stage herringbone ring drive
 yaw_disc_r = 200;     // slew disc: DOUBLED, two ply layers (24 thick)
 yaw_pitch_r = yaw_disc_r + 7;   // gear-segment pitch radius; with the
                                 // m2 8T pinion (pitch r 8) the yaw
                                 // ratio is ~26:1 — plenty for a
                                 // gravity-neutral vertical axis
-yaw_seg_arc = yaw_travel + 20;  // segment arc: travel + mesh margin
+yaw_seg_arc = yaw_travel + 12;  // segment arc: travel + 6/end mesh margin
+yaw_strip_arc = 360 - yaw_seg_arc;  // 178 = travel + 4/end read
+                                // overshoot — 15 mm at the r 214 crest,
+                                // more than the shoulder's 10 deg buys
+                                // at its r 81 lobe (the overshoot
+                                // guards camera field of view, a
+                                // length, not an angle)
+yaw_lobe_r = yaw_pitch_r + 7 - 0.8;  // 213.2: the disc is NOT a plain
+                                // circle — the bare arc bulges into a
+                                // READOUT LOBE sized so the strip
+                                // crest lands EXACTLY at the gear
+                                // band's outer radius (214). The
+                                // rotating rim presents ONE cylinder
+                                // to the world, so a band/camera
+                                // collision is geometrically
+                                // impossible at any overtravel — the
+                                // reading goes bad (camera sees gear)
+                                // before anything can touch. Real
+                                // tooth tips (yaw_pitch_r + m = 209)
+                                // sit 5 inside; the 13-deep steps
+                                // where lobe meets band double as
+                                // azimuth registers for the end
+                                // segments
 shoulder_ratio = 150; shoulder_min = -20; shoulder_max = 100;  // capstan
 elbow_travel = 135;   // downward bend only; drive TBD (redesign underway)
 wrist_travel = 180;   // +-90; drive TBD (redesign underway)
@@ -238,7 +270,15 @@ elbow_cw_slot_x = 205;         // ...centered at upper_len - 245
 //     printed pylon at azimuth 315, pinion down over the full gear
 //     band — out of every swept corridor (the arm's drive boom owns
 //     azimuths 90..270 at full-up; the front board corners sweep
-//     r 161 vs the pinion's 215)
+//     r 161 vs the pinion's 215). The REST of the rim bulges into
+//     the READOUT LOBE (yaw_lobe_r): white strip on its face, crest
+//     flush with the gear band's outer radius, read by a base-fixed
+//     camera at azimuth 135 — diametrically opposite the pinion, the
+//     only heading that stays on the strip at both extremes. With
+//     the rim envelope one cylinder the camera can never be struck;
+//     the lobe's own worst passes are the hold-down risers (6 off —
+//     the same clearance the gear band always had) and the pinion
+//     teeth at full travel (step corner 3.3 deg / ~12 mm off)
 // (1) LEFT (+y) board: grows the FIXED shoulder sector — one CNC ply
 //     piece (or face-bolted stack), so joint torque grounds straight
 //     into the base with no bracket or pylon

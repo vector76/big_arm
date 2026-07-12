@@ -40,7 +40,8 @@
 // shoulder (x < 0), dipping to z 54 just 6 mm over the rim. Keep
 // clamp hardware off the rim within ~35 deg of azimuth 180 (or under
 // 6 mm tall there); the four bars at 45/135/225/315 all sit outside
-// the strip (|y| >= 141 at r 200). Drawn as generic riser-bar
+// the strip (|y| >= 141 at r 200), and the clamp screws hold r 216+
+// past the readout lobe's 213.2 rim. Drawn as generic riser-bar
 // hold-downs screwed to the desk; C-clamps at a desk edge work the
 // same — mind the zoning.
 //
@@ -60,7 +61,9 @@ rz(tb_clamp_az) {
     tx(150) tz(disc_z0 + 2 * ply_t) cub([120, 35, 14], [0, 1, 0]);
     tx(225) tz(disc_z0) cub([45, 35, 2 * ply_t], [0, 1, 0]);
   }
-  color("silver") tx(212) {
+  // screws at r 220: the 135 bar stands over the readout lobe, whose
+  // rim reaches yaw_lobe_r (213.2) — r 212 would spear it there
+  color("silver") tx(220) {
     tz(disc_z0 - 20) cylinder(d = 8, h = 60, $fn = 24);
     tz(disc_z0 + 2 * ply_t + 14) cylinder(d = 14, h = 5, $fn = 24);
   }

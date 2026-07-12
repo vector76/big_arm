@@ -65,7 +65,9 @@ export const defaultParams: DesignParams = {
   payloadMass: 2.27, // 5 lb
   counterweightMargin: 1.0,
   columnHeight: 0.4,
-  yaw: { ratio: 60, efficiency: 0.8, travel: deg(180) },
+  // Yaw travel 180 -> 170: the slew rim now shares an exact 360-deg
+  // budget between the gear band and the angle strip (cad/arm/params.scad)
+  yaw: { ratio: 60, efficiency: 0.8, travel: deg(170) },
   shoulder: { ratio: 150, efficiency: 0.7, travel: deg(120) },
   // Elbow/wrist ratios kept low to allow single-stage reductions without
   // bulky gears (decision 2026-07-09); closed-loop sensing absorbs the

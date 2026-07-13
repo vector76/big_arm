@@ -64,8 +64,8 @@ npm run export:cad:full  # same assembly at FULL print fidelity, for comparison
 ```
 
 That render deliberately overruns the budget and the viewer labels it; it is a
-measurement, not something to deploy. Today: 447k triangles at full fidelity
-vs 99k at twin fidelity, for no visible difference.
+measurement, not something to deploy. Today: 616k triangles at full fidelity
+vs 140k at twin fidelity, for no visible difference.
 
 ## Status
 

@@ -153,6 +153,14 @@ body {
   letter-spacing: -1px;
 }
 
+/* collapse the cell spacing: the default 2px gutters are gaps in the ROW's
+   hit area — a click that lands in one hits the table and does nothing,
+   which on a table whose every row is a button is just a dead spot */
+#perf table,
+#parts table {
+  border-collapse: collapse;
+}
+
 #perf td,
 #parts td {
   padding: 0 6px 0 0;

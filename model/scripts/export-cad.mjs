@@ -80,13 +80,17 @@ const run = (args) =>
 // be RATCHETED DOWN whenever a part gets cheaper. If a body blows its
 // budget, the first question is whether the offending feature exists for
 // MANUFACTURE, in which case it belongs behind $twin rather than in the
-// viewer's meshes — that switch is what took this scene from 447k
-// triangles to 99k with no visible change.
+// viewer's meshes — that switch is what takes this scene from 616k
+// triangles to 140k with no visible change.
+//
+// Re-baselined when the elbow drive + nose capstan landed: a third drive
+// is real new geometry, not a regression, so the ceilings move with it.
+// (The gate caught the growth on the merge, which is the job.)
 const TRI_BUDGET = {
-  static: 13_000,
+  static: 24_000,
   yaw: 20_000,
-  upper: 44_000,
-  fore: 25_000,
+  upper: 49_000,
+  fore: 58_000,
   ee: 16_000,
 };
 

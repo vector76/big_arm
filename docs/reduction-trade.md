@@ -35,12 +35,28 @@ move).
 
 ## Per-joint leanings (to be tested)
 
-- **Wrist (40:1):** **worm.** Compact, self-locking, and the margin is so
-  large (η floor 0.22) that even a poor worm clears it. Threaded-rod worm +
-  ~Ø50 mm printed wheel.
-- **Elbow (90:1):** **worm if measured η ≥ 0.5** (margin ≥ 1.4), else
-  printed cycloidal (η floor 0.45 is comfortable for a decent cycloidal).
-  Both are single-stage and compact at this ratio.
+- **Wrist and elbow (2026-07-12): the worm lean is dead** — after the
+  links tapered, both worm motors outgrew the truss hollows. Both
+  joints now run the shoulder's capstan recipe (herringbone primary +
+  cable, remote motor riding the elbow-CW fin as counterweight
+  credit), designed in CAD (`cad/arm/`):
+  - **Wrist (~20:1):** second 8T/51T primary into a cable loop — fat
+    capstan on the fin, two straight ~650 mm runs down the forearm to
+    a drum ring on the EE fork plate. η ≈ 0.85 → margin ~2.4.
+  - **Elbow (~65:1, relaxed from the worm-era 90:1):** third 8T
+    primary with the wheel grown to 66T (the drum can't shrink — the
+    1.1 mm cord's bend ratio floors it at eff_r 10.125, and tension
+    rises as the arc shrinks) into a **nose capstan folded into the
+    board's thickness**: the upper arm's fork cap grows a CNC lobe
+    and a slim printed liner rides its rim (cable centerline r 80),
+    one shared groove carrying both cables as complementary seated
+    arcs; two crossed idler sheaves on the forearm land the two
+    tangencies a constant few degrees apart, keeping the liner
+    travel-sized and the whole drive inside the plate's 12 mm.
+    η ≈ 0.83 with the idlers → margin ~1.67. Power-off is now
+    back-drivable at every joint (the worms' free self-locking is
+    gone): a loaded gripper sags slowly on power loss — brake or
+    acceptance still to be decided.
 - **Shoulder (150:1): leading hypothesis (2026-07-09) — herringbone
   primary + capstan cable sector.** A 6.375:1 printed herringbone pair
   (8T/51T m2; the wheel's addendum stubbed to 0.45 so its tips clear the

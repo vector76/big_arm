@@ -20,6 +20,7 @@
 include <params.scad>
 use <../lib/helpers.scad>
 use <../lib/gears.scad>
+use <../lib/capstan.scad>
 
 anchor_d = 2.2;                 // cable feed-through, knot behind it
 bore_d = shaft_d + 2.5;         // free clearance around the dead axle
@@ -27,28 +28,12 @@ relief_d = 15.5;                // pocket-floor relief (see gear_drum)
 
 wr_core_d = 2 * (wr_cap_r - cable_d / 2 + groove_g);   // 32.1
 wr_flange_d = 37;               // ~2 proud of the cable crest (33.1)
-wr_groove_turns = wr_cap_len / groove_p;
 z_core = wr_core_y0 - wr_whl_y0;   // 38.5: locked to the cable plane
 
-// the groove cutter — the same twisted-crescent construction as
-// gear_drum.scad's drum_groove (see the long note there), radii swapped
-module wr_groove() {
-  n = 40;
-  cw = 360 * groove_w / groove_p;
-  tz(2 - groove_p / 2)
-    linear_extrude(wr_cap_len + groove_p,
-                   twist = 360 * (wr_groove_turns + 1),
-                   slices = ceil(wr_groove_turns + 1) * 72, convexity = 10)
-      polygon(concat(
-        [for (i = [0 : n])
-          let (d = -cw / 2 + cw * i / n,
-               u = d * groove_p / 360,
-               ri = wr_cap_r - cable_d / 2 + groove_w / 2
-                    - sqrt(max(0, pow(groove_w / 2, 2) - u * u)))
-            ri * [cos(d), sin(d)]],
-        [for (i = [0 : n]) let (d = cw / 2 - cw * i / n)
-          (wr_core_d / 2 + 0.7) * [cos(d), sin(d)]]));
-}
+// the groove cutter — the shared hull-chain sweep (LH lay; see
+// ../lib/capstan.scad), at the wrist capstan radius and length
+module wr_groove()
+  tz(2) capstan_groove(wr_cap_r, wr_cap_len, groove_p, groove_w, cable_d);
 
 // flange + grooved core + flange + mid-groove anchor, z 0 = the lower
 // flange's bottom face

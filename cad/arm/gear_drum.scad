@@ -28,6 +28,7 @@
 include <params.scad>
 use <../lib/helpers.scad>
 use <../lib/gears.scad>
+use <../lib/capstan.scad>
 
 anchor_d = 2.2;                 // cable feed-through, knot or crimp behind it
 bore_d = shaft_d + 2.5;         // free clearance around the dead axle
@@ -35,7 +36,6 @@ relief_d = 15.5;                // pocket-floor relief: the floor ring
                                 // catches the OUTER race only, so the
                                 // static inner race never rubs
 
-groove_turns = drum_len / groove_p;
 z_core = core_y0 - whl_y0;      // 35: grooved core start, from the
                                 // lane math — locked to the tracks
 
@@ -57,38 +57,17 @@ module drum_body() difference() {
       ry(90) cylinder(d = anchor_d, h = drum_flange_d, $fn = 24);
 }
 
-// the groove cutter: a chain of pairwise-hulled discs marching down
-// the helix. Each disc is the groove's circular cross-section made
-// thinly 3D (hull needs a solid), held normal to the cable path;
-// hulling each adjacent pair sweeps the round-bottom groove directly.
-// The disc center rides the groove ARC's center — half the w-vs-cable
-// clearance outboard of the cord centerline — so the seated cord's
-// center lands exactly at drum_eff_r. (The old twisted-extrude
-// crescent cut the same groove — residue between the two cutters is
-// ~15 mm^3, all at the run-out ends — but its facets were 20-micron
-// slivers crosshatching the surface; these quads lie along the lay.)
-// LEFT-HAND helix (rz marches negative: +twist rotated -angle with
-// height, verified against the crescent at azimuth 90) — DERIVED,
-// not chosen: with the real segments in the assembly (run A's knot
-// at the lower/gusset end), the winding sense demands a LH lay to
-// march WITH the track ramp. The old right-hand note predated
-// drawing the segments real: a RH groove crosses the tracks at
-// 2.7 deg — the in-opposition failure the params wrap-math note
-// warns about.
-module drum_groove() {
-  seg = 60;                       // hull segments per turn
-  lay = atan(groove_p / (2 * PI * drum_eff_r));   // ~1.35 deg
-  n = ceil((groove_turns + 1) * seg);
-  // render(): bake the chain to one mesh, else preview's CSG
-  // normalization explodes on difference-over-1060-hulls
-  render(convexity = 10)
-  for (i = [0 : n - 1]) hull() for (f = [i / n, (i + 1) / n])
-    tz(2 - groove_p / 2 + (drum_len + groove_p) * f)
-      rz(-360 * (groove_turns + 1) * f)
-        tx(drum_eff_r - cable_d / 2 + groove_w / 2)
-          rx(-lay) rx(90)
-            cylinder(d = groove_w, h = 0.02, center = true, $fn = 24);
-}
+// the groove cutter — the shared hull-chain sweep (see
+// ../lib/capstan.scad for the construction and its verification
+// against the old twisted-extrude crescent).
+// LEFT-HAND helix — DERIVED, not chosen: with the real segments in
+// the assembly (run A's knot at the lower/gusset end), the winding
+// sense demands a LH lay to march WITH the track ramp. The old
+// right-hand note predated drawing the segments real: a RH groove
+// crosses the tracks at 2.7 deg — the in-opposition failure the
+// params wrap-math note warns about.
+module drum_groove()
+  tz(2) capstan_groove(drum_eff_r, drum_len, groove_p, groove_w, cable_d);
 
 // the shared gear: 51T stub-addendum herringbone
 module drive_wheel()

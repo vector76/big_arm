@@ -21,34 +21,19 @@
 include <params.scad>
 use <../lib/helpers.scad>
 use <../lib/gears.scad>
+use <../lib/capstan.scad>
 
 anchor_d = 2.2;                 // cable feed-through, knot or crimp behind it
 bore_d = shaft_d + 2.5;         // free clearance around the dead axle
 relief_d = 15.5;                // pocket-floor relief (see gear_drum)
 
-el_groove_turns = el_core_len / groove_p;
 z_core = el_core_y0 - el_whl_y0;   // 30.7: locked to the take-off
                                    // stations astride the channel
 
-// the groove cutter — gear_drum's twisted annular crescent verbatim
-// (see the long note there), at the elbow core length
-module el_groove() {
-  n = 40;
-  cw = 360 * groove_w / groove_p;
-  tz(2 - groove_p / 2)
-    linear_extrude(el_core_len + groove_p,
-                   twist = 360 * (el_groove_turns + 1),
-                   slices = ceil(el_groove_turns + 1) * 72, convexity = 10)
-      polygon(concat(
-        [for (i = [0 : n])
-          let (d = -cw / 2 + cw * i / n,
-               u = d * groove_p / 360,
-               ri = drum_eff_r - cable_d / 2 + groove_w / 2
-                    - sqrt(max(0, pow(groove_w / 2, 2) - u * u)))
-            ri * [cos(d), sin(d)]],
-        [for (i = [0 : n]) let (d = cw / 2 - cw * i / n)
-          (drum_core_d / 2 + 0.7) * [cos(d), sin(d)]]));
-}
+// the groove cutter — the shared hull-chain sweep (LH lay; see
+// ../lib/capstan.scad), at the elbow core length
+module el_groove()
+  tz(2) capstan_groove(drum_eff_r, el_core_len, groove_p, groove_w, cable_d);
 
 // flange + grooved core + flange + one anchor hole per core end,
 // z 0 = the lower flange's bottom face

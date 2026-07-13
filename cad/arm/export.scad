@@ -29,6 +29,14 @@ include <params.scad>
 use <../lib/helpers.scad>
 use <assembly.scad>
 
+// THE TWIN IS AN ILLUSTRATION — the same reasoning as housings = false
+// below, one level down. Manufacturing features that read as sub-pixel
+// here still cost full price on the GPU every frame (the drums' helical
+// cable groove alone was 124k triangles), so this file — and ONLY this
+// file — renders at twin fidelity. The print/cut exports never include
+// export.scad, so they keep every flank and every turn of the groove.
+$twin = true;
+
 if (group == "static") bench_env();
 else if (group == "yaw") slew_base();
 // housings = false: the twin is an illustration — the printed drive

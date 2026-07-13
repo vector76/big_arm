@@ -61,11 +61,12 @@ body {
   font-size: 13px;
 }
 
-/* twin.html: IK drag hint, parked under the lil-gui pose panel */
+/* twin.html: IK drag hint, parked under the lil-gui pose panel
+   (which carries one row more than the pose sliders: the perf switch) */
 #ik-hint {
   position: fixed;
   right: 15px;
-  top: 172px;
+  top: 200px;
   width: 245px;
   box-sizing: border-box;
   color: #8b95a3;
@@ -92,6 +93,169 @@ body {
 
 .page-link:hover {
   color: #d7dce2;
+}
+
+/* twin.html: the mesh-cost inspector (src/view/perfHud.ts). The body list
+   sits bottom-right, clear of the pose panel; clicking a body opens the
+   per-part overlay. Both hidden until the "mesh stats" switch is on. */
+#perf,
+#parts {
+  position: fixed;
+  display: none;
+  color: #8b95a3;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  background: rgba(20, 22, 26, 0.82);
+  border: 1px solid #333a44;
+  border-radius: 6px;
+}
+
+#perf.on,
+#parts.on {
+  display: block;
+}
+
+#perf {
+  right: 15px;
+  bottom: 12px;
+  padding: 6px 10px;
+}
+
+/* which render the numbers came from — so a screenshot of the HUD is
+   self-labelling in a before/after pair */
+.perf-head {
+  color: #8b95a3;
+  padding-bottom: 3px;
+  margin-bottom: 3px;
+  border-bottom: 1px solid #333a44;
+}
+
+.perf-head b {
+  color: #d7dce2;
+  font-weight: 600;
+}
+
+#perf .perf-row {
+  cursor: pointer;
+}
+
+#perf .perf-row:hover {
+  color: #d7dce2;
+  background: #2a303a;
+}
+
+.perf-num {
+  text-align: right;
+}
+
+.perf-bar {
+  color: #e8b34b;
+  letter-spacing: -1px;
+}
+
+/* collapse the cell spacing: the default 2px gutters are gaps in the ROW's
+   hit area — a click that lands in one hits the table and does nothing,
+   which on a table whose every row is a button is just a dead spot */
+#perf table,
+#parts table {
+  border-collapse: collapse;
+}
+
+#perf td,
+#parts td {
+  padding: 0 6px 0 0;
+}
+
+.perf-total {
+  color: #d7dce2;
+  border-top: 1px solid #333a44;
+}
+
+.perf-total .perf-bar {
+  color: #8b95a3;
+  letter-spacing: 0;
+}
+
+.perf-live b {
+  color: #d7dce2;
+  font-weight: 600;
+}
+
+/* the per-part overlay: opens stacked directly above #perf (perfHud.ts
+   pins it there on open, until you drag it), draggable by its title bar,
+   and deliberately see-through — you are meant to watch the arm behind it
+   while the highlight moves */
+#parts {
+  right: 15px;
+  bottom: 140px;
+  padding: 0 0 4px;
+  user-select: none;
+}
+
+.parts-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 6px 5px 10px;
+  border-bottom: 1px solid #333a44;
+  cursor: grab;
+}
+
+.parts-bar.dragging {
+  cursor: grabbing;
+}
+
+.parts-title {
+  flex: 1;
+  color: #d7dce2;
+  font-weight: 600;
+}
+
+.parts-close {
+  border: 0;
+  background: none;
+  color: #8b95a3;
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 2px 5px;
+}
+
+.parts-close:hover {
+  color: #e5604d;
+}
+
+#parts table {
+  margin: 4px 6px 0 10px;
+}
+
+.parts-head {
+  color: #5f6875;
+}
+
+.parts-row {
+  cursor: pointer;
+}
+
+.parts-row:hover {
+  background: #2a303a;
+}
+
+.parts-row.lit {
+  background: #3a3320;
+  color: #d7dce2;
+}
+
+.parts-swatch {
+  width: 10px;
+  min-width: 10px;
+  padding: 0 !important;
+  border: 1px solid #4a525e;
+  border-radius: 2px;
+}
+
+.parts-name {
+  padding-left: 7px !important;
 }
 
 .margin-good { color: #6fd08c; }

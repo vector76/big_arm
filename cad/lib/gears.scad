@@ -72,17 +72,23 @@ module gear2d(m, z, pa = 20, backlash = 0, steps = 10, ha = 1) {
 // Herringbone gear: two opposite-hand helical halves meeting at mid-height.
 // helix: helix angle in degrees. bore: through-hole diameter (0 = solid).
 module herringbone_gear(m, z, height, helix = 25, pa = 20, backlash = 0,
-                        bore = 0, steps = 10, ha = 1) {
+                        bore = 0, steps = undef, ha = 1) {
   rp = m * z / 2;
   half = height / 2;
   // rotation of the cross-section over one half, from the helix angle
   tw = half * tan(helix) / (PI * m * z) * 360;
+  // flank samples drive the whole cost: the 2D profile is z * ~3 * steps
+  // points and the twist sweeps every one of them up every slice. The
+  // involute needs 10 to MESH; it needs ~3 to LOOK like a gear.
+  st = !is_undef(steps) ? steps : ($twin ? 3 : 10);
   difference() {
     tz(half) mz([0, 1])
-      linear_extrude(height = half, twist = tw, slices = max(8, ceil(tw)), convexity = 10)
-        gear2d(m, z, pa, backlash, steps, ha);
+      linear_extrude(height = half, twist = tw,
+                     slices = max($twin ? 3 : 8, ceil(tw / ($twin ? 4 : 1))),
+                     convexity = 10)
+        gear2d(m, z, pa, backlash, st, ha);
     if (bore > 0)
-      tz(-1) cylinder(d = bore, h = height + 2, $fn = 64);
+      tz(-1) cylinder(d = bore, h = height + 2, $fn = $twin ? 24 : 64);
   }
 }
 

@@ -78,7 +78,7 @@ module sector_segment(i = idx, end = 0) {
                                                // station at the end face
   difference() {
     // the wedge section, swept over this segment's arc
-    rz(-half) rotate_extrude(angle = seg_ang, $fn = 240) seg_profile();
+    rz(-half) rotate_extrude(angle = seg_ang, $fn = $twin ? 90 : 240) seg_profile();
     // track slots: the ANCHORED one stops 2 deg short of its arc end,
     // leaving the band itself as the anchor abutment
     track_slot(i, -1, end == -1 ? -half + 2 : -half - 0.5, half + 0.5);

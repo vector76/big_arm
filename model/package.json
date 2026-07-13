@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "export:cad": "node scripts/export-cad.mjs",
+    "export:cad:full": "node scripts/export-cad.mjs --detail=print",
     "preview": "vite preview",
     "test": "vitest run"
   },

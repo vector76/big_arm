@@ -68,7 +68,7 @@ include <params.scad>
 use <../lib/helpers.scad>
 use <joints.scad>
 
-$fn = 64;
+$fn = $twin ? 32 : 64;
 
 // baseplate proxy: a plain flat slab — nothing cut into it at all
 module base_plate() part("wheat")

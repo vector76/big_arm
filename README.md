@@ -46,6 +46,27 @@ npm test       # model-core unit tests
 npm run build  # static site in model/dist/
 ```
 
+The twin's meshes render at **twin fidelity** (`$twin` in
+[`cad/arm/params.scad`](cad/arm/params.scad)): features that exist to make a
+part *work* rather than to be *seen* — the drums' helical cable groove, the
+gears' involute flanks — get coarse tessellation, because on screen they are
+worth a few pixels and cost six figures of triangles. Print and cut exports
+never go through `export.scad`, so they keep full manufacturing fidelity.
+
+`export:cad` reports each body's triangle count against a budget and fails if
+one is blown, so a CAD edit can't quietly make the twin unrenderable. The
+viewer has a matching **mesh-stats HUD** (the pose panel's *mesh stats*
+switch, or `?stats=1`): triangles per rigid body, then per part — click one to
+isolate it in the scene, or focus the camera on it.
+
+```sh
+npm run export:cad:full  # same assembly at FULL print fidelity, for comparison
+```
+
+That render deliberately overruns the budget and the viewer labels it; it is a
+measurement, not something to deploy. Today: 616k triangles at full fidelity
+vs 140k at twin fidelity, for no visible difference.
+
 ## Status
 
 Concept stage (July 2026). Documents are drafts; the engineering model is

@@ -84,13 +84,13 @@ module gear_drum() {
       tz(z_core - 2) drum_body();
       tz(z_core + drum_len + 2) cylinder(d = 28, h = drum_boss_l);
     }
-    tz(-0.5) cylinder(d = bore_d, h = lt + 1, $fn = 48);
+    tz(-0.5) cylinder(d = bore_d, h = lt + 1, $fn = $twin ? 24 : 48);
     // 608 pockets into both ends; the relief past each floor keeps
     // the rotating floor ring off the static inner race
-    tz(-0.5) cylinder(d = bearing_pocket_d, h = bearing_w + 0.5, $fn = 96);
-    tz(-0.5) cylinder(d = relief_d, h = bearing_w + 1.5, $fn = 48);
-    tz(lt - bearing_w) cylinder(d = bearing_pocket_d, h = bearing_w + 0.5, $fn = 96);
-    tz(lt - bearing_w - 1) cylinder(d = relief_d, h = bearing_w + 1.5, $fn = 48);
+    tz(-0.5) cylinder(d = bearing_pocket_d, h = bearing_w + 0.5, $fn = $twin ? 24 : 96);
+    tz(-0.5) cylinder(d = relief_d, h = bearing_w + 1.5, $fn = $twin ? 24 : 48);
+    tz(lt - bearing_w) cylinder(d = bearing_pocket_d, h = bearing_w + 0.5, $fn = $twin ? 24 : 96);
+    tz(lt - bearing_w - 1) cylinder(d = relief_d, h = bearing_w + 1.5, $fn = $twin ? 24 : 48);
   }
 }
 

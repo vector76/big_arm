@@ -63,11 +63,11 @@ module elbow_gear_capstan() {
       tz(z_core - 2) el_drum_body();
       tz(z_core + el_core_len + 2) cylinder(d = 28, h = bearing_w);
     }
-    tz(-0.5) cylinder(d = bore_d, h = lt + 1, $fn = 48);
-    tz(-0.5) cylinder(d = bearing_pocket_d, h = bearing_w + 0.5, $fn = 96);
-    tz(-0.5) cylinder(d = relief_d, h = bearing_w + 1.5, $fn = 48);
-    tz(lt - bearing_w) cylinder(d = bearing_pocket_d, h = bearing_w + 0.5, $fn = 96);
-    tz(lt - bearing_w - 1) cylinder(d = relief_d, h = bearing_w + 1.5, $fn = 48);
+    tz(-0.5) cylinder(d = bore_d, h = lt + 1, $fn = $twin ? 24 : 48);
+    tz(-0.5) cylinder(d = bearing_pocket_d, h = bearing_w + 0.5, $fn = $twin ? 24 : 96);
+    tz(-0.5) cylinder(d = relief_d, h = bearing_w + 1.5, $fn = $twin ? 24 : 48);
+    tz(lt - bearing_w) cylinder(d = bearing_pocket_d, h = bearing_w + 0.5, $fn = $twin ? 24 : 96);
+    tz(lt - bearing_w - 1) cylinder(d = relief_d, h = bearing_w + 1.5, $fn = $twin ? 24 : 48);
   }
 }
 

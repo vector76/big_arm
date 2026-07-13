@@ -36,12 +36,12 @@ tab_az = [el_arc[0] + 4, (el_arc[0] + el_arc[1]) / 2, el_arc[1] - 4];
 module elbow_nose() difference() {
   union() {
     // the C-channel body, seated on the lobe rim inside the slab
-    ry(-el_arc[1]) rx(-90) rotate_extrude(angle = enl_span, $fn = 240)
+    ry(-el_arc[1]) rx(-90) rotate_extrude(angle = enl_span, $fn = $twin ? 90 : 240)
       polygon([[el_lobe_r, enl_y0], [enl_out_r, enl_y0],
                [enl_out_r, enl_y1], [el_lobe_r, enl_y1]]);
     // three 16-deg screw tabs on the plate's outer face, each
     // lapping from the wood (r 62..lobe) over the body's end face
-    for (a = tab_az) ry(-(a + 8)) rx(-90) rotate_extrude(angle = 16, $fn = 240)
+    for (a = tab_az) ry(-(a + 8)) rx(-90) rotate_extrude(angle = 16, $fn = $twin ? 90 : 240)
       polygon([[62, upper_w / 2], [el_lobe_r, upper_w / 2],
                [el_lobe_r, enl_y1], [enl_out_r, enl_y1],
                [enl_out_r, upper_w / 2 + tab_t],
@@ -50,7 +50,7 @@ module elbow_nose() difference() {
   // the shared V channel: apex at el_apex_r, 45-deg walls, cut clear
   // through the outer wall (the cord stays captive between the
   // flanking wall rings at 43.5..45.3 / 52.7..54.5)
-  ty(el_cab_y) rx(-90) rotate_extrude($fn = 240)
+  ty(el_cab_y) rx(-90) rotate_extrude($fn = $twin ? 90 : 240)
     polygon([[el_apex_r, 0],
              [el_apex_r + 5, 5],
              [el_apex_r + 5, -5]]);

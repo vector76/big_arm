@@ -57,7 +57,7 @@ include <params.scad>
 use <../lib/helpers.scad>
 use <joints.scad>
 
-$fn = 64;
+$fn = $twin ? 32 : 64;
 
 // arm side plate — solid here; its hole (15.5) passes the pink sleeve.
 // Not a precision fit: pink registers by its screwed flange, and the

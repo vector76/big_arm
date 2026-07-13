@@ -18,17 +18,27 @@
 // render(): bakes the hulls to one mesh, else F5 preview's CSG
 // normalization explodes on difference-over-hundreds-of-hulls.
 
+// $twin (params.scad) renders the three.js twin, where a whole capstan is
+// worth ~30 px and the groove's round bottom is worth none of them: the
+// sweep is n = (turns + 1) * seg hulls of an fn-gon disc, so seg and fn
+// multiply into the single largest triangle bill in the viewer's meshes.
+// Coarsening BOTH here covers all three drives at once; the print keeps
+// 60/24. A special variable so it reaches this lib, which has no
+// params.scad to include.
 use <helpers.scad>
 
-module capstan_groove(arc_r, len, p, w, cable, seg = 60, fn = 24) {
+module capstan_groove(arc_r, len, p, w, cable,
+                      seg = undef, fn = undef) {
+  sg = !is_undef(seg) ? seg : ($twin ? 8 : 60);
+  nf = !is_undef(fn) ? fn : ($twin ? 8 : 24);
   turns = len / p;
   lay = atan(p / (2 * PI * arc_r));
-  n = ceil((turns + 1) * seg);
+  n = ceil((turns + 1) * sg);
   render(convexity = 10)
     for (i = [0 : n - 1]) hull() for (f = [i / n, (i + 1) / n])
       tz(-p / 2 + (len + p) * f)
         rz(-360 * (turns + 1) * f)
           tx(arc_r - cable / 2 + w / 2)
             rx(-lay) rx(90)
-              cylinder(d = w, h = 0.02, center = true, $fn = fn);
+              cylinder(d = w, h = 0.02, center = true, $fn = nf);
 }

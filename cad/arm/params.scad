@@ -819,4 +819,14 @@ pose_shoulder = 40;
 pose_elbow = 70;      // 0..135 downward
 pose_wrist = -10;     // +-90
 
-$fn = 48;
+// ---- render fidelity ----
+// $twin = false is MANUFACTURING TRUTH: what the printers and the cut
+// list get. export.scad sets $twin = true for the three.js twin, where a
+// feature that exists to make the part WORK (the drums' helical cable
+// groove, the involute flanks) can read as a handful of pixels and still
+// cost six figures of triangles. A special ($-prefixed) variable because
+// it is dynamically scoped: lib/gears.scad has no params.scad to include,
+// but it still sees this through the call chain.
+$twin = false;
+
+$fn = $twin ? 24 : 48;

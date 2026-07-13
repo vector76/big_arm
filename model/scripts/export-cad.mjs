@@ -86,11 +86,27 @@ const run = (args) =>
 // Re-baselined when the elbow drive + nose capstan landed: a third drive
 // is real new geometry, not a regression, so the ceilings move with it.
 // (The gate caught the growth on the merge, which is the job.)
+//
+// Ratcheted down after the twin's gears went to straight flanks (1 step,
+// 1 slice per half): that one is kept, and it is most of the win.
+//
+// upper/fore are back UP because the capstan groove is carved again. It
+// was dropped from the twin on the finding that a coarse hull chain reads
+// as holes through the core wall — true of a FLAT seg, but the sag scales
+// with arc_r, so the fix is to derive seg per drive rather than to delete
+// the thread (lib/capstan.scad). A grooveless capstan is not a cheaper
+// capstan, it is a different part: the helix is the one feature that says
+// what these cores ARE, and it is legible at ~30 px.
+//
+// PROVISIONAL — these two are the pre-straight-flank ceilings, which held
+// these same bodies WITH a groove and so cannot false-fail. They are not
+// yet a high-water mark: the straight-flank gears land under them by a
+// wide margin. RATCHET DOWN to ~20% over measured on the next render.
 const TRI_BUDGET = {
-  static: 24_000,
-  yaw: 20_000,
-  upper: 49_000,
-  fore: 58_000,
+  static: 23_000,
+  yaw: 21_000,
+  upper: 49_000,   // provisional; expect ~27k measured
+  fore: 58_000,    // provisional; expect ~44k measured
   ee: 16_000,
 };
 

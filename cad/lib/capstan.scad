@@ -18,35 +18,33 @@
 // render(): bakes the hulls to one mesh, else F5 preview's CSG
 // normalization explodes on difference-over-hundreds-of-hulls.
 
+// WHY THE COARSE GROOVE LOOKED BROKEN, and why it is carved anyway.
 // A hull CHORDS the helix: between two discs the cutter's outer surface is
-// a straight line, so mid-hull it sags BELOW the arc it should be riding.
-// That sag is what seg buys down, and the number to read it against is the
-// groove's DEPTH (groove_g, 0.6) — not the drum, which is 17x bigger and
-// flatters any seg. The sag also scales with arc_r, so a single slice count
-// canNOT serve all three drives.
+// a straight line, so mid-hull it sags BELOW the arc it should ride. Read
+// that sag against the groove's DEPTH (groove_g, 0.6) — not against the
+// drum, which is 17x bigger and flatters any seg. At a flat seg = 8 the sag
+// is 0.41 mm on the shoulder/elbow and 0.64 mm on the WRIST, whose bigger
+// radius makes it WORST: 0.64 > 0.6, so there the cutter never breaks the
+// core surface between nodes and the thread renders as a lattice of
+// detached nubs (and, where it does bite, as holes through the wall).
 //
-// $twin (params.scad) renders the three.js twin, where a whole capstan is
-// worth ~30 px and the groove's round bottom is worth none of them: the
-// sweep is n = (turns + 1) * seg hulls of an fn-gon disc, so seg and fn
-// multiply into the single largest triangle bill in the viewer's meshes.
-// The disc (fn) coarsens freely — nobody counts a hexagon's corners at
-// 30 px — but seg is DERIVED, not chosen. A flat seg = 8 sagged the chord
-// 0.41 mm on the shoulder/elbow and 0.64 mm on the WRIST, whose bigger
-// radius made it worst; against a 0.6-deep groove that meant the cutter
-// never broke the core surface between nodes at all, and the thread
-// rendered as a lattice of detached NUBS instead of a helix. Solving
-// twin_err pins the sag to a fixed fraction of the groove on every drive
-// (17 slices at arc_r 10.1, 21 at 16) — the twin's mesh now costs its
-// triangles where the eye actually reads the part, ALONG the lay.
+// The conclusion to draw is NOT that the groove can't be coarsened — it is
+// that seg cannot be a flat number, because the sag scales with arc_r and
+// one slice count therefore cannot serve three drives of different size.
+// So seg is DERIVED: solve twin_err and the sag is pinned to a fixed
+// fraction of the groove on every capstan (17 slices at arc_r 10.1, 21 at
+// 16). The thread is what the eye actually reads on these parts, so the
+// twin spends its triangles there and claws them back on the disc — an
+// fn-gon nobody can count at 30 px.
 //
 // THE PRINT PATH IS UNTOUCHED — 60/24 and the arc-riding disc center, byte
-// for byte what upstream renders. Everything below that moves is gated on
-// $twin. A special variable so it reaches this lib, which has no
-// params.scad to include.
+// for byte. Every term that moves is gated on $twin (params.scad). A
+// special variable so it reaches this lib, which has no params.scad to
+// include.
 use <helpers.scad>
 
 // the twin's chord-sag ceiling, mm — 1/6 of the 0.6 groove depth, i.e. the
-// coarsest sweep that still cuts a groove you can see. Lower = more slices.
+// coarsest sweep that still cuts a groove you can SEE. Lower = more slices.
 twin_err = 0.1;
 
 module capstan_groove(arc_r, len, p, w, cable,
@@ -64,7 +62,7 @@ module capstan_groove(arc_r, len, p, w, cable,
   // riding the disc centers out to the mid-chord radius halves the worst sag
   // and centers it on the true groove, so a coarse sweep still lands on the
   // right surface. The print rides the arc itself (k = 1) — at 60 slices its
-  // sag is 15 microns and correcting it would be a change to manufacturing
+  // sag is 15 microns, and correcting it would be a change to manufacturing
   // truth for no manufacturing reason.
   k = $twin ? (1 + 1 / cos(180 / sg)) / 2 : 1;
   render(convexity = 10)

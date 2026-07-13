@@ -79,12 +79,15 @@ module herringbone_gear(m, z, height, helix = 25, pa = 20, backlash = 0,
   tw = half * tan(helix) / (PI * m * z) * 360;
   // flank samples drive the whole cost: the 2D profile is z * ~3 * steps
   // points and the twist sweeps every one of them up every slice. The
-  // involute needs 10 to MESH; it needs ~3 to LOOK like a gear.
-  st = !is_undef(steps) ? steps : ($twin ? 3 : 10);
+  // involute needs 10 to MESH; it needs only a straight flank (1) to
+  // LOOK like a gear, and these halves twist ~7 deg — one slice each.
+  // Measured on the 51T wheel: 8.6k tris at 3/3, 2.4k at 1/1, renders
+  // indistinguishable.
+  st = !is_undef(steps) ? steps : ($twin ? 1 : 10);
   difference() {
     tz(half) mz([0, 1])
       linear_extrude(height = half, twist = tw,
-                     slices = max($twin ? 3 : 8, ceil(tw / ($twin ? 4 : 1))),
+                     slices = $twin ? max(1, ceil(tw / 8)) : max(8, ceil(tw)),
                      convexity = 10)
         gear2d(m, z, pa, backlash, st, ha);
     if (bore > 0)

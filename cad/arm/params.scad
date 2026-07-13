@@ -508,20 +508,22 @@ wr_drum_r = 50;       // cable CENTERLINE radius at the EE drum — the
 wr_cap_r = 16;        // capstan centerline radius: core wall over the
                       // bore ~10 mm — nothing thin anywhere
 wrist_ratio = primary_ratio * wr_drum_r / wr_cap_r;   // ~19.9
-wr_axle = [-230, 160];       // capstan dead axle (forearm frame x,z):
-                             // MOVED BACK 40 and up 10 (was -190,150)
-                             // to open the elbow-drive bay — the two
-                             // fin kidneys' web grows ~12 -> ~47, the
-                             // wheels' tip gap ~18 -> ~52 — once the
-                             // fat outboard cover became the slim
-                             // tangential bridge (below). What binds
-                             // the move-back now is the CORE, the
-                             // remaining y > 55 hardware near the
-                             // shoulder at full-up: its flange edge
-                             // holds shoulder-r 253.5 at full
-                             // extension vs the fixed sector crest's
-                             // 240 (the old cover corner passed 3.6).
-                             // Wheel low point (z 107.6) passes 33
+wr_axle = [-230, 146];       // capstan dead axle (forearm frame x,z):
+                             // MOVED BACK 40 (was -190,150, opening
+                             // the elbow-drive bay: kidney web ~12 ->
+                             // ~44, wheel tip gap ~18 -> ~31 with the
+                             // elbow stack dropped too) once the fat
+                             // outboard cover became the slim
+                             // tangential bridge (below), then DROPPED
+                             // toward the forearm axis. What binds
+                             // BOTH moves is the CORE, the y > 55
+                             // hardware near the shoulder at full-up:
+                             // its flange edge holds shoulder-r 245.5
+                             // at full extension vs the fixed sector
+                             // crest's 240 (house precedent: the
+                             // shoulder drum flanges pass 2.8) — the
+                             // frontier z = sqrt(262^2 - (450+x)^2).
+                             // Wheel low point (z 93.6) passes 19
                              // over the top chord at full extension
 wr_mesh_a = 215;     // pinion direction from the capstan axle, deg
                      // (180 = straight back). ROTATED DOWN past 180 to
@@ -531,7 +533,7 @@ wr_mesh_a = 215;     // pinion direction from the capstan axle, deg
                      // lower. Bound: the motor body's bottom must
                      // clear the fin's bottom-edge rule (taper line
                      // + 2) at full extension — at 215 the bottom
-                     // passes z ~105 vs the line's ~79 at that x
+                     // passes z ~91 vs the line's ~79 at that x
 wr_pin = wr_axle + cd * [cos(wr_mesh_a), sin(wr_mesh_a)];
 // the outboard support is a slim TANGENTIAL BRIDGE (drawn in the
 // assembly): a strap across the boss aligned with the tangent about
@@ -639,10 +641,14 @@ wr_screw_r = 41;             // 6 wood screws into the EE plate
 // tangency falls inside the upper-arm plate's silhouette; with them
 // the liner is travel-sized and the channel is a PLAIN CIRCLE. The
 // drum's march is eaten as fleet in the drum->sheave spans
-// (+-el_ramp/2 = +-2.2 over 113 / 178 mm: +-1.1 / +-0.7 deg), and
-// each sheave CANTS ~1.0 / ~0.6 deg to bisect its fixed 2 mm
-// take-off-to-channel plane offset (detail-time bracket feature;
-// drawn square here).
+// (+-el_ramp/2 = +-2.2 over 56 / 188 mm: +-2.3 / +-0.7 deg — the dn
+// span went short when the stack dropped toward the forearm axis;
+// a free idler turns fleet into wall rub, not position error, and
+// the mouth is wide, but BENCH-VALIDATE the dn sheave's tracking —
+// the fallback is raising el_axle back toward z 198 at ~1 mm of CG
+// height per 1.5 mm of span), and each sheave CANTS ~2.0 / ~0.6 deg
+// to bisect its fixed 2 mm take-off-to-channel plane offset
+// (detail-time bracket feature; drawn square here).
 // Wrap bookkeeping: the shoulder's TWO-CABLE SHARED-CHANNEL scheme
 // (same gap_turns/track_sep/dead_w, end anchors on the drum).
 el_teeth = 66;        // interference: at C = 74 the stub (0.45) tips
@@ -652,18 +658,20 @@ el_primary = el_teeth / pinion_teeth;                  // 8.25
 el_cd = gear_module * (pinion_teeth + el_teeth) / 2;   // 74
 el_nose_r = 80;       // cable centerline; crest 81.4, liner wall 82.9
 elbow_ratio = el_primary * el_nose_r / drum_eff_r;     // 65.2
-el_axle = [-63, 198]; // drum dead axle (forearm frame x,z), HIGH on
-                      // the fin (r 207.7): the r 67 wheel tips pass
-                      // ~62 over the top chord at full extension,
-                      // the boss passes ~40 in-plane under the upper
-                      // wrist run, the drum->sheave spans reach 84+
-                      // (the fleet rule), and the wheel tips pass
-                      // 16.4 off the wrist wheel's — 4.8 off its
-                      // slab hull, the pinch; the ring wall below
-                      // is clipped against the wrist stack's zone
+el_axle = [-80, 165]; // drum dead axle (forearm frame x,z), DROPPED
+                      // toward the forearm axis (was -63,198 — every
+                      // mm of stack CG height is closing-CW the
+                      // block must supply): the r 67 wheel tips pass
+                      // ~26 over the top chord at full extension,
+                      // the boss passes 13 in-plane under the upper
+                      // wrist run, and the wheel tips pass ~31 off
+                      // the wrist wheel's. What STOPS further drop:
+                      // the drum->dn-sheave span (fleet, see the
+                      // march note above) and the boss-under-run
+                      // margin, both shrinking ~1:1 with z
 el_mesh_a = 215;      // pinion direction: down past straight-back
                       // (the wrist drive's motor-lowering move) —
-                      // motor bottom z ~134 vs the chord line ~71
+                      // motor bottom z ~98 vs the chord line ~74
 el_pin = el_axle + el_cd * [cos(el_mesh_a), sin(el_mesh_a)];
 el_turns = elbow_travel / 360 * el_nose_r / drum_eff_r;  // 2.96
 el_ramp = el_turns * groove_p;                 // 4.4: the march
@@ -673,7 +681,7 @@ el_core_len = ceil(track_sep + el_ramp + 2 * dead_w);    // 17
 // (45.8..54.2 at their split planes) — except the liner's three
 // screw tabs on the 55 face (to 58) and, high on the fin, the drum
 // core (40.7..57.7), boss (..66.7) and bridge. The wrist runs come
-// back in to 61.5: cord edge ~3 over the tabs, ~40 in-plane off the
+// back in to 61.5: cord edge ~3 over the tabs, 13 in-plane off the
 // boss. Forearm-fixed vs the STATIC upper-arm plate: the dn sheave
 // (and its bracket's plate-lane crossing) holds azimuth <= ~92 at
 // r >= 103, whose plate shadow starts at ~139 (and it only sweeps

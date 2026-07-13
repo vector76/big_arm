@@ -685,7 +685,7 @@ module forearm() {
   // ---- elbow capstan drive (see the params section; ratio ~65) ----
   // The third flipped stack on the fin, one bay closer to the joint
   // than the wrist's: the 66T wheel + pinion straddle the fin through
-  // their own kidney (lane 10..37 — the axle rides HIGH, el_axle,
+  // their own kidney (lane 10..37 — el_axle low over the chord line,
   // so the Ø134 wheel obeys the fin's taper-line rule at full
   // extension), the grooved core sits astride the liner's channel
   // plane (take-offs 46 / 52), boss + concept bridge beyond
@@ -726,7 +726,7 @@ module forearm() {
   }
   // the two idler sheaves (608-cored printed spools) astride the
   // channel plane, with concept brackets. dn roots on the fin
-  // strip straight above it at (-2, 110) — its plate-lane crossing
+  // strip straight above it at (-2, 106) — its plate-lane crossing
   // holds azimuth ~91, 48 deg inside the shadow limit, sweeping
   // away — and takes the axle from an arm outboard of the spool;
   // up roots on the +y plate's solid top margin ahead of the joint
@@ -743,8 +743,8 @@ module forearm() {
   }
   color("khaki") {
     // bracket dn: fin pad + riser + arm over the spool's outboard face
-    txz([-2, 110]) ty(40) cub([14, 17, 8], [1, 0, 1]);
-    hull() txz([[-2, 110], el_pul_p(0)]) ty(52.5) rx(-90)
+    txz([-2, 106]) ty(40) cub([14, 17, 10], [1, 0, 1]);
+    hull() txz([[-2, 106], el_pul_p(0)]) ty(52.5) rx(-90)
       cylinder(d = 12, h = 4.5);
     // bracket up: pad on the plate's top margin + riser + arm
     txz([58, 52]) ty(40) cub([18, 18, 12], [0, 0, 0]);
@@ -1011,7 +1011,7 @@ module fore_cw_fin_2d() {
         txy([30, elbow_d / 2 - 30 * t + 48]) circle(2);
       }
       // the elbow drive's blob: >= 25 of ply around its kidney (the
-      // dn sheave's bracket pad roots on the strip at (-2, 110))
+      // dn sheave's bracket pad roots on the strip at (-2, 106))
       hull() {
         txy(el_axle) circle(94);
         txy(el_pin) circle(35);

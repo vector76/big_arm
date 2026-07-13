@@ -1,5 +1,6 @@
 import GUI from 'lil-gui';
 import { solveIk } from './core/ik';
+import { CadStats, initPerfHud } from './view/perfHud';
 import { Frames, TwinPose, TwinScene } from './view/twinScene';
 
 // The CAD twin viewer: renders the actual OpenSCAD assembly (five rigid
@@ -34,6 +35,10 @@ async function main(): Promise<void> {
     scene.setPose(pose);
     savePose(pose);
   });
+  // what the export measured (fidelity + budget). Optional: an old
+  // model/public/cad/ without stats.json still renders, just without the
+  // budget column — the HUD counts the meshes itself either way.
+  initPerfHud(scene, gui, await fetchStats(base));
 
   // Drag the end effector, IK fills in the joints. The ee pitch vs
   // horizontal (shoulder - elbow + wrist) is captured at the grab and
@@ -51,6 +56,15 @@ async function main(): Promise<void> {
   };
 }
 
+async function fetchStats(base: string): Promise<CadStats | null> {
+  try {
+    const res = await fetch(`${base}stats.json?v=${__BUILD_ID__}`);
+    return res.ok ? ((await res.json()) as CadStats) : null;
+  } catch {
+    return null;
+  }
+}
+
 function buildPanel(frames: Frames, pose: TwinPose, onChange: () => void): GUI {
   const gui = new GUI({ title: 'big_arm CAD twin' });
   const f = gui.addFolder('Pose (deg)');
@@ -58,7 +72,9 @@ function buildPanel(frames: Frames, pose: TwinPose, onChange: () => void): GUI {
   f.add(pose, 'shoulder', frames.shoulder_min, frames.shoulder_max, 1);
   f.add(pose, 'elbow', 0, frames.elbow_travel, 1);
   f.add(pose, 'wrist', -frames.wrist_travel / 2, frames.wrist_travel / 2, 1);
-  gui.onChange(onChange);
+  // scoped to the pose folder, not the root: the root also carries the
+  // perf-HUD switch, which has nothing to do with the pose
+  f.onChange(onChange);
   return gui;
 }
 

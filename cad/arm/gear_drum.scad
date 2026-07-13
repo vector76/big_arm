@@ -73,11 +73,16 @@ module drum_body() difference() {
 // a RH groove crosses the tracks at 2.7 deg — the in-opposition
 // failure the params wrap-math note warns about.
 module drum_groove() {
-  n = 40;
+  // 72 slices per turn resolves a 1.5 mm-pitch helix for the PRINT. In the
+  // twin the whole drum is ~30 px, so the groove is the single most
+  // expensive invisible thing in the scene: at 17 turns this is 1296
+  // slices of an 82-point crescent, ~124k triangles by itself.
+  n = $twin ? 12 : 40;
   cw = 360 * groove_w / groove_p;   // crescent arc width, deg
   tz(2 - groove_p / 2)
     linear_extrude(drum_len + groove_p, twist = 360 * (groove_turns + 1),
-                   slices = ceil(groove_turns + 1) * 72, convexity = 10)
+                   slices = ceil(groove_turns + 1) * ($twin ? 12 : 72),
+                   convexity = 10)
       polygon(concat(
         [for (i = [0 : n])
           let (d = -cw / 2 + cw * i / n,
@@ -104,13 +109,13 @@ module gear_drum() {
       tz(z_core - 2) drum_body();
       tz(z_core + drum_len + 2) cylinder(d = 28, h = drum_boss_l);
     }
-    tz(-0.5) cylinder(d = bore_d, h = lt + 1, $fn = 48);
+    tz(-0.5) cylinder(d = bore_d, h = lt + 1, $fn = $twin ? 24 : 48);
     // 608 pockets into both ends; the relief past each floor keeps
     // the rotating floor ring off the static inner race
-    tz(-0.5) cylinder(d = bearing_pocket_d, h = bearing_w + 0.5, $fn = 96);
-    tz(-0.5) cylinder(d = relief_d, h = bearing_w + 1.5, $fn = 48);
-    tz(lt - bearing_w) cylinder(d = bearing_pocket_d, h = bearing_w + 0.5, $fn = 96);
-    tz(lt - bearing_w - 1) cylinder(d = relief_d, h = bearing_w + 1.5, $fn = 48);
+    tz(-0.5) cylinder(d = bearing_pocket_d, h = bearing_w + 0.5, $fn = $twin ? 24 : 96);
+    tz(-0.5) cylinder(d = relief_d, h = bearing_w + 1.5, $fn = $twin ? 24 : 48);
+    tz(lt - bearing_w) cylinder(d = bearing_pocket_d, h = bearing_w + 0.5, $fn = $twin ? 24 : 96);
+    tz(lt - bearing_w - 1) cylinder(d = relief_d, h = bearing_w + 1.5, $fn = $twin ? 24 : 48);
   }
 }
 

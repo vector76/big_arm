@@ -33,12 +33,13 @@ z_core = wr_core_y0 - wr_whl_y0;   // 38.5: locked to the cable plane
 // the groove cutter — the same twisted-crescent construction as
 // gear_drum.scad's drum_groove (see the long note there), radii swapped
 module wr_groove() {
-  n = 40;
+  n = $twin ? 12 : 40;
   cw = 360 * groove_w / groove_p;
   tz(2 - groove_p / 2)
     linear_extrude(wr_cap_len + groove_p,
                    twist = 360 * (wr_groove_turns + 1),
-                   slices = ceil(wr_groove_turns + 1) * 72, convexity = 10)
+                   slices = ceil(wr_groove_turns + 1) * ($twin ? 12 : 72),
+                   convexity = 10)
       polygon(concat(
         [for (i = [0 : n])
           let (d = -cw / 2 + cw * i / n,
@@ -79,11 +80,11 @@ module wrist_gear_capstan() {
       tz(z_core - 2) wr_capstan_body();
       tz(z_core + wr_cap_len + 2) cylinder(d = 28, h = bearing_w);
     }
-    tz(-0.5) cylinder(d = bore_d, h = lt + 1, $fn = 48);
-    tz(-0.5) cylinder(d = bearing_pocket_d, h = bearing_w + 0.5, $fn = 96);
-    tz(-0.5) cylinder(d = relief_d, h = bearing_w + 1.5, $fn = 48);
-    tz(lt - bearing_w) cylinder(d = bearing_pocket_d, h = bearing_w + 0.5, $fn = 96);
-    tz(lt - bearing_w - 1) cylinder(d = relief_d, h = bearing_w + 1.5, $fn = 48);
+    tz(-0.5) cylinder(d = bore_d, h = lt + 1, $fn = $twin ? 24 : 48);
+    tz(-0.5) cylinder(d = bearing_pocket_d, h = bearing_w + 0.5, $fn = $twin ? 24 : 96);
+    tz(-0.5) cylinder(d = relief_d, h = bearing_w + 1.5, $fn = $twin ? 24 : 48);
+    tz(lt - bearing_w) cylinder(d = bearing_pocket_d, h = bearing_w + 0.5, $fn = $twin ? 24 : 96);
+    tz(lt - bearing_w - 1) cylinder(d = relief_d, h = bearing_w + 1.5, $fn = $twin ? 24 : 48);
   }
 }
 

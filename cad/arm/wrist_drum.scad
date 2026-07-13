@@ -43,7 +43,7 @@ module wrist_drum() difference() {
   wd_tube(2 * wr_crest_r, wr_hub_id, wd_y0, wd_y1);
   // the two V-grooves, cut as revolved triangles about the axis
   for (i = [0, 1]) ty(wr_cab_y + i * wr_band) rx(-90)
-    rotate_extrude($fn = 120)
+    rotate_extrude($fn = $twin ? 48 : 120)
       polygon([[wr_apex_r, 0],
                [wr_crest_r + 2, wr_crest_r + 2 - wr_apex_r],
                [wr_crest_r + 2, -(wr_crest_r + 2 - wr_apex_r)]]);

@@ -90,23 +90,25 @@ const run = (args) =>
 // Ratcheted down after the twin's gears went to straight flanks (1 step,
 // 1 slice per half): that one is kept, and it is most of the win.
 //
-// upper/fore are back UP because the capstan groove is carved again. It
-// was dropped from the twin on the finding that a coarse hull chain reads
-// as holes through the core wall — true of a FLAT seg, but the sag scales
-// with arc_r, so the fix is to derive seg per drive rather than to delete
-// the thread (lib/capstan.scad). A grooveless capstan is not a cheaper
-// capstan, it is a different part: the helix is the one feature that says
-// what these cores ARE, and it is legible at ~30 px.
+// upper/fore are the two bodies carrying capstans, and they are back UP
+// because the groove is carved again. Measured, whole scene, same machine:
 //
-// PROVISIONAL — these two are the pre-straight-flank ceilings, which held
-// these same bodies WITH a groove and so cannot false-fail. They are not
-// yet a high-water mark: the straight-flank gears land under them by a
-// wide margin. RATCHET DOWN to ~20% over measured on the next render.
+//   smooth cores (no groove)     85,624 tris    upper 20,156  fore 16,118
+//   groove at a FLAT seg = 8    115,058         upper 33,732  fore 31,976
+//   groove at a DERIVED seg     117,292         upper 34,020  fore 33,922
+//
+// Read the middle row before trusting the top one. The groove that got
+// deleted was ALREADY costing 29.4k triangles — and spending them on a
+// thread that rendered as detached nubs, because a flat seg sags the hull
+// chord below the arc and the sag scales with arc_r (lib/capstan.scad).
+// Deriving seg per drive buys a thread that actually reads for 2.2k more:
+// +1.9% on the carved version, and the LAST 7% of the way from smooth to
+// legible. Legibility is not what the groove costs; the groove is.
 const TRI_BUDGET = {
   static: 23_000,
   yaw: 21_000,
-  upper: 49_000,   // provisional; expect ~27k measured
-  fore: 58_000,    // provisional; expect ~44k measured
+  upper: 41_000,   // 34,020 measured
+  fore: 41_000,    // 33,922 measured
   ee: 16_000,
 };
 

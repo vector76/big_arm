@@ -508,10 +508,21 @@ wr_drum_r = 50;       // cable CENTERLINE radius at the EE drum — the
 wr_cap_r = 16;        // capstan centerline radius: core wall over the
                       // bore ~10 mm — nothing thin anywhere
 wrist_ratio = primary_ratio * wr_drum_r / wr_cap_r;   // ~19.9
-wr_axle = [-190, 150];       // capstan dead axle (forearm frame x,z):
-                             // high on the fin — the wheel's low point
-                             // (z 97.6) passes 22 over the upper arm's
-                             // top chord at full extension (75.5)
+wr_axle = [-230, 160];       // capstan dead axle (forearm frame x,z):
+                             // MOVED BACK 40 and up 10 (was -190,150)
+                             // to open the elbow-drive bay — the two
+                             // fin kidneys' web grows ~12 -> ~47, the
+                             // wheels' tip gap ~18 -> ~52 — once the
+                             // fat outboard cover became the slim
+                             // tangential bridge (below). What binds
+                             // the move-back now is the CORE, the
+                             // remaining y > 55 hardware near the
+                             // shoulder at full-up: its flange edge
+                             // holds shoulder-r 253.5 at full
+                             // extension vs the fixed sector crest's
+                             // 240 (the old cover corner passed 3.6).
+                             // Wheel low point (z 107.6) passes 33
+                             // over the top chord at full extension
 wr_mesh_a = 215;     // pinion direction from the capstan axle, deg
                      // (180 = straight back). ROTATED DOWN past 180 to
                      // drop the motor — the heaviest piece — toward
@@ -520,9 +531,20 @@ wr_mesh_a = 215;     // pinion direction from the capstan axle, deg
                      // lower. Bound: the motor body's bottom must
                      // clear the fin's bottom-edge rule (taper line
                      // + 2) at full extension — at 215 the bottom
-                     // passes z ~95 vs the line's ~77 at that x
-                     // (~18 in hand; ~230 would spend it all)
+                     // passes z ~105 vs the line's ~79 at that x
 wr_pin = wr_axle + cd * [cos(wr_mesh_a), sin(wr_mesh_a)];
+// the outboard support is a slim TANGENTIAL BRIDGE (drawn in the
+// assembly): a strap across the boss aligned with the tangent about
+// the SHOULDER at full extension — the orientation in which sweeping
+// past the fixed sector changes its ends' shoulder-radius least —
+// with feet dropping to the fin OUTSIDE the wheel's swept tips.
+// Every strap point with y > 55 holds shoulder-r >= ~279 at
+// extension (the core's own 253.5 is the binding figure)
+wr_str_n = let (v = wr_axle - [-upper_len, 0])
+  [-v[1], v[0]] / norm(v);   // unit tangent (perp to the radial)
+wr_str_l = 66;               // half-span: the 16-sq feet's nearest
+                             // corners sit 54.7 off the axle, 2.3
+                             // past the wheel's swept tips (52.4)
 // wrap bookkeeping — DELIBERATELY still the PINNED-MIDPOINT scheme
 // (one cable, mid-anchor, frozen band + march: the shoulder's OLD
 // math; the shoulder moved to two-cable shared channels — fold that
@@ -554,8 +576,8 @@ wr_cap_len = ceil(wr_band + wr_ramp + 2); // 11: grooved core
 wr_cab_y = 61.5;             // first groove centerline (59 hugs the
                              // wood; +2.5 clears the elbow liner tabs)
 wr_whl_y0 = 27;              // wheel inboard face (fin kidney idiom)
-wr_core_y0 = wr_cab_y + wr_band / 2 - wr_cap_len / 2;   // 56.5
-wr_y1 = wr_core_y0 + wr_cap_len + 2 + bearing_w;        // 76.5: part end
+wr_core_y0 = wr_cab_y + wr_band / 2 - wr_cap_len / 2;   // 59.1
+wr_y1 = wr_core_y0 + wr_cap_len + 2 + bearing_w;        // 79.1: part end
 // the two runs are EXTERNAL COMMON TANGENTS of the drum and capstan
 // circles (converging ~3 deg — belt-like); the common normal n makes
 // angle acos((r2-r1)/d) with the center line, two signs = two runs

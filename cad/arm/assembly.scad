@@ -560,12 +560,15 @@ module forearm() {
   // (lane 27..54), the grooved capstan core sits out at the cable
   // plane (grooves wr_cab_y / + band, OUTBOARD of the elbow drive's
   // 55..70.2 claim — joint hardware still cleared RADIALLY, see the
-  // lane notes in params), and the part
-  // ends in a bearing boss picked up by a
-  // CONCEPT-LEVEL bridge — plate over the boss, rear wall down to the
-  // fin's outer face at x <= axle - 68 (wheel tips reach 52.4, the
-  // down-rotated pinion's reach 58.3 + margin, and both cable runs
-  // leave toward +x, so the back is free air). To be
+  // lane notes in params), and the part ends in a bearing boss
+  // picked up by a slim TANGENTIAL BRIDGE: a strap across the boss
+  // aligned with the tangent about the SHOULDER at full extension —
+  // the old plate + rear-wall cover swept 3.6 over the fixed sector
+  // crest at full-up and barred moving the stack back; the strap's
+  // ends hold the axle's own shoulder-radius, its feet drop to the
+  // fin outside the wheel's swept tips (nearest post corners 54.7
+  // off the axle), and the bar crosses ~12 over the departing runs.
+  // To be
   // detailed as walled housings with staggered screws, the shoulder
   // treatment.
   txz(wr_axle) {
@@ -591,11 +594,13 @@ module forearm() {
       hull() { txy(wr_axle) circle(62); txy(wr_pin) circle(32); }
       hull() { txy(wr_axle) circle(56); txy(wr_pin) circle(26); }
     }
-    // outboard bridge: plate over the boss + rear wall to the fin
-    txz(wr_axle) {
-      ty(wr_y1 + 1) tx(-68) cub([118, 8, 70], [0, 0, 1]);
-      ty(40) tx(-68) cub([8, wr_y1 + 1 - 40, 70], [0, 0, 1]);
-    }
+    // outboard support: the slim tangential bridge — feet posts on
+    // the fin (y 40) outside the wheel's tips, bar over the boss
+    for (s = [-1, 1]) txz(wr_axle + s * wr_str_l * wr_str_n)
+      ty(40) cub([16, wr_y1 + 2 - 40, 16], [1, 0, 1]);
+    hull() txz([wr_axle + wr_str_l * wr_str_n,
+                wr_axle - wr_str_l * wr_str_n])
+      ty(wr_y1 + 1) rx(-90) cylinder(d = 16, h = 8);
   }
   // the cable runs' STRAIGHT portions, drawn as rods for clearance
   // eyeballing: external common tangents of the r 50 drum and r 16

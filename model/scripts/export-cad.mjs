@@ -86,11 +86,16 @@ const run = (args) =>
 // Re-baselined when the elbow drive + nose capstan landed: a third drive
 // is real new geometry, not a regression, so the ceilings move with it.
 // (The gate caught the growth on the merge, which is the job.)
+//
+// Ratcheted down after the twin's gears went to straight flanks (1 step,
+// 1 slice per half) and the capstan grooves stopped being carved at twin
+// fidelity at all (lib/capstan.scad — a coarse groove read as holes
+// through the wall): upper 49k -> 25k, fore 58k -> 20k.
 const TRI_BUDGET = {
-  static: 24_000,
-  yaw: 20_000,
-  upper: 49_000,
-  fore: 58_000,
+  static: 23_000,
+  yaw: 21_000,
+  upper: 25_000,
+  fore: 20_000,
   ee: 16_000,
 };
 

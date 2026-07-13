@@ -88,14 +88,27 @@ const run = (args) =>
 // (The gate caught the growth on the merge, which is the job.)
 //
 // Ratcheted down after the twin's gears went to straight flanks (1 step,
-// 1 slice per half) and the capstan grooves stopped being carved at twin
-// fidelity at all (lib/capstan.scad — a coarse groove read as holes
-// through the wall): upper 49k -> 25k, fore 58k -> 20k.
+// 1 slice per half): that one is kept, and it is most of the win.
+//
+// upper/fore are the two bodies carrying capstans, and they are back UP
+// because the groove is carved again. Measured, whole scene, same machine:
+//
+//   smooth cores (no groove)     85,624 tris    upper 20,156  fore 16,118
+//   groove at a FLAT seg = 8    115,058         upper 33,732  fore 31,976
+//   groove at a DERIVED seg     117,292         upper 34,020  fore 33,922
+//
+// Read the middle row before trusting the top one. The groove that got
+// deleted was ALREADY costing 29.4k triangles — and spending them on a
+// thread that rendered as detached nubs, because a flat seg sags the hull
+// chord below the arc and the sag scales with arc_r (lib/capstan.scad).
+// Deriving seg per drive buys a thread that actually reads for 2.2k more:
+// +1.9% on the carved version, and the LAST 7% of the way from smooth to
+// legible. Legibility is not what the groove costs; the groove is.
 const TRI_BUDGET = {
   static: 23_000,
   yaw: 21_000,
-  upper: 25_000,
-  fore: 20_000,
+  upper: 41_000,   // 34,020 measured
+  fore: 41_000,    // 33,922 measured
   ee: 16_000,
 };
 
